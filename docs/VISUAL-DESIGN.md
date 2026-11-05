@@ -73,7 +73,7 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 - Radios: 8 px (controles), 12 px (paneles), 16 px (modales), 999 px (llaves).
 - Bordes: 1 px `--line`; el foco usa 2 px `--teal` con offset 2.
 - Sombras: `0 1px 0 rgba(255,255,255,0.04) inset` para superficies; `0 24px 60px rgba(0,0,0,0.45)` solo para modales. Nada de sombras duras.
-- Textura: un ruido SVG muy sutil (`feTurbulence`, opacidad 0.03) sobre el fondo; no sobre el texto.
+- Textura: un ruido SVG muy sutil (`feTurbulence`, opacidad 0.03) sobre el fondo; estático, nunca animado y nunca sobre el texto.
 
 ## 6. Layout y jerarquía
 
@@ -109,6 +109,8 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 
 **Estados obligatorios:** default, hover, active, focus-visible, disabled, loading, success, error, empty. Si falta uno, el componente no está terminado.
 
+**Editor:** la interacción es clic en origen → clic en destino, no drag. Si se agrega drag, debe existir una alternativa de un solo puntero (WCAG 2.2 *Dragging Movements*).
+
 ## 8. Movimiento
 
 | Evento | Duración | Easing | Qué se mueve |
@@ -123,12 +125,17 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 
 **Reglas:** animar solo `transform` y `opacity` (o `stroke-dashoffset` en SVG); nada de `width/height/top/left`. Respetar `prefers-reduced-motion: reduce`: duración 0, sin loops. Nada de parallax, flashing ni animación de fondo infinita.
 
+**Transiciones de pantalla:** la View Transitions API se usa solo como mejora progresiva; si el navegador no la soporta, el cambio es instantáneo o con CSS/WAAPI. También respeta reduced motion.
+
 ## 9. Accesibilidad
 
 - WCAG 2.2 AA: texto 4.5:1; texto grande y elementos no textuales 3:1.
 - Color + forma/texto: las llaves tienen símbolo; éxito/error tienen icono y texto.
 - Targets ≥ 44×44 px; teclado completo; `:focus-visible` siempre visible; Esc cierra modales.
 - SVG: `role="button"`, `tabindex="0"`, `aria-label` por celda; la bitácora con `aria-live="polite"`.
+- **Reflow 320 px:** el shell (controles, texto, navegación) debe reflowar a 320 CSS px sin scroll horizontal. El taller SVG puede conservar layout 2D solo donde el diagrama lo exija; WCAG contempla la excepción de juegos/diagramas.
+- **Foco no obscurecido:** la barra sticky de acciones no puede tapar el control enfocado. Verificar con teclado, no solo con mouse.
+- **Drag alternativo:** el editor usa clic origen → destino, no drag. Si se agrega drag, ofrecer una alternativa de un solo puntero.
 - `prefers-reduced-motion` y `prefers-contrast: more`; sin flashing; sonido apagado por defecto si se agrega.
 - Probar con axe DevTools y WebAIM; no confiar solo en el ojo.
 
@@ -145,29 +152,30 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 | Necesidad | Decisión | Por qué |
 |---|---|---|
 | Animación UI | **CSS + Web Animations API** (0 KB) | Alcanza para hover, modales, cables, fichas y cinta. |
-| Timeline compleja | **Motion mini** (~3.4 KB gzip) si hace falta | La opción más chica; vendorizada, sin build. |
-| SVG morphing / timelines ricas | **Anime.js v4** (~13–17 KB) | Solo si aparece una necesidad real; no por defecto. |
-| Animación de scroll / secuencias largas | **GSAP** (~28 KB) | Overkill para este juego; no. |
-| Tipografías | **Fraunces + Inter Variable**, self-hosted | Carácter editorial + legibilidad de UI; sin Google Fonts en runtime. |
-| Iconos | **Lucide** inline SVG (ISC) | 1.5 px de stroke, consistentes, sin icon font. |
+| Timeline compleja | **Motion mini** (3.12 kB minimum bundle, comparación oficial nov 2026) si hace falta | La opción más chica; vendorizada, sin build. |
+| SVG morphing / timelines ricas | **Anime.js v4** (~24.5 KB agregados según el sitio; base de compresión no declarada; MIT; v4.4.1 abr 2026) | Solo si aparece una necesidad real; no por defecto. |
+| Animación de scroll / secuencias largas | **GSAP** (27.29 kB minimum bundle; closed-source/Webflow-owned; licencia separada) | Overkill para este juego; no. |
+| Tipografías | **Fraunces + Inter Variable**, self-hosted (OFL) | Carácter editorial + legibilidad de UI; sin Google Fonts en runtime. El tamaño depende del subset/axes: medir. |
+| Iconos | **Lucide** inline SVG (ISC; v1.68.0 al momento de la investigación) | 1.5 px de stroke, consistentes, sin icon font. |
 | Gráficos del informe | Skill **archify** | Diagramas de autómatas y arquitectura para el informe, no para el juego. |
 | Documentación | Skill **cognitive-doc-design** | Estructura de guías y onboarding. |
-| Diseño / contraste | Figma, Realtime Colors, Coolors, WebAIM, axe, Lighthouse | Mockups, paleta, contraste y auditoría. |
-| Referencias | Mobbin, Game UI Database, Dribbble | Patrones de UI de juegos, no copias. |
+| Diseño / contraste | Figma, Realtime Colors, Coolors, WebAIM, axe, Lighthouse | 0 bytes en el bundle; solo mockups, paleta, contraste y auditoría. |
+| Referencias | Mobbin, Game UI Database, Dribbble | Patrones de UI de juegos, no copias. Dribbble es mood, no evidencia de UX. |
 
-**Regla de dependencias:** si una librería no ahorra más de lo que pesa, no entra. El proyecto sigue sin framework y sin build step.
+**Regla de dependencias:** si una librería no ahorra más de lo que pesa, no entra. El proyecto sigue sin framework y sin build step. Nada de CDN en runtime: si una librería se usa, se vendoriza localmente con su licencia.
 
 ## 12. Checklist “no retro / no hecho con los pies”
 
 - [ ] No hay pixel art, CRT, scanlines, neón, bevels ni sombras duras.
 - [ ] No hay controles nativos sin estilar, emojis como iconos ni ClipArt.
 - [ ] Todo está en la grilla de 4/8 px; nada desalineado; sin overflow.
-- [ ] Funciona a 360 px, 768 px y 1440 px; sin scroll horizontal.
+- [ ] Funciona a 320 px (reflow/zoom), 360 px, 768 px y 1440 px; el shell sin scroll horizontal; el taller puede conservar 2D solo donde el diagrama lo exija.
 - [ ] Jerarquía tipográfica clara; máximo 3 pesos por pantalla; body no va en mayúsculas.
 - [ ] Contraste AA; el color no es la única señal.
 - [ ] Cada componente tiene hover, focus, active, disabled, loading, success, error y empty.
 - [ ] `prefers-reduced-motion` respetado; sin animación infinita.
-- [ ] Teclado completo; foco visible; Esc cierra modales.
+- [ ] Teclado completo; foco visible; el foco no queda tapado por la barra sticky; Esc cierra modales.
+- [ ] Si hay drag, existe una alternativa de un solo puntero.
 - [ ] Captura/GIF en el PR; checklist de `docs/SMOKE.md` pasado.
 - [ ] Playtest con 5 personas: “¿qué hago primero?” en los primeros 10 segundos.
 
@@ -203,3 +211,23 @@ Preguntas (sin ayudar):
 - Xbox Accessibility Guideline 102 (contrast): <https://docs.xbox.com/build/game-principles/accessibility/xag-deep-dives/xag-102-contrast>
 - Game Accessibility Guidelines: <https://gameaccessibilityguidelines.com/full-list/>
 - Google Playables design best practices: <https://developers.google.com/youtube/gaming/playables/certification/best_practices_design>
+
+### WCAG 2.2 y navegador
+
+- W3C, *Reflow*: <https://www.w3.org/WAI/WCAG22/Understanding/reflow>
+- W3C, *Focus Not Obscured*: <https://www.w3.org/WAI/WCAG22/Understanding/focus-not-obscured-minimum>
+- W3C, *Dragging Movements*: <https://www.w3.org/WAI/WCAG22/Understanding/dragging-movements>
+- W3C, *Use of Color*: <https://www.w3.org/WAI/WCAG22/Understanding/use-of-color>
+- MDN, *View Transition API*: <https://developer.mozilla.org/en-US/docs/Web/API/View_Transition_API>
+- MDN, *prefers-reduced-motion*: <https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/At-rules/%40media/prefers-reduced-motion>
+- MDN, *feTurbulence*: <https://developer.mozilla.org/en-US/docs/Web/SVG/Reference/Element/feTurbulence>
+- web.dev, *Optimize webfont loading*: <https://web.dev/articles/optimize-webfont-loading>
+
+### Referencias de UI
+
+- Mobbin, *NYT Word Puzzle input*: <https://mobbin.com/explore/screens/b2a9c84d-b962-45f0-b76d-589b3a560a3e>
+- Mobbin, *NYT Puzzle completion*: <https://mobbin.com/explore/screens/7232dc3d-9917-4d64-b34c-c052b2c7703c>
+- Mobbin, *The New Yorker web game in progress*: <https://mobbin.com/explore/screens/01f12678-2b8f-480d-b692-314cba3a6c83>
+- Game UI Database, *Mini Metro*: <https://www.gameuidatabase.com/gameData.php?id=704>
+- *Monument Valley Panoramic Edition* case study: <https://cedrepradier.com/work/monument-valley-panoramic-edition>
+- Dribbble, *1010! puzzle concept* (mood only): <https://dribbble.com/shots/23736352-1010-Block-Puzzle-Game-App-Ui-Design>

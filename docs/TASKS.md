@@ -191,7 +191,8 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 - [ ] Tokens de [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md) aplicados en `styles.css`.
 - [ ] Fuentes self-hosted Fraunces + Inter, sin requests externos.
 - [ ] Contraste AA, foco visible, targets ≥ 44 px, `prefers-reduced-motion`.
-- [ ] Responsive 360 / 768 / 1440 sin scroll horizontal.
+- [ ] Responsive 320 / 360 / 768 / 1440; shell sin scroll horizontal; foco no tapado por la barra sticky.
+- [ ] Si hay drag, alternativa de un solo puntero.
 - [ ] Checklist “no retro / no hecho con los pies” completo.
 - [ ] Captura/GIF por nivel y smoke test visual.
 

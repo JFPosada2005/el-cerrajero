@@ -35,6 +35,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - Propone **dos puzzles por nivel** (reparar y construir) y un ladrón que escala.
 - **D6 aprobado:** el nivel 3 usa “contiene 1-2-2 o 2-1-1”, para que el bifurcador sea necesario.
 - **Addendum visual:** [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md) con la dirección “precisión noir”, tokens, tipografía Fraunces + Inter, motion, accesibilidad y checklist “no retro”.
+- **Investigación visual adicional integrada:** reflow 320 px, foco no obscurecido por sticky, alternativa a drag, View Transitions progresiva, textura estática y tamaños de librerías corregidos.
 - Los contratos se congelan con F1-F5.
 
 ## Qué sigue

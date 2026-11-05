@@ -157,3 +157,10 @@ User: "Algo mas que quiero que se tuviera en cuenta en el diseño tambien en el 
 - `skills/el-cerrajero-visual-design/SKILL.md` and `AGENTS.md` added so UI work follows the visual contract.
 - Launched a read-only web research explorer (background session `ses_e53686566ffelUVHYJSrMBsXIQ`) to find additional references and gaps without filling the parent context.
 - Engram was degraded at launch; memory saves may be incomplete until it recovers.
+
+### L14 — Visual research handoff integrated (2026-11-05)
+
+- Explorer returned a compact handoff (no raw pages in the parent context).
+- Added to `docs/VISUAL-DESIGN.md`: WCAG 2.2 reflow at 320 CSS px, focus-not-obscured check for sticky actions, single-pointer alternative if dragging is added, View Transitions as progressive enhancement, static texture only, corrected library sizes (Motion Mini 3.12 kB minimum, GSAP 27.29 kB, Anime.js ~24.5 KB aggregate with measurement caveat).
+- Added references for WCAG 2.2, MDN, web.dev, Mobbin, Game UI Database and Monument Valley.
+- Engram unavailable during the explorer run; persistence deferred.
