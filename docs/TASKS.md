@@ -27,7 +27,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | --- | --- | --- | --- | --- | --- | --- |
 | T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — | — |
 | T2 | Shell del juego + Nivel 1 vertical slice | review | Juan | S1-S4, S7-S9 | T1 | — |
-| T3 | Nivel 2 (AFD con bucle / paridad) | todo | colaborador | S3-S5, S9 | T2, diseño congelado | [#1](https://github.com/JFPosada2005/el-cerrajero/issues/1) |
+| T3 | Nivel 2 (AFD con bucle / paridad) | todo | MateoTorres1543 | S3-S5, S9 | T2, diseño congelado | [#1](https://github.com/JFPosada2005/el-cerrajero/issues/1) |
 | T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
 | T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
 | T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
@@ -92,7 +92,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T3 — Nivel 2: AFD con bucle / paridad
 
-**Estado:** todo. **Dueño sugerido:** colaborador.
+**Estado:** todo. **Asignada a:** MateoTorres1543.
 
 **Objetivo:** introducir el bucle y los lenguajes regulares infinitos sin nombrarlos.
 

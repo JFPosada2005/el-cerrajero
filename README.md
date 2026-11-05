@@ -93,5 +93,6 @@ No hay dependencias externas ni build step. El juego es HTML, CSS, JavaScript co
 ## Créditos
 
 - Autor: Juan Posada — código 160004831.
+- Colaborador: MateoTorres1543.
 - Curso: Lenguajes de Programación, Universidad de los Llanos.
 - Rúbrica: informe + sustentación. El juego es la evidencia; el informe es la tesis.

@@ -33,7 +33,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 
 1. Recibir `docs/DESIGN.md` del modelo de diseño y congelar interfaces.
 2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
-3. Invitar al colaborador (falta su usuario de GitHub).
+3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
 4. Implementar T3 (nivel 2) y T4 (AFND) en ramas separadas.
 5. Implementar T5 (AP) y T6 (MT).
 6. Pulido T7 y informe T8.
