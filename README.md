@@ -1,5 +1,7 @@
 # El Cerrajero
 
+Repositorio: <https://github.com/JFPosada2005/el-cerrajero> (privado).
+
 Proyecto final de **Lenguajes de Programación** (Universidad de los Llanos). Un juego de puzzles donde el jugador diseña mecanismos de bóvedas que, formalmente, son autómatas. El juego nunca nombra la teoría: la usa. El informe es el que la hace explícita.
 
 ## Estado actual

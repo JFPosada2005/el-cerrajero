@@ -23,7 +23,7 @@ Requisitos:
 - Git.
 
 ```bash
-git clone <url-del-repo>
+git clone https://github.com/JFPosada2005/el-cerrajero.git
 cd el-cerrajero
 npm test
 npm run serve
