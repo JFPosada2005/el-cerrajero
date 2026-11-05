@@ -1,6 +1,6 @@
 # El Cerrajero — Diseño técnico
 
-> **Estado:** propuesto. Los contratos **no** están congelados todavía. La decisión D6 (regla del nivel 3) espera aprobación del owner. El resto del documento es la referencia técnica para T3-T8.
+> **Estado:** aprobado el 2026-11-05, incluida D6. Los contratos se congelan con F1-F5. La capa visual está en [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md).
 
 > **Idioma:** documento técnico en inglés; los términos de UI van en español. El resumen en español está abajo.
 
@@ -10,7 +10,8 @@
 - Tres capas: `core` (motores puros), `game` (datos, juez, ladrón, flujo), `ui` (SVG y DOM). `main.js` solo orquesta.
 - Juez **exacto** para AFD/AFND (niveles 1-3): equivalencia y contraejemplo más corto. Juez **acotado** para AP/MT (niveles 4-5): barrido exhaustivo pequeño + familias dirigidas, con límites declarados.
 - Cambio propuesto en el nivel 3 (D6): en vez de "contiene 01 o 10", usar "contiene 1-2-2 o 2-1-1". La primera regla equivale a "contiene ambos símbolos" y su AFD mínimo tiene 4 estados, así que el bifurcador quedaría opcional. Con la segunda, el AFD mínimo tiene 6 estados y el AFND con bifurcador tiene 8: la pieza nueva sí enseña.
-- Pregunta abierta: aprobar D6. Las otras dos preguntas del diseño tienen default: el colaborador puede pushear ramas feature (no `main`), y las etiquetas ▲/▼ del nivel 4 están bien.
+- D6 aprobado: el nivel 3 usa “contiene 1-2-2 o 2-1-1”. El colaborador puede pushear ramas feature (no `main`); las etiquetas ▲/▼ del nivel 4 quedan.
+- Addendum visual: [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md).
 
 ---
 
@@ -27,7 +28,7 @@
 | D3 | One judge contract: `judge(puzzle, machine) → Verdict`. It keeps the TASKS.md field names `correct`, `counterexample`, `reason`. | TASKS.md's `judge(player, target)` has no room for the bounded settings. |
 | D4 | Counterexamples are ordered **shortlex**, using the level's key order. Exact judges return the globally shortest one; bounded judges return the shortest among the inputs they tested. | Results are deterministic, so tests can pin exact strings. |
 | D5 | Each level unlocks new parts: gear (self-loop) from L2, fork and spring from L3, stack from L4, drum and tape on L5. | Makes S4's "one new part per level" concrete. |
-| D6 | **L3 rule: "contains 1-2-2 or 2-1-1"**, not "contains 01 or 10". **Needs owner approval.** | "01 or 10" is the same as "has both symbols": its minimal deterministic machine has 4 cells, while the fork version needs 6, so the fork would teach nothing (verified). |
+| D6 | **L3 rule: "contains 1-2-2 or 2-1-1"**, not "contains 01 or 10". **Approved 2026-11-05.** | "01 or 10" is the same as "has both symbols": its minimal deterministic machine has 4 cells, while the fork version needs 6, so the fork would teach nothing (verified). |
 | D7 | L4 repair = balanced lever turns (never empty). L4 build = Aⁿ Bⁿ with n ≥ 1. The stack mechanism accepts **by final state**, over a base symbol `Z`. | Difficulty goes up: the build needs a phase cell that the repair does not. |
 | D8 | L5 = **binary addition**. Repair = a +1 counter. Build = an adder made of the +1 section, a −1 section and a loop. 15 pins in total (verified). | Matches Engram decision #254 and the "computation judge" the brief asks for. Reusing the repaired section shows progress. |
 | D9 | One thief character who learns a new trick per level. `game/thief.js` turns a verdict into story lines. | S4 asks for a thief that gets smarter. |
@@ -721,10 +722,23 @@ Then tag "contracts frozen" in TASKS.md.
 | Report overclaims what the thief proves | Use the "evidence, not proof" wording from §4.2 and §4.3. Cite Rabin–Scott, Moore/Hopcroft, Sénizergues and Rice, plus D'Antoni et al. (Automata Tutor) for counterexample feedback. **Check every citation before using it.** |
 | Game served from `file://` | ES modules need `npm run serve` (Python is a stated requirement) |
 
-**Open questions, for the owner, one at a time:**
-1. Approve D6, changing L3 to 1-2-2 / 2-1-1?
-2. Does S10 ("push only after approval") also apply to the collaborator's feature-branch pushes that CONTRIBUTING requires? Default proposal: yes to feature branches, no to `main`.
-3. Are the L4 key labels "▲ Subir / ▼ Bajar" OK? Default proposal: yes.
+**Resolved decisions (2026-11-05):**
+1. D6 approved: L3 uses "contains 1-2-2 or 2-1-1".
+2. The collaborator may push `feat/*` branches and open PRs; `main` remains gated by the owner.
+3. L4 key labels "▲ Subir / ▼ Bajar" approved.
+
+## 13. Visual design and feel
+
+The visual and UX layer is specified in [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md). Non-negotiables:
+
+- **Not retro, not improvised.** No pixel art, CRT, scanlines, neon, thick bevels, emoji icons, or default browser controls.
+- **Direction:** "precision noir" — ink background, warm brass, ivory, teal, coral; editorial display type (Fraunces) plus a screen-first UI face (Inter), self-hosted.
+- **Three reads:** goal and active key first, mechanism second, log/hints third.
+- **Tokens only:** colors, spacing, radii, shadows, durations come from `VISUAL-DESIGN.md`; no one-off styles.
+- **Accessibility:** WCAG AA, color plus shape/text, 44 px targets, visible focus, keyboard, `prefers-reduced-motion`.
+- **Motion with purpose:** 120–420 ms, transform/opacity only, no infinite background animation.
+- **Libraries:** native CSS and Web Animations API first; Motion mini (~3.4 KB) only if choreography needs it; no framework, no build step, no external runtime requests.
+- **Definition of done:** the visual checklist in `VISUAL-DESIGN.md` §12 and the smoke test in `docs/SMOKE.md`.
 
 ---
 

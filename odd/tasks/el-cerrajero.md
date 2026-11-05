@@ -57,6 +57,10 @@ S12 — Stack assumption (marked as assumption).
 Web, vanilla JavaScript ES modules, SVG, CSS; no framework; Node's built-in test runner; local server via `python -m http.server`. Rationale: zero-install demo, easy to inspect, matches the user's Node 24 environment.
 Acceptance: `npm test` passes; `npm run serve` serves the game.
 
+S13 — Visual quality and UX.
+User: "Que no se sienta como si estuviera jugando un juego retro o creado con los pies."
+Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-hosted Fraunces + Inter; WCAG AA; 44px targets; visible focus; `prefers-reduced-motion`; responsive 360/768/1440; no retro anti-patterns; playtest with 5 users.
+
 ## Tasks
 
 | ID | Task | Specs | Route | Status | Commit |
@@ -67,7 +71,7 @@ Acceptance: `npm test` passes; `npm run serve` serves the game.
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | pending | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
 | T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
-| T7 | Polish: level select, persistence, feedback, README, demo script | S4, S8, S9 | inline | pending | - |
+| T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
 
 ## Log
@@ -132,8 +136,8 @@ Superseded: the old SDD "delegate everything / ask before delegating" preference
 
 - `docs/DESIGN.md` now contains the independent design: three layers (`core`, `game`, `ui`), data contracts for DFA/NFA/PDA/TM, exact judge for L1-L3, bounded judge for L4-L5, level schema, UI components, per-level design, testing strategy.
 - Key decisions: D1 levels as ES modules; D2 fixed cells / editable wires; D3 single `judge` contract; D4 shortlex counterexamples; D5 one new part per level; D7 stack by final state; D8 binary addition; D9 one thief; D10 progress v2.
-- Open decision D6: change L3 from "contains 01 or 10" to "contains 1-2-2 or 2-1-1". Evidence: minimal DFA is 4 states for the former and 6 for the latter; the fork is optional in the former. Pending owner approval.
-- Contracts are not frozen until D6 is resolved and F1-F5 land.
+- D6 approved on 2026-11-05: L3 uses "contains 1-2-2 or 2-1-1". Evidence: minimal DFA is 4 states for the former and 6 for the latter; the fork is optional in the former.
+- Contracts freeze with F1-F5.
 
 ### L12 — Repo and collaborator authorization (2026-11-05)
 
@@ -144,3 +148,12 @@ User: "MateoTorres1543 es el usuario colaborador".
 - GitHub issues created for T3-T8; T3 assigned to MateoTorres1543.
 - Invitation sent to MateoTorres1543 with `write` permission; acceptance pending.
 - The initial push is covered by the user's explicit repo-creation request. Future pushes to `main` remain gated by S10 and user verification.
+
+### L13 — Visual design addendum (2026-11-05)
+
+User: "Algo mas que quiero que se tuviera en cuenta en el diseño tambien en el atractivo visual, investiguen skills de diseño, librerias, recursos y demas que puedan ayudar al correcto funcionamiento pero tambien al correcto enganche visual y comodidad al jugar. Que no se sienta como si estuviera jugando un juego retro o creado con los pies."
+
+- `docs/VISUAL-DESIGN.md`: "precision noir" direction, tokens, Fraunces + Inter self-hosted, motion table, accessibility, performance, library decisions, "no retro" checklist.
+- `skills/el-cerrajero-visual-design/SKILL.md` and `AGENTS.md` added so UI work follows the visual contract.
+- Launched a read-only web research explorer (background session `ses_e53686566ffelUVHYJSrMBsXIQ`) to find additional references and gaps without filling the parent context.
+- Engram was degraded at launch; memory saves may be incomplete until it recovers.

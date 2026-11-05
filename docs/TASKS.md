@@ -13,7 +13,7 @@ Este tablero es la vista de trabajo para el colaborador. El alcance y las specs 
 
 Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
-> **Diseño recibido:** [`docs/DESIGN.md`](DESIGN.md) es la referencia técnica. Los contratos **no** están congelados hasta aprobar D6 y completar el freeze F1-F5. No empezar T3-T6 hasta entonces.
+> **Diseño aprobado (2026-11-05, D6 incluido):** [`docs/DESIGN.md`](DESIGN.md) es la referencia técnica. La capa visual está en [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md). El freeze F1-F5 es el siguiente paso; no empezar T3-T6 hasta que esté.
 
 ## Milestone actual
 
@@ -186,11 +186,21 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 - README final y guion de demo de 10 minutos.
 - Smoke test de los 5 niveles.
 
+**Diseño visual (obligatorio):**
+
+- [ ] Tokens de [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md) aplicados en `styles.css`.
+- [ ] Fuentes self-hosted Fraunces + Inter, sin requests externos.
+- [ ] Contraste AA, foco visible, targets ≥ 44 px, `prefers-reduced-motion`.
+- [ ] Responsive 360 / 768 / 1440 sin scroll horizontal.
+- [ ] Checklist “no retro / no hecho con los pies” completo.
+- [ ] Captura/GIF por nivel y smoke test visual.
+
 **Criterios de aceptación:**
 
 - [ ] Se puede jugar del nivel 1 al 5 sin tocar la consola.
 - [ ] El progreso sobrevive a recargar.
 - [ ] No hay términos académicos en la UI.
+- [ ] El juego se ve y se siente como un puzzle moderno, no retro.
 - [ ] Guion de demo probado.
 
 ## T8 — Informe y sustentación

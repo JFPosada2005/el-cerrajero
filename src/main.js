@@ -67,6 +67,7 @@ function renderPalette() {
     button.type = 'button';
     button.className = `key key-${key}${key === selectedKey ? ' is-active' : ''}`;
     button.textContent = key;
+    button.setAttribute('aria-label', `Llave ${key}`);
     button.setAttribute('aria-pressed', String(key === selectedKey));
     button.addEventListener('click', () => selectKey(key));
     palette.append(button);
@@ -136,7 +137,7 @@ function renderLevel() {
         </section>
         <aside class="panel log-panel">
           <h2>Bitácora</h2>
-          <ul id="log" class="log"></ul>
+          <ul id="log" class="log" aria-live="polite" aria-label="Bitácora del taller"></ul>
         </aside>
       </main>
     </div>
