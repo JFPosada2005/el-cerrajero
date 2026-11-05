@@ -126,4 +126,21 @@ Superseded: the old SDD "delegate everything / ask before delegating" preference
 
 - Launched an independent read-only architecture design task on `gentle-ai-verify` (background session `ses_e53857deeffe8TcIPlBOAHGMTp`).
 - Scope: module boundaries, data contracts for DFA/NFA/PDA/TM, judge/oracle strategy, level schema, game state machine, UI components, per-level design, testing strategy, file structure, collaborator handoff, risks.
-- No implementation or file writes from the design agent; the parent will persist the returned document as `docs/DESIGN.md`.
+- No implementation or file writes from the design agent; the parent persisted the returned document as `docs/DESIGN.md`.
+
+### L11 — Design received (2026-11-05)
+
+- `docs/DESIGN.md` now contains the independent design: three layers (`core`, `game`, `ui`), data contracts for DFA/NFA/PDA/TM, exact judge for L1-L3, bounded judge for L4-L5, level schema, UI components, per-level design, testing strategy.
+- Key decisions: D1 levels as ES modules; D2 fixed cells / editable wires; D3 single `judge` contract; D4 shortlex counterexamples; D5 one new part per level; D7 stack by final state; D8 binary addition; D9 one thief; D10 progress v2.
+- Open decision D6: change L3 from "contains 01 or 10" to "contains 1-2-2 or 2-1-1". Evidence: minimal DFA is 4 states for the former and 6 for the latter; the fork is optional in the former. Pending owner approval.
+- Contracts are not frozen until D6 is resolved and F1-F5 land.
+
+### L12 — Repo and collaborator authorization (2026-11-05)
+
+User: "Ademas crea un repositorio en github de este proyecto porque agregaremos un colaborador a nuestro proyecto".
+User: "MateoTorres1543 es el usuario colaborador".
+
+- Private repo created: <https://github.com/JFPosada2005/el-cerrajero>; `main` pushed.
+- GitHub issues created for T3-T8; T3 assigned to MateoTorres1543.
+- Invitation sent to MateoTorres1543 with `write` permission; acceptance pending.
+- The initial push is covered by the user's explicit repo-creation request. Future pushes to `main` remain gated by S10 and user verification.

@@ -29,9 +29,16 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - T2 (nivel 1): falta el smoke test de navegador y la alineación con `docs/DESIGN.md`.
 - La UI del taller no tiene todavía un modo de construcción libre; el nivel 1 es de reparación.
 
+## Diseño técnico
+
+- [`docs/DESIGN.md`](DESIGN.md) recibido del modelo independiente: arquitectura por capas, contratos de datos, juez exacto para AFD/AFND y acotado para AP/MT, esquema de niveles, UI y plan de tests.
+- Propone **dos puzzles por nivel** (reparar y construir) y un ladrón que escala.
+- **D6 pendiente:** cambiar la regla del nivel 3 a “contiene 1-2-2 o 2-1-1” para que el bifurcador sea necesario. Con “01 o 10” el AFD mínimo tiene 4 estados y el bifurcador queda opcional.
+- Los contratos **no** están congelados; el freeze F1-F5 es la continuación de T2.
+
 ## Qué sigue
 
-1. Recibir `docs/DESIGN.md` del modelo de diseño y congelar interfaces.
+1. Aprobar D6 y congelar interfaces (F1-F5).
 2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
 4. Implementar T3 (nivel 2) y T4 (AFND) en ramas separadas.

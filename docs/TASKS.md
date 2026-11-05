@@ -13,6 +13,8 @@ Este tablero es la vista de trabajo para el colaborador. El alcance y las specs 
 
 Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
+> **Diseño recibido:** [`docs/DESIGN.md`](DESIGN.md) es la referencia técnica. Los contratos **no** están congelados hasta aprobar D6 y completar el freeze F1-F5. No empezar T3-T6 hasta entonces.
+
 ## Milestone actual
 
 **M1 — Nivel 1 jugable y documentación de handoff.**
@@ -96,7 +98,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Objetivo:** introducir el bucle y los lenguajes regulares infinitos sin nombrarlos.
 
-**Regla del cliente (borrador):** “La bóveda abre con cualquier código que tenga una cantidad par de rojas.”
+**Regla del cliente (propuesta del diseño):** reparar = cantidad impar de `1`; construir = termina en `2-1`.
 
 **Pieza nueva:** engranaje de bucle.
 
@@ -124,7 +126,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 **Criterios de aceptación:**
 
 - [ ] `epsilonClosure`, `simulateNFA`, `nfaToDFA` (construcción de subconjuntos) y `areEquivalentNFA` implementados.
-- [ ] El nivel 3 acepta “contiene 01 o 10”.
+- [ ] El nivel 3 acepta “contiene 1-2-2 o 2-1-1” (D6 propuesto; pendiente de aprobación).
 - [ ] El jugador puede usar bifurcador y resorte épsilon.
 - [ ] El juez es equivalencia exacta vía determinización.
 - [ ] El contraejemplo más corto se muestra en la UI.
