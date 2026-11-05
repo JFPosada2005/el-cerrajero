@@ -117,7 +117,9 @@ Superseded: the old SDD "delegate everything / ask before delegating" preference
 - `CONTRIBUTING.md` -> setup, branch/commit/PR flow, code style, tests, definition of done.
 - `docs/TASKS.md` -> detailed task board T1-T8 with acceptance criteria, dependencies, parallelizable work, frozen interfaces.
 - `docs/STATUS.md` -> current state, tests, risks, next steps, blockers.
-- Pending: `docs/DESIGN.md` from the independent design model; GitHub repo creation; collaborator invite.
+- GitHub repo created (private): <https://github.com/JFPosada2005/el-cerrajero>; `main` pushed.
+- GitHub issues created for T3-T8: #1 (T3), #5 (T4), #6 (T5), #2 (T6), #3 (T7), #4 (T8).
+- Pending: `docs/DESIGN.md` from the independent design model; collaborator invite (username pending).
 
 ### L10 — Design delegation (2026-11-05)
 

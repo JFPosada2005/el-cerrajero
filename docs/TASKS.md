@@ -23,16 +23,16 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## Tabla
 
-| ID | Tarea | Estado | Dueño | Specs | Depende de |
-| --- | --- | --- | --- | --- | --- |
-| T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — |
-| T2 | Shell del juego + Nivel 1 vertical slice | review | Juan | S1-S4, S7-S9 | T1 |
-| T3 | Nivel 2 (AFD con bucle / paridad) | todo | colaborador | S3-S5, S9 | T2, diseño congelado |
-| T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado |
-| T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado |
-| T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado |
-| T7 | Pulido: mapa, persistencia, feedback, demo | todo | colaborador | S4, S8, S9 | T3-T6 |
-| T8 | Informe + sustentación | todo | Juan + redactor | S11 | T3-T7, playtest |
+| ID | Tarea | Estado | Dueño | Specs | Depende de | Issue |
+| --- | --- | --- | --- | --- | --- | --- |
+| T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — | — |
+| T2 | Shell del juego + Nivel 1 vertical slice | review | Juan | S1-S4, S7-S9 | T1 | — |
+| T3 | Nivel 2 (AFD con bucle / paridad) | todo | colaborador | S3-S5, S9 | T2, diseño congelado | [#1](https://github.com/JFPosada2005/el-cerrajero/issues/1) |
+| T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
+| T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
+| T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
+| T7 | Pulido: mapa, persistencia, feedback, demo | todo | colaborador | S4, S8, S9 | T3-T6 | [#3](https://github.com/JFPosada2005/el-cerrajero/issues/3) |
+| T8 | Informe + sustentación | todo | Juan + redactor | S11 | T3-T7, playtest | [#4](https://github.com/JFPosada2005/el-cerrajero/issues/4) |
 
 ## T1 — Scaffold + motor AFD
 

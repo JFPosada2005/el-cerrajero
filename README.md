@@ -40,6 +40,7 @@ No hay dependencias externas ni build step. El juego es HTML, CSS, JavaScript co
 | [`docs/TASKS.md`](docs/TASKS.md) | Tablero de tareas con estado, dueño, archivos, criterios de aceptación y dependencias. |
 | [`docs/STATUS.md`](docs/STATUS.md) | Qué funciona, qué está en progreso, qué sigue y qué está bloqueado. |
 | [`CONTRIBUTING.md`](CONTRIBUTING.md) | Setup, ramas, commits, tests, PRs y estilo de código. |
+| [Issues del repo](https://github.com/JFPosada2005/el-cerrajero/issues) | Tareas accionables en GitHub, una por tarea T3-T8. |
 | [`odd/tasks/el-cerrajero.md`](odd/tasks/el-cerrajero.md) | Documento ODD: specs, tareas y bitácora de decisiones. Es la fuente de verdad del alcance. |
 
 ## Estructura
