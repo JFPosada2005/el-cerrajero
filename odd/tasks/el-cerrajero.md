@@ -2,8 +2,8 @@
 
 Objective: build a 5-level browser puzzle game where the player designs vault mechanisms that are formally DFAs, NFAs with epsilon transitions, PDAs, and a Turing machine. The game never names the formalism; the report does.
 
-Branch: `feat/el-cerrajero`
-Delivery: work-unit commits on the feature branch; push only after the user verifies and explicitly approves.
+Branch: `main` stable; work units use `feat/<task-id>-<slug>`.
+Delivery: work-unit commits; push only after the user verifies and explicitly approves.
 Test runner: `node --test` (Node 24, zero dependencies).
 
 ## Specs
@@ -61,8 +61,8 @@ Acceptance: `npm test` passes; `npm run serve` serves the game.
 
 | ID | Task | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- | --- |
-| T1 | Scaffold + DFA core (simulate, complete, minimize, equivalence, shortest counterexample) + tests | S3, S9, S12 | inline | done | pending |
-| T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | pending | - |
+| T1 | Scaffold + DFA core (simulate, complete, minimize, equivalence, shortest counterexample) + tests | S3, S9, S12 | inline | done | `9d71345` |
+| T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | review | `9b8911c` |
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | pending | - |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | pending | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
@@ -100,5 +100,27 @@ Superseded: the old SDD "delegate everything / ask before delegating" preference
 
 ### L7 — T1 evidence (2026-11-05)
 
-- `npm test` -> pending
-- Commit -> pending
+- `npm test` -> 12 passing (DFA core).
+- Commit -> `9d71345` (`feat(el-cerrajero): add DFA core engine`).
+
+### L8 — T2 evidence (2026-11-05)
+
+- Level 1 vertical slice implemented: start screen, SVG workshop, palette, legitimate-key test, thief heist, win modal, localStorage progress.
+- `node --check` clean on `src/main.js`, `src/ui/workshop.js`, `src/game/level1.js`, `src/game/rules.js`.
+- `npm test` -> 17 passing (12 DFA + 5 level 1).
+- Commit -> `9b8911c` (`feat(el-cerrajero): add level 1 vertical slice`).
+- Pending: browser smoke test (start → level → repair → heist → win) and design-doc alignment.
+
+### L9 — Collaborator documentation (2026-11-05)
+
+- `README.md` -> project overview, quick start, structure, theory map, conventions.
+- `CONTRIBUTING.md` -> setup, branch/commit/PR flow, code style, tests, definition of done.
+- `docs/TASKS.md` -> detailed task board T1-T8 with acceptance criteria, dependencies, parallelizable work, frozen interfaces.
+- `docs/STATUS.md` -> current state, tests, risks, next steps, blockers.
+- Pending: `docs/DESIGN.md` from the independent design model; GitHub repo creation; collaborator invite.
+
+### L10 — Design delegation (2026-11-05)
+
+- Launched an independent read-only architecture design task on `gentle-ai-verify` (background session `ses_e53857deeffe8TcIPlBOAHGMTp`).
+- Scope: module boundaries, data contracts for DFA/NFA/PDA/TM, judge/oracle strategy, level schema, game state machine, UI components, per-level design, testing strategy, file structure, collaborator handoff, risks.
+- No implementation or file writes from the design agent; the parent will persist the returned document as `docs/DESIGN.md`.
