@@ -98,7 +98,7 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 | Panel | superficie, borde 1 px, radio 16, padding 24; highlight interno de 1 px. |
 | Contrato | tarjeta ivory (fondo `--ink`, texto `#17130A`), radio 12, padding 16; número en latón oscuro `#7A5A12`, cliente y regla en Fraunces; nota en `#5A5348`. Persistente durante el nivel: nunca se colapsa ni se oculta. |
 | Celda (nodo) | 88 px, fill `#111821`, borde 2.5 px latón; aceptar = doble anillo; inicio = bandera; hover glow; activo teal; error coral con shake de 120 ms. |
-| Cable | 2.5 px muted; label en píldora con fondo `--bg`; camino activo teal; resorte = dashed; bifurcador = rombo; engranaje = engranaje pequeño. |
+| Cable | 2.5 px muted; **un cable por llave, dibujado en paralelo**; label con el símbolo y halo `--bg`; hover coral y cursor pointer; **clic corta el cable**; foco teal 3.6 px; camino activo teal; resorte = dashed; bifurcador = rombo; engranaje = engranaje pequeño. |
 | Paleta de llaves | 48 px, símbolo visible, anillo activo teal, tooltip con nombre. |
 | Pila | fichas 56×32, base 64×20, push/pop 220 ms, label “base”/“ficha”. |
 | Cinta | celdas 40×40, números tabulares, cabezal triángulo, slide 180 ms. |
@@ -110,7 +110,7 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 
 **Estados obligatorios:** default, hover, active, focus-visible, disabled, loading, success, error, empty. Si falta uno, el componente no está terminado.
 
-**Editor:** la interacción es clic en origen → clic en destino, no drag. Si se agrega drag, debe existir una alternativa de un solo puntero (WCAG 2.2 *Dragging Movements*).
+**Editor:** conectar es clic en origen → clic en destino; **cortar es clic directo sobre el cable**. No hay drag. Si se agrega drag, debe existir una alternativa de un solo puntero (WCAG 2.2 *Dragging Movements*).
 
 ## 8. Movimiento
 

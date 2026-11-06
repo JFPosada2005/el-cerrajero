@@ -35,7 +35,7 @@ Acceptance: L3 uses a fork (nondeterminism) and a spring (epsilon transition).
 
 S7 — The Cerrajero fiction.
 Accepted design: the player is a locksmith; each level is a contract; the client gives the rule; the thief tests the mechanism; each level has repair, build, and heist phases.
-Acceptance: the contract card stays visible during play (client + rule in plain words); the thief's report reads as forensic evidence (pick marks, attempt log), never as a friendly hint; the UI uses workshop vocabulary (memory cell, loop gear, fork, spring, stack spring, tape), never formal vocabulary.
+Acceptance: the contract card stays visible during play (client + rule in plain words); the thief's report reads as forensic evidence (pick marks, attempt log), never as a friendly hint; the repair phase starts with the mechanism incomplete, never one wire away from solved; the UI uses workshop vocabulary (memory cell, loop gear, fork, spring, stack spring, tape), never formal vocabulary.
 
 S8 — Scope discipline.
 User: "no vamos a extendernos de mas en esto".
@@ -59,7 +59,8 @@ Acceptance: `npm test` passes; `npm run serve` serves the game.
 
 S13 — Visual quality and UX.
 User: "Que no se sienta como si estuviera jugando un juego retro o creado con los pies."
-Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-hosted Fraunces + Inter; WCAG AA; 44px targets; visible focus; `prefers-reduced-motion`; responsive 360/768/1440; no retro anti-patterns; playtest with 5 users.
+User (2026-11-06): "como juego graficamente se ve muy simple, me hubiera gusta algo mas elaborado, que se vea como un juego de verdad, con animaciones, texturas, sonidos y muchas mas cosas que caractericen un juego."
+Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-hosted Fraunces + Inter; WCAG AA; 44px targets; visible focus; `prefers-reduced-motion`; responsive 320/360/768/1440; no retro anti-patterns; playtest with 5 users. The full remaster (animations, textures, sound) is a named phase after all five levels work; the functional pass keeps the event hooks and tokens that make it possible without rewriting the levels.
 
 ## Tasks
 
@@ -178,3 +179,14 @@ User: "perfecto, hagamoslo de esa forma"
 - Deferred: optional countdown mode (practice by default, never blocks progress, WCAG 2.2.1), after the freeze.
 - Deferred to T7: two-role demo script (one reader, one operator).
 - RED observed first: 26 tests fail/pass as expected; GREEN after `src/game/thief.js`, `runHeist.reason`, the card markup and tokens.
+
+### L16 — Level 1 feedback and editor interaction (2026-11-06)
+
+User: "funciona bien, el primer nivel esta bastante sencillo a mi parecer, aunque como juego graficamente se ve muy simple, me hubiera gusta algo mas elaborado, que se vea como un juego de verdad, con animaciones, texturas, sonidos y muchas mas cosas que caractericen un juego. Vamos a realizarlo de la siguiente forma, podemos terminar el juego como lo estas haciendo por el momento, despues de ver que todos los niveles andan bien y el se completan de manera exitosa entonces remasterizaremos el juego y usaremos la logica ya creada en la que sabemos que funciona bien los niveles. Una cosa que note es que ya venia puestas transcisiones en el juego en el nivel uno, la idea seria que no venga esto porque practicamente ya estaba armada casi la solucion cuando entre a completar el nivel, ademas para quitar una transcicion tengo que elegir la llave que tiene el numero y volver a elegir las celdas como si fuera a ponerlo per pues hace el efecto contrario, no se si dejarlo asi o implementar esto mejor de una forma que sea mas comodo porque en ese sentido no fue intuitivo, eso lo tuve que descubrir."
+
+- **Plan aprobado:** completar los 5 niveles funcionales y verificados primero; el remaster visual (animaciones, texturas, sonido) va después, sobre la lógica ya probada.
+- **Nivel 1 no está casi resuelto:** el blueprint inicial perdió el cable del medio. Secuencia de feedback: `123` lockout → agregar el cable → `121`/`223` intruder → cortar los dos cruzados → equivalente.
+- **Corte de cables:** clic directo sobre el cable (hit area de 18 px, hover coral, foco teal, Enter/Space, aria-label). Un cable por llave, dibujado en paralelo. Conectar de nuevo un cable existente ya no lo corta: es `kept`.
+- **Escape** cancela una selección pendiente.
+- **Docs:** `DESIGN.md` §5.1/§7.2/§8, `VISUAL-DESIGN.md` (componente Cable + editor), `TASKS.md` T2, `STATUS.md`.
+- **Evidencia:** RED primero; GREEN con 24 tests.

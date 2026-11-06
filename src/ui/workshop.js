@@ -14,11 +14,12 @@ function nodeMap(level) {
   return new Map(level.states.map(state => [state.id, state]));
 }
 
-function edgeGeometry(from, to) {
+function edgeGeometry(from, to, offset = 0) {
   if (from.id === to.id) {
+    const x = from.x + offset;
     return {
-      path: `M ${from.x - 26} ${from.y - 38} C ${from.x - 86} ${from.y - 130}, ${from.x + 86} ${from.y - 130}, ${from.x + 26} ${from.y - 38}`,
-      labelX: from.x,
+      path: `M ${x - 26} ${from.y - 38} C ${x - 86} ${from.y - 130}, ${x + 86} ${from.y - 130}, ${x + 26} ${from.y - 38}`,
+      labelX: x,
       labelY: from.y - LOOP_LABEL_OFFSET,
     };
   }
@@ -27,10 +28,12 @@ function edgeGeometry(from, to) {
   const length = Math.hypot(dx, dy) || 1;
   const ux = dx / length;
   const uy = dy / length;
-  const startX = from.x + ux * NODE_RADIUS;
-  const startY = from.y + uy * NODE_RADIUS;
-  const endX = to.x - ux * NODE_RADIUS;
-  const endY = to.y - uy * NODE_RADIUS;
+  const shiftX = -uy * offset;
+  const shiftY = ux * offset;
+  const startX = from.x + ux * NODE_RADIUS + shiftX;
+  const startY = from.y + uy * NODE_RADIUS + shiftY;
+  const endX = to.x - ux * NODE_RADIUS + shiftX;
+  const endY = to.y - uy * NODE_RADIUS + shiftY;
   const midX = (startX + endX) / 2;
   const midY = (startY + endY) / 2;
   const curve = 30;
@@ -43,27 +46,34 @@ function edgeGeometry(from, to) {
   };
 }
 
-export function createWorkshop({ svg, level, transitions, onToggle }) {
+export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
   const states = nodeMap(level);
   let selectedKey = level.alphabet[0];
   let pendingSource = null;
   let highlighted = [];
 
-  function edgeGroups() {
-    const groups = new Map();
+  function wireList() {
+    const pairs = new Map();
     for (const [source, row] of Object.entries(transitions)) {
-      for (const [symbol, target] of Object.entries(row)) {
+      for (const symbol of Object.keys(row)) {
+        const target = row[symbol];
         const key = `${source}\u0000${target}`;
-        if (!groups.has(key)) {
-          groups.set(key, { source, target, symbols: [] });
+        if (!pairs.has(key)) {
+          pairs.set(key, []);
         }
-        groups.get(key).symbols.push(symbol);
+        pairs.get(key).push({ source, target, symbol });
       }
     }
-    for (const group of groups.values()) {
-      group.symbols.sort((a, b) => level.alphabet.indexOf(a) - level.alphabet.indexOf(b));
+    const wires = [];
+    for (const group of pairs.values()) {
+      group.sort((a, b) => level.alphabet.indexOf(a.symbol) - level.alphabet.indexOf(b.symbol));
+      const step = 18;
+      group.forEach((wire, index) => {
+        const offset = (index - (group.length - 1) / 2) * step;
+        wires.push({ ...wire, offset });
+      });
     }
-    return [...groups.values()];
+    return wires;
   }
 
   function litEdges() {
@@ -132,15 +142,22 @@ export function createWorkshop({ svg, level, transitions, onToggle }) {
 
   function renderEdges() {
     const lit = litEdges();
-    for (const group of edgeGroups()) {
-      const from = states.get(group.source);
-      const to = states.get(group.target);
+    for (const wire of wireList()) {
+      const from = states.get(wire.source);
+      const to = states.get(wire.target);
       if (!from || !to) {
         continue;
       }
-      const geometry = edgeGeometry(from, to);
-      const isLit = lit.has(`${group.source}\u0000${group.target}`);
-      svg.append(
+      const geometry = edgeGeometry(from, to, wire.offset);
+      const isLit = lit.has(`${wire.source}\u0000${wire.target}`);
+      const group = svgElement('g', {
+        class: `wire${isLit ? ' is-lit' : ''}`,
+        role: 'button',
+        tabindex: '0',
+        'aria-label': `Cable ${wire.symbol}: ${from.label} a ${to.label}`,
+      });
+      group.append(svgElement('path', { d: geometry.path, class: 'edge-hit' }));
+      group.append(
         svgElement('path', {
           d: geometry.path,
           class: `edge${isLit ? ' is-lit' : ''}`,
@@ -152,8 +169,16 @@ export function createWorkshop({ svg, level, transitions, onToggle }) {
         y: geometry.labelY,
         class: 'edge-label',
       });
-      label.textContent = group.symbols.join(',');
-      svg.append(label);
+      label.textContent = wire.symbol;
+      group.append(label);
+      group.addEventListener('click', () => handleWireClick(wire.source, wire.symbol));
+      group.addEventListener('keydown', event => {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          handleWireClick(wire.source, wire.symbol);
+        }
+      });
+      svg.append(group);
     }
   }
 
@@ -205,7 +230,12 @@ export function createWorkshop({ svg, level, transitions, onToggle }) {
     }
     const source = pendingSource;
     pendingSource = null;
-    onToggle(source, stateId, selectedKey);
+    onConnect(source, stateId, selectedKey);
+    render();
+  }
+
+  function handleWireClick(source, symbol) {
+    onCut(source, symbol);
     render();
   }
 
@@ -232,6 +262,13 @@ export function createWorkshop({ svg, level, transitions, onToggle }) {
     highlighted = [];
     render();
   }
+
+  svg.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && pendingSource !== null) {
+      pendingSource = null;
+      render();
+    }
+  });
 
   render();
 

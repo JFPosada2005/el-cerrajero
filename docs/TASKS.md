@@ -73,8 +73,9 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 - Pantalla de inicio y pantalla de nivel.
 - **Ficha del contrato persistente** con cliente, número y regla en palabras llanas.
-- Taller SVG con 4 celdas fijas y cables por llave.
-- Fase de reparación: dos cables incorrectos.
+- Taller SVG con 4 celdas fijas y un cable clickeable por llave.
+- Fase de reparación: falta un cable y sobran dos.
+- **Conectar** con clic en origen → destino; **cortar** con clic directo sobre el cable.
 - Botón “Probar la llave” y “Iniciar el asalto”.
 - Juez por equivalencia de AFD y contraejemplo más corto.
 - **Diagnóstico forense** del ladrón: `intruder` (marcas de ganzúa) o `lockout` (la llave del cliente no cedió).
@@ -83,13 +84,15 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Criterios de aceptación:**
 
-- [x] La llave `123` abre el mecanismo inicial.
-- [x] El mecanismo inicial no es equivalente al objetivo.
-- [x] El ladrón encuentra un contraejemplo de longitud 3 (`121` o `223`).
-- [x] Al cortar los dos cables incorrectos, el mecanismo es equivalente.
-- [x] El mecanismo corregido rechaza `1234`, `12` y `223`.
-- [x] El asalto distingue `intruder` de `lockout`.
-- [x] 26 tests totales pasando.
+- [x] El mecanismo inicial no abre con la llave del cliente (`123`).
+- [x] El mecanismo inicial no está casi resuelto: falta un cable y sobran dos.
+- [x] El ladrón reporta `lockout` con `123` mientras falta el cable.
+- [x] Al agregar el cable faltante, el ladrón entra por `121` o `223` (`intruder`).
+- [x] Al cortar los dos cables cruzados, el mecanismo es equivalente.
+- [x] El mecanismo reparado abre con `123` y rechaza `1234`, `12` y `223`.
+- [x] Conectar de nuevo un cable existente no lo corta: el corte es un clic aparte.
+- [x] Escape cancela una selección pendiente.
+- [x] 24 tests totales pasando.
 - [ ] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
 - [x] La UI del nivel no muestra vocabulario académico (guard en `tests/level1.test.js`).
 

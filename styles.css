@@ -477,6 +477,38 @@ button:active {
   filter: url(#glow);
 }
 
+.wire {
+  cursor: pointer;
+}
+
+.wire .edge-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-width: 18;
+  pointer-events: stroke;
+}
+
+.wire:hover .edge {
+  stroke: var(--coral);
+}
+
+.wire:hover .edge-label {
+  fill: var(--coral);
+}
+
+.wire:focus-visible {
+  outline: none;
+}
+
+.wire:focus-visible .edge {
+  stroke: var(--teal);
+  stroke-width: 3.6;
+}
+
+.wire:focus-visible .edge-label {
+  fill: var(--teal);
+}
+
 .edge-label {
   fill: var(--ink);
   font-family: "Segoe UI", system-ui, sans-serif;
@@ -487,7 +519,6 @@ button:active {
   stroke: #0a0e13;
   stroke-width: 5px;
   stroke-linejoin: round;
-  pointer-events: none;
 }
 
 .start-arrow {

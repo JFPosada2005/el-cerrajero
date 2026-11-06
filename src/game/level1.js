@@ -24,7 +24,7 @@ export const level1 = {
   ],
   initialTransitions: {
     q0: { 1: 'q1', 2: 'q1' },
-    q1: { 2: 'q2' },
+    q1: {},
     q2: { 3: 'q3', 1: 'q3' },
     q3: {},
   },

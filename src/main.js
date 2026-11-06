@@ -88,16 +88,31 @@ function selectKey(key) {
   }
 }
 
-function toggleTransition(source, target, symbol) {
+function connectTransition(source, target, symbol) {
   const row = playerTransitions[source] ?? {};
   playerTransitions[source] = row;
   if (row[symbol] === target) {
-    delete row[symbol];
-    appendLog(`Cortaste el cable ${symbol}: ${source} → ${target}.`);
+    appendLog(`Ese cable ya está puesto: ${source} → ${target}.`);
+    return;
+  }
+  if (symbol in row) {
+    const previous = row[symbol];
+    row[symbol] = target;
+    appendLog(`Moviste la llave ${symbol}: ${previous} → ${target}.`);
     return;
   }
   row[symbol] = target;
   appendLog(`Conectaste la llave ${symbol}: ${source} → ${target}.`);
+}
+
+function cutWire(source, symbol) {
+  const row = playerTransitions[source] ?? {};
+  if (!(symbol in row)) {
+    return;
+  }
+  const target = row[symbol];
+  delete row[symbol];
+  appendLog(`Cortaste el cable ${symbol}: ${source} → ${target}.`);
 }
 
 function renderLevel() {
@@ -129,7 +144,7 @@ function renderLevel() {
           </div>
           <h2>Llaves</h2>
           <div id="palette" class="palette"></div>
-          <p class="hint">Elegí una llave, tocá la celda de origen y después la de destino. Si el cable ya existe, se corta. Un cable que falta manda la llave a la alarma.</p>
+          <p class="hint">Elegí una llave y tocá origen y destino para conectar. Tocá un cable para cortarlo. Un cable que falta manda la llave a la alarma.</p>
           <div class="actions">
             <button id="test-key" class="secondary">Probar la llave</button>
             <button id="heist" class="primary">Iniciar el asalto</button>
@@ -155,7 +170,8 @@ function renderLevel() {
     svg: document.querySelector('#canvas'),
     level: level1,
     transitions: playerTransitions,
-    onToggle: toggleTransition,
+    onConnect: connectTransition,
+    onCut: cutWire,
   });
   document.querySelector('#test-key').addEventListener('click', handleTestKey);
   document.querySelector('#heist').addEventListener('click', handleHeist);

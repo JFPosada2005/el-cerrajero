@@ -17,13 +17,14 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - equivalencia por BFS del producto;
   - contraejemplo más corto.
 - Nivel 1:
-  - taller SVG con 4 celdas y cables por llave;
-  - dos cables incorrectos que el jugador debe cortar;
+  - taller SVG con 4 celdas y un cable clickeable por llave;
+  - mecanismo inicial **incompleto**: falta un cable y sobran dos;
+  - conectar con clic en origen → destino; **cortar con clic directo sobre el cable**; Escape cancela una selección pendiente;
   - **ficha del contrato persistente** con cliente y regla en palabras llanas;
   - prueba de la llave legítima `123`;
   - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
   - modal de victoria y persistencia en `localStorage`.
-- Tests: **26 pasando** con `node --test`.
+- Tests: **24 pasando** con `node --test`.
 
 ## Qué está en revisión
 
@@ -52,9 +53,9 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 
 ```text
 tests/dfa.test.js      12 passing
-tests/level1.test.js    9 passing
+tests/level1.test.js    7 passing
 tests/thief.test.js     5 passing
-total                  26 passing
+total                  24 passing
 ```
 
 Comando: `npm test`.
@@ -69,6 +70,9 @@ Comando: `npm test`.
 
 ## Decisiones recientes
 
+- **Plan por fases:** primero completar los 5 niveles de forma funcional y verificada; después remasterizar lo visual (animaciones, texturas, sonido) reutilizando la lógica ya probada. Coordinado con el usuario el 2026-11-06.
+- **Corte de cables:** es un clic directo sobre el cable, no un re-toggle desde la paleta. Un cable = un objeto clickeable; conectar de nuevo no corta.
+- **Nivel 1:** el mecanismo inicial parte incompleto (falta un cable) además de tener dos cruzados, para que no se sienta casi resuelto.
 - Se mantiene la ficción del cerrajero. De la idea de la bomba se adaptaron dos cosas: la **ficha del contrato persistente** y el **diagnóstico forense** del ladrón (marcas de ganzúa, no pistas). El modo contrarreloj queda opcional para después del freeze; el demo de dos roles va al guion de T7.
 - Nivel 3 queda como **AFND-λ** (bifurcador + resorte), no como sumidero/complemento.
 - Exactamente **5 niveles**, sin actos extra.

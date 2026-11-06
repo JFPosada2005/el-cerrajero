@@ -423,13 +423,13 @@ Drum blueprint: `{ "rules": { "<section>": { "<symbol>": { "write", "move", "to"
   "phases": {
     "repair": {
       "goal": "Abre solo con 1-2-3.",
-      "intro": "Alguien cruzó dos cables. Encontralos y cortalos.",
+      "intro": "El mecanismo quedó a medio armar. Falta un cable y hay dos de más.",
       "cells": [ { "id": "q0", "label": "Entrada", "x": 140, "y": 270, "start": true },
                  { "id": "q1", "label": "Celda 1", "x": 340, "y": 150 },
                  { "id": "q2", "label": "Celda 2", "x": 540, "y": 270 },
                  { "id": "q3", "label": "Cerrojo", "x": 720, "y": 150, "accept": true } ],
       "blueprint": { "wires": [ { "from": "q0", "to": "q1", "key": "1" }, { "from": "q0", "to": "q1", "key": "2" },
-                                { "from": "q1", "to": "q2", "key": "2" }, { "from": "q2", "to": "q3", "key": "3" },
+                                { "from": "q2", "to": "q3", "key": "3" },
                                 { "from": "q2", "to": "q3", "key": "1" } ] },
       "target": { "kind": "machine", "machine": { "type": "dfa", "states": ["t0","t1","t2","t3"],
                   "alphabet": ["1","2","3","4"], "start": "t0", "accept": ["t3"],
@@ -544,7 +544,7 @@ These show only what differs from level 1. Client names are placeholder content.
 
 | Component | Inputs | Outputs and methods | Must not know |
 |---|---|---|---|
-| `graphEditor.js` (evolves from `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)`, `setWires(wires)`, `light({ cells, wires })`, `clearLight()`; emits `{ type: 'toggle-wire', from, to, tool }` | gating rules, acceptance, determinism |
+| `graphEditor.js` (evolves from `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)`, `setWires(wires)`, `light({ cells, wires })`, `clearLight()`; emits `{ type: 'connect-wire' \| 'cut-wire', from, to, tool }` | gating rules, acceptance, determinism |
 | `geometry.js` | cell positions | `edgeGeometry`, `loopGeometry`, `springPath` | — |
 | `palette.js` | keys, parts, stack labels | `onSelect(tool)`, where tool = `{ kind: 'key', key } \| { kind: 'spring' }` plus `stack` on L4 | — |
 | `stackPanel.js` | `{ root, labels }` | `show(stack)`, `pulse('push' \| 'pop')` | the symbols `Z` / `X` (gets labels) |
@@ -560,7 +560,8 @@ These show only what differs from level 1. Client names are placeholder content.
 
 | Situation | Result |
 |---|---|
-| An identical wire already exists | `removed` |
+| A wire is clicked (`cut-wire`) | `removed` |
+| An identical wire is connected again (`connect-wire`) | `kept` (no change; the cut is its own edit) |
 | Self-loop without the gear part | `blocked: needs-gear` |
 | Same key from the same cell, fork not unlocked | `moved` (the old wire is retargeted) |
 | Same key from the same cell, fork unlocked | `added` |
@@ -568,7 +569,7 @@ These show only what differs from level 1. Client names are placeholder content.
 | Pin on the lock section | `blocked: lock-is-final` |
 
 `describeWire` (in `ui/text.js`) chooses how each wire is drawn:
-- key wires: labels like `1,2`;
+- key wires: one parallel curve per key, labeled with its own symbol;
 - springs: a dashed zigzag with no text;
 - forks: a glyph at the source;
 - gears: a cog at the top of the loop;
@@ -581,7 +582,7 @@ These show only what differs from level 1. Client names are placeholder content.
 Every counterexample below was checked in the scratch probes (Appendix A).
 
 ### L1: the safe (DFA, finite)
-- **Repair**: two wrong wires. The thief's counterexample is **`121`** (intruder).
+- **Repair**: the initial blueprint is incomplete (the middle wire is missing) and has two crossed wires. Until the middle wire is added the thief reports **`123`** (lockout); after adding it, the crossed wires give **`121`** (intruder). The player adds one cable and cuts two, with feedback after each step.
 - **Build**: 3-1-4 from a blank blueprint. The blank blueprint gives **`314`** (lockout).
 - **Edge cases**: self-loop → `needs-gear`; a missing wire → alarm.
 
@@ -766,8 +767,8 @@ All probes ran in the scratch copy with `HOME`/`TMP` pointing inside it.
 
 - `src/main.js`: level text is written with `innerHTML`, against CONTRIBUTING.md. Fix in F5.
 - `src/main.js`: `setItem` must stay inside a try/catch. Already fixed in the current `saveProgress`.
-- `src/main.js`: "Lenguajes" breaks the banned-word list. Add an allow-list for the course credit line.
+- `src/main.js`: the course credit line that contained "Lenguajes" was removed on 2026-11-06; no allow-list is needed.
 - `src/main.js`: level 1 is hard-coded. Fix in F5 (data-driven levels).
-- `src/ui/workshop.js`: clicking the same cell twice makes an ungated self-loop, and there is no way to cancel a pending selection. Fix in F5 with `applyEdit`.
+- `src/ui/workshop.js`: clicking the same cell twice makes an ungated self-loop. Fix in F5 with `applyEdit`. Escape cancels a pending selection.
 - ODD doc: the T1/T2 commit rows were updated after this design was written; verify against the current file.
 - ODD doc: add a log entry recording the user's explicit request to create the repo and the initial push.
