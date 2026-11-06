@@ -67,15 +67,15 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Estado:** review.
 
-**Archivos:** `index.html`, `styles.css`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/workshop.js`, `tests/level1.test.js`, `tests/thief.test.js`.
+**Archivos:** `index.html`, `styles.css`, `serve.py`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/workshop.js`, `tests/level1.test.js`, `tests/thief.test.js`, `tests/workshop.test.js`.
 
 **Qué incluye:**
 
 - Pantalla de inicio y pantalla de nivel.
 - **Ficha del contrato persistente** con cliente, número y regla en palabras llanas.
-- Taller SVG con 4 celdas fijas y un cable clickeable por llave.
+- Taller SVG con 4 celdas fijas y **un cable por par de celdas**, con todos sus valores en una sola etiqueta (`1,2`).
 - Fase de reparación: falta un cable y sobran dos.
-- **Conectar** con clic en origen → destino; **cortar** con clic directo sobre el cable.
+- **Conectar** con clic en origen → destino; **cortar** eligiendo la **tijera** y haciendo clic sobre el cable (corta el cable completo).
 - Botón “Probar la llave” y “Iniciar el asalto”.
 - Juez por equivalencia de AFD y contraejemplo más corto.
 - **Diagnóstico forense** del ladrón: `intruder` (marcas de ganzúa) o `lockout` (la llave del cliente no cedió).
@@ -84,19 +84,19 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Criterios de aceptación:**
 
-- [x] El mecanismo inicial no abre con la llave del cliente (`123`).
-- [x] El mecanismo inicial no está casi resuelto: falta un cable y sobran dos.
-- [x] El ladrón reporta `lockout` con `123` mientras falta el cable.
-- [x] Al agregar el cable faltante, el ladrón entra por `121` o `223` (`intruder`).
-- [x] Al cortar los dos cables cruzados, el mecanismo es equivalente.
-- [x] El mecanismo reparado abre con `123` y rechaza `1234`, `12` y `223`.
-- [x] Conectar de nuevo un cable existente no lo corta: el corte es un clic aparte.
+- [x] El mecanismo inicial abre con `2` (`intruder`): un cable va directo al cerrojo.
+- [x] Al cortar ese cable, abre con `11` (`intruder`): el segundo atajo.
+- [x] Al cortar el segundo, el cliente queda afuera con `123` (`lockout`).
+- [x] Al conectar el cable faltante, el mecanismo es equivalente y abre con `123`.
+- [x] El mecanismo reparado rechaza `1234`, `12` y `223`.
+- [x] Un cable con varias llaves se dibuja una vez con la etiqueta `1,2`.
+- [x] La tijera corta el cable completo; conectar de nuevo no corta.
 - [x] Escape cancela una selección pendiente.
-- [x] 24 tests totales pasando.
+- [x] **33 tests** totales pasando, incluido un test de DOM del editor (conectar, cortar, teclado).
 - [ ] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
 - [x] La UI del nivel no muestra vocabulario académico (guard en `tests/level1.test.js`).
 
-**Tests:** `node --test tests/level1.test.js tests/thief.test.js`.
+**Tests:** `node --test tests/level1.test.js tests/thief.test.js tests/workshop.test.js`.
 
 ## T3 — Nivel 2: AFD con bucle / paridad
 

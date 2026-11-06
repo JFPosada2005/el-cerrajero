@@ -14,12 +14,11 @@ function nodeMap(level) {
   return new Map(level.states.map(state => [state.id, state]));
 }
 
-function edgeGeometry(from, to, offset = 0) {
+function edgeGeometry(from, to) {
   if (from.id === to.id) {
-    const x = from.x + offset;
     return {
-      path: `M ${x - 26} ${from.y - 38} C ${x - 86} ${from.y - 130}, ${x + 86} ${from.y - 130}, ${x + 26} ${from.y - 38}`,
-      labelX: x,
+      path: `M ${from.x - 26} ${from.y - 38} C ${from.x - 86} ${from.y - 130}, ${from.x + 86} ${from.y - 130}, ${from.x + 26} ${from.y - 38}`,
+      labelX: from.x,
       labelY: from.y - LOOP_LABEL_OFFSET,
     };
   }
@@ -28,12 +27,10 @@ function edgeGeometry(from, to, offset = 0) {
   const length = Math.hypot(dx, dy) || 1;
   const ux = dx / length;
   const uy = dy / length;
-  const shiftX = -uy * offset;
-  const shiftY = ux * offset;
-  const startX = from.x + ux * NODE_RADIUS + shiftX;
-  const startY = from.y + uy * NODE_RADIUS + shiftY;
-  const endX = to.x - ux * NODE_RADIUS + shiftX;
-  const endY = to.y - uy * NODE_RADIUS + shiftY;
+  const startX = from.x + ux * NODE_RADIUS;
+  const startY = from.y + uy * NODE_RADIUS;
+  const endX = to.x - ux * NODE_RADIUS;
+  const endY = to.y - uy * NODE_RADIUS;
   const midX = (startX + endX) / 2;
   const midY = (startY + endY) / 2;
   const curve = 30;
@@ -48,32 +45,29 @@ function edgeGeometry(from, to, offset = 0) {
 
 export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
   const states = nodeMap(level);
-  let selectedKey = level.alphabet[0];
+  let tool = { kind: 'key', key: level.alphabet[0] };
   let pendingSource = null;
   let highlighted = [];
 
-  function wireList() {
-    const pairs = new Map();
+  function isCutting() {
+    return tool.kind === 'cut';
+  }
+
+  function wireGroups() {
+    const groups = new Map();
     for (const [source, row] of Object.entries(transitions)) {
-      for (const symbol of Object.keys(row)) {
-        const target = row[symbol];
+      for (const [symbol, target] of Object.entries(row)) {
         const key = `${source}\u0000${target}`;
-        if (!pairs.has(key)) {
-          pairs.set(key, []);
+        if (!groups.has(key)) {
+          groups.set(key, { source, target, symbols: [] });
         }
-        pairs.get(key).push({ source, target, symbol });
+        groups.get(key).symbols.push(symbol);
       }
     }
-    const wires = [];
-    for (const group of pairs.values()) {
-      group.sort((a, b) => level.alphabet.indexOf(a.symbol) - level.alphabet.indexOf(b.symbol));
-      const step = 18;
-      group.forEach((wire, index) => {
-        const offset = (index - (group.length - 1) / 2) * step;
-        wires.push({ ...wire, offset });
-      });
+    for (const group of groups.values()) {
+      group.symbols.sort((a, b) => level.alphabet.indexOf(a) - level.alphabet.indexOf(b));
     }
-    return wires;
+    return [...groups.values()];
   }
 
   function litEdges() {
@@ -88,7 +82,7 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
     const defs = svgElement('defs');
     for (const [id, color] of [
       ['arrow', '#77818f'],
-      ['arrow-lit', '#2ec4b6'],
+      ['arrow-lit', '#38c6b8'],
     ]) {
       const marker = svgElement('marker', {
         id,
@@ -142,22 +136,25 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
 
   function renderEdges() {
     const lit = litEdges();
-    for (const wire of wireList()) {
-      const from = states.get(wire.source);
-      const to = states.get(wire.target);
+    const cutting = isCutting();
+    for (const group of wireGroups()) {
+      const from = states.get(group.source);
+      const to = states.get(group.target);
       if (!from || !to) {
         continue;
       }
-      const geometry = edgeGeometry(from, to, wire.offset);
-      const isLit = lit.has(`${wire.source}\u0000${wire.target}`);
-      const group = svgElement('g', {
-        class: `wire${isLit ? ' is-lit' : ''}`,
-        role: 'button',
-        tabindex: '0',
-        'aria-label': `Cable ${wire.symbol}: ${from.label} a ${to.label}`,
-      });
-      group.append(svgElement('path', { d: geometry.path, class: 'edge-hit' }));
-      group.append(
+      const geometry = edgeGeometry(from, to);
+      const isLit = lit.has(`${group.source}\u0000${group.target}`);
+      const classes = ['wire', cutting ? 'is-cutting' : '', isLit ? 'is-lit' : ''].filter(Boolean).join(' ');
+      const attributes = { class: classes };
+      if (cutting) {
+        attributes.role = 'button';
+        attributes.tabindex = '0';
+        attributes['aria-label'] = `Cortar cable ${group.symbols.join(',')}: ${from.label} a ${to.label}`;
+      }
+      const wire = svgElement('g', attributes);
+      wire.append(svgElement('path', { d: geometry.path, class: 'edge-hit' }));
+      wire.append(
         svgElement('path', {
           d: geometry.path,
           class: `edge${isLit ? ' is-lit' : ''}`,
@@ -169,37 +166,44 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
         y: geometry.labelY,
         class: 'edge-label',
       });
-      label.textContent = wire.symbol;
-      group.append(label);
-      group.addEventListener('click', () => handleWireClick(wire.source, wire.symbol));
-      group.addEventListener('keydown', event => {
-        if (event.key === 'Enter' || event.key === ' ') {
-          event.preventDefault();
-          handleWireClick(wire.source, wire.symbol);
-        }
-      });
-      svg.append(group);
+      label.textContent = group.symbols.join(',');
+      wire.append(label);
+      if (cutting) {
+        wire.addEventListener('click', () => handleWireClick(group.source, group.target));
+        wire.addEventListener('keydown', event => {
+          if (event.key === 'Enter' || event.key === ' ') {
+            event.preventDefault();
+            handleWireClick(group.source, group.target);
+          }
+        });
+      }
+      svg.append(wire);
     }
   }
 
   function renderStates() {
+    const cutting = isCutting();
     for (const state of level.states) {
       const classes = [
         'state',
         state.start ? 'is-start' : '',
         state.accept ? 'is-accept' : '',
+        cutting ? 'is-muted' : '',
         pendingSource === state.id ? 'is-pending' : '',
         highlighted.includes(state.id) ? 'is-lit' : '',
       ]
         .filter(Boolean)
         .join(' ');
-      const group = svgElement('g', {
+      const attributes = {
         class: classes,
         transform: `translate(${state.x} ${state.y})`,
-        role: 'button',
-        tabindex: '0',
         'aria-label': state.label,
-      });
+      };
+      if (!cutting) {
+        attributes.role = 'button';
+        attributes.tabindex = '0';
+      }
+      const group = svgElement('g', attributes);
       group.append(svgElement('circle', { r: '44', class: 'state-body' }));
       if (state.accept) {
         group.append(svgElement('circle', { r: '36', class: 'accept-ring' }));
@@ -223,6 +227,9 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
   }
 
   function handleNodeClick(stateId) {
+    if (isCutting()) {
+      return;
+    }
     if (pendingSource === null) {
       pendingSource = stateId;
       render();
@@ -230,12 +237,12 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
     }
     const source = pendingSource;
     pendingSource = null;
-    onConnect(source, stateId, selectedKey);
+    onConnect(source, stateId, tool.key);
     render();
   }
 
-  function handleWireClick(source, symbol) {
-    onCut(source, symbol);
+  function handleWireClick(source, target) {
+    onCut(source, target);
     render();
   }
 
@@ -248,7 +255,13 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
   }
 
   function setSelectedKey(key) {
-    selectedKey = key;
+    tool = { kind: 'key', key };
+    pendingSource = null;
+    render();
+  }
+
+  function setCutting() {
+    tool = { kind: 'cut' };
     pendingSource = null;
     render();
   }
@@ -272,5 +285,5 @@ export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
 
   render();
 
-  return { setSelectedKey, highlight, clearHighlight, render };
+  return { setSelectedKey, setCutting, highlight, clearHighlight, render };
 }

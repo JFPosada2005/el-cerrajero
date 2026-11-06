@@ -428,9 +428,9 @@ Drum blueprint: `{ "rules": { "<section>": { "<symbol>": { "write", "move", "to"
                  { "id": "q1", "label": "Celda 1", "x": 340, "y": 150 },
                  { "id": "q2", "label": "Celda 2", "x": 540, "y": 270 },
                  { "id": "q3", "label": "Cerrojo", "x": 720, "y": 150, "accept": true } ],
-      "blueprint": { "wires": [ { "from": "q0", "to": "q1", "key": "1" }, { "from": "q0", "to": "q1", "key": "2" },
-                                { "from": "q2", "to": "q3", "key": "3" },
-                                { "from": "q2", "to": "q3", "key": "1" } ] },
+      "blueprint": { "wires": [ { "from": "q0", "to": "q1", "key": "1" }, { "from": "q0", "to": "q3", "key": "2" },
+                                { "from": "q1", "to": "q3", "key": "1" },
+                                { "from": "q2", "to": "q3", "key": "3" } ] },
       "target": { "kind": "machine", "machine": { "type": "dfa", "states": ["t0","t1","t2","t3"],
                   "alphabet": ["1","2","3","4"], "start": "t0", "accept": ["t3"],
                   "transitions": { "t0": { "1": "t1" }, "t1": { "2": "t2" }, "t2": { "3": "t3" }, "t3": {} } } },
@@ -544,7 +544,7 @@ These show only what differs from level 1. Client names are placeholder content.
 
 | Component | Inputs | Outputs and methods | Must not know |
 |---|---|---|---|
-| `graphEditor.js` (evolves from `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)`, `setWires(wires)`, `light({ cells, wires })`, `clearLight()`; emits `{ type: 'connect-wire' \| 'cut-wire', from, to, tool }` | gating rules, acceptance, determinism |
+| `graphEditor.js` (evolves from `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)` with `{ kind: 'key', key } \| { kind: 'cut' }`; `light({ cells, wires })`, `clearLight()`; emits `{ type: 'connect-wire', from, to, tool }` or `{ type: 'cut-wire', from, to }` | gating rules, acceptance, determinism |
 | `geometry.js` | cell positions | `edgeGeometry`, `loopGeometry`, `springPath` | — |
 | `palette.js` | keys, parts, stack labels | `onSelect(tool)`, where tool = `{ kind: 'key', key } \| { kind: 'spring' }` plus `stack` on L4 | — |
 | `stackPanel.js` | `{ root, labels }` | `show(stack)`, `pulse('push' \| 'pop')` | the symbols `Z` / `X` (gets labels) |
@@ -560,7 +560,7 @@ These show only what differs from level 1. Client names are placeholder content.
 
 | Situation | Result |
 |---|---|
-| A wire is clicked (`cut-wire`) | `removed` |
+| A cable is cut (`cut-wire`) | `removed` (every key on that cable) |
 | An identical wire is connected again (`connect-wire`) | `kept` (no change; the cut is its own edit) |
 | Self-loop without the gear part | `blocked: needs-gear` |
 | Same key from the same cell, fork not unlocked | `moved` (the old wire is retargeted) |
@@ -582,7 +582,7 @@ These show only what differs from level 1. Client names are placeholder content.
 Every counterexample below was checked in the scratch probes (Appendix A).
 
 ### L1: the safe (DFA, finite)
-- **Repair**: the initial blueprint is incomplete (the middle wire is missing) and has two crossed wires. Until the middle wire is added the thief reports **`123`** (lockout); after adding it, the crossed wires give **`121`** (intruder). The player adds one cable and cuts two, with feedback after each step.
+- **Repair**: the initial blueprint has two crossed wires and is missing the middle wire. Progression: **`2`** (intruder, a wire straight to the lock), then **`11`** (intruder, the second shortcut), then **`123`** (lockout, the missing wire), then the player adds it and the mechanism is equivalent. Each debris cable carries a single key, so the scissors cut is unambiguous.
 - **Build**: 3-1-4 from a blank blueprint. The blank blueprint gives **`314`** (lockout).
 - **Edge cases**: self-loop → `needs-gear`; a missing wire → alarm.
 

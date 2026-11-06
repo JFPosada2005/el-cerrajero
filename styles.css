@@ -309,6 +309,48 @@ button:active {
   margin-bottom: 0.9rem;
 }
 
+.tools {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin-bottom: 0.9rem;
+}
+
+.tools .palette {
+  margin-bottom: 0;
+}
+
+.tool {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 44px;
+  padding: 0 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: var(--bg-2);
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.tool:hover {
+  border-color: var(--coral);
+  color: var(--ink);
+}
+
+.tool.is-active {
+  border-color: var(--coral);
+  color: var(--coral);
+  background: rgba(240, 106, 74, 0.12);
+}
+
+.tool svg {
+  display: block;
+}
+
 .key {
   width: 3rem;
   height: 3rem;
@@ -452,6 +494,15 @@ button:active {
   filter: url(#glow);
 }
 
+.state.is-muted {
+  cursor: default;
+}
+
+.state.is-muted:hover .state-body {
+  stroke: var(--brass);
+  filter: none;
+}
+
 .state.is-pending .state-body {
   stroke: var(--teal);
   stroke-dasharray: 7 5;
@@ -477,35 +528,39 @@ button:active {
   filter: url(#glow);
 }
 
-.wire {
-  cursor: pointer;
-}
-
 .wire .edge-hit {
   fill: none;
   stroke: transparent;
   stroke-width: 18;
+  pointer-events: none;
+}
+
+.wire.is-cutting {
+  cursor: crosshair;
+}
+
+.wire.is-cutting .edge-hit {
   pointer-events: stroke;
 }
 
-.wire:hover .edge {
+.wire.is-cutting:hover .edge {
   stroke: var(--coral);
 }
 
-.wire:hover .edge-label {
+.wire.is-cutting:hover .edge-label {
   fill: var(--coral);
 }
 
-.wire:focus-visible {
+.wire.is-cutting:focus-visible {
   outline: none;
 }
 
-.wire:focus-visible .edge {
+.wire.is-cutting:focus-visible .edge {
   stroke: var(--teal);
   stroke-width: 3.6;
 }
 
-.wire:focus-visible .edge-label {
+.wire.is-cutting:focus-visible .edge-label {
   fill: var(--teal);
 }
 

@@ -23,9 +23,9 @@ export const level1 = {
     { id: 'q3', label: 'Cerrojo', x: 720, y: 150, accept: true },
   ],
   initialTransitions: {
-    q0: { 1: 'q1', 2: 'q1' },
-    q1: {},
-    q2: { 3: 'q3', 1: 'q3' },
+    q0: { 1: 'q1', 2: 'q3' },
+    q1: { 1: 'q3' },
+    q2: { 3: 'q3' },
     q3: {},
   },
   target: createDFA({

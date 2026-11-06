@@ -17,14 +17,14 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - equivalencia por BFS del producto;
   - contraejemplo más corto.
 - Nivel 1:
-  - taller SVG con 4 celdas y un cable clickeable por llave;
+  - taller SVG con 4 celdas y **un cable por par de celdas**, con todos sus valores en una etiqueta;
   - mecanismo inicial **incompleto**: falta un cable y sobran dos;
-  - conectar con clic en origen → destino; **cortar con clic directo sobre el cable**; Escape cancela una selección pendiente;
+  - conectar con clic en origen → destino; **cortar con la tijera**; Escape cancela una selección pendiente;
   - **ficha del contrato persistente** con cliente y regla en palabras llanas;
   - prueba de la llave legítima `123`;
   - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
   - modal de victoria y persistencia en `localStorage`.
-- Tests: **24 pasando** con `node --test`.
+- Tests: **33 pasando** con `node --test`, incluido un test de DOM del editor.
 
 ## Qué está en revisión
 
@@ -52,13 +52,14 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 ## Tests
 
 ```text
-tests/dfa.test.js      12 passing
-tests/level1.test.js    7 passing
-tests/thief.test.js     5 passing
-total                  24 passing
+tests/dfa.test.js       12 passing
+tests/level1.test.js     8 passing
+tests/thief.test.js      5 passing
+tests/workshop.test.js   8 passing
+total                   33 passing
 ```
 
-Comando: `npm test`.
+Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).
 
 ## Riesgos
 
@@ -71,7 +72,10 @@ Comando: `npm test`.
 ## Decisiones recientes
 
 - **Plan por fases:** primero completar los 5 niveles de forma funcional y verificada; después remasterizar lo visual (animaciones, texturas, sonido) reutilizando la lógica ya probada. Coordinado con el usuario el 2026-11-06.
-- **Corte de cables:** es un clic directo sobre el cable, no un re-toggle desde la paleta. Un cable = un objeto clickeable; conectar de nuevo no corta.
+- **Corte de cables:** hay una **tijera** explícita en la paleta. Con la tijera activa, un clic sobre el cable lo corta completo; las celdas se atenúan y los cables pasan a ser objetivos. Conectar vuelve a elegir una llave.
+- **Un cable por par de celdas:** todos sus valores van en una sola etiqueta (`1,2`). No se dibujan cables paralelos.
+- **Servidor sin caché:** `serve.py` agrega `Cache-Control: no-store` para que el navegador no mezcle módulos viejos y nuevos (fue la causa de un editor roto).
+- **Test de DOM:** `tests/workshop.test.js` cubre conectar, cortar y teclado sin navegador.
 - **Nivel 1:** el mecanismo inicial parte incompleto (falta un cable) además de tener dos cruzados, para que no se sienta casi resuelto.
 - Se mantiene la ficción del cerrajero. De la idea de la bomba se adaptaron dos cosas: la **ficha del contrato persistente** y el **diagnóstico forense** del ladrón (marcas de ganzúa, no pistas). El modo contrarreloj queda opcional para después del freeze; el demo de dos roles va al guion de T7.
 - Nivel 3 queda como **AFND-λ** (bifurcador + resorte), no como sumidero/complemento.

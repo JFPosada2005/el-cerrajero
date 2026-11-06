@@ -54,7 +54,7 @@ Rubric: Título, Autores, Resumen ejecutivo, Introducción, Marco teórico/refer
 Acceptance: report follows the rubric; one chapter per level; results from the playtest.
 
 S12 — Stack assumption (marked as assumption).
-Web, vanilla JavaScript ES modules, SVG, CSS; no framework; Node's built-in test runner; local server via `python -m http.server`. Rationale: zero-install demo, easy to inspect, matches the user's Node 24 environment.
+Web, vanilla JavaScript ES modules, SVG, CSS; no framework; Node's built-in test runner; local server via `python serve.py` (no-store headers). Rationale: zero-install demo, easy to inspect, matches the user's Node 24 environment.
 Acceptance: `npm test` passes; `npm run serve` serves the game.
 
 S13 — Visual quality and UX.
@@ -190,3 +190,14 @@ User: "funciona bien, el primer nivel esta bastante sencillo a mi parecer, aunqu
 - **Escape** cancela una selección pendiente.
 - **Docs:** `DESIGN.md` §5.1/§7.2/§8, `VISUAL-DESIGN.md` (componente Cable + editor), `TASKS.md` T2, `STATUS.md`.
 - **Evidencia:** RED primero; GREEN con 24 tests.
+
+### L17 — Editor repair: explicit scissors, one cable per pair (2026-11-06)
+
+User: "no, arreglalo, no sirve, ya no se pueden conectar los cables usando las llaves, de hecho haciendo clic en ellos o tab enter no se quitan, no son seleccionables para quitarlos, los puedo seleccionar para conectarlo y no funciona tampoco, coloca un boton con una tijera que indique que seleccionandola se puede cortar un cable, ademas lo de dejar muchos cables que lleven un valor cada uno no me suena, si mas adelante hay mas valores entonces se vuelve un revueltijo, igual tampoco esta opcion funciona, en la vista inicial que ya tiene cables con dos valores sigue apareciendo un cable con los dos, busca una mejor forma que no separe los cables."
+
+- **Causa raíz:** el navegador servía `src/ui/workshop.js` desde caché (`304`) mientras cargaba el `main.js` nuevo. El editor recibía `onConnect` pero llamaba `onToggle`. Confirmado en el log de `python -m http.server`.
+- **Arreglo del servidor:** `serve.py` con `Cache-Control: no-store`; `npm run serve` ahora lo usa.
+- **Editor:** un cable por par de celdas, todas las llaves en una etiqueta (`1,2`). Botón `Cortar` con icono de tijera inline activa el modo corte; las celdas se atenúan, los cables pasan a ser botones (crosshair, hover coral) y clic o Enter corta el cable completo. Elegir una llave vuelve a conectar. Escape cancela una selección pendiente.
+- **Secuencia del nivel 1:** `2` (intruso) → cortar → `11` (intruso) → cortar → `123` (lockout) → conectar el cable faltante → equivalente. Cada cable de escombro lleva una sola llave, así el corte con tijera no es ambiguo.
+- **Guard de regresión:** `tests/workshop.test.js` (DOM falso) cubre conectar, propagación de la llave activa, cables inertes, corte con tijera, Enter y etiquetas multi-llave.
+- **Evidencia:** RED primero; GREEN con 33 tests.

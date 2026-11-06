@@ -6,11 +6,19 @@ import { areEquivalentDFA } from '../src/core/dfa.js';
 
 const initial = buildPlayerDFA(level1, level1.initialTransitions);
 
+function cut(transitions, source, target) {
+  for (const symbol of Object.keys(transitions[source] ?? {})) {
+    if (transitions[source][symbol] === target) {
+      delete transitions[source][symbol];
+    }
+  }
+}
+
 function repaired() {
   const transitions = structuredClone(level1.initialTransitions);
+  cut(transitions, 'q0', 'q3');
+  cut(transitions, 'q1', 'q3');
   transitions.q1[2] = 'q2';
-  delete transitions.q0[2];
-  delete transitions.q2[1];
   return buildPlayerDFA(level1, transitions);
 }
 
@@ -21,25 +29,34 @@ test('the contract names the client and the rule', () => {
   assert.match(level1.goal, /1/);
 });
 
-test('the initial mechanism is incomplete and locks the client out', () => {
+test('the first crossed wire opens the vault with a single key', () => {
   assert.equal(testKey(initial, '123').accepted, false);
   const heist = runHeist(initial, level1.target);
+  assert.equal(heist.escaped, true);
+  assert.equal(heist.reason, 'intruder');
+  assert.equal(heist.counterexample, '2');
+});
+
+test('the second crossed wire opens the vault with two keys', () => {
+  const transitions = structuredClone(level1.initialTransitions);
+  cut(transitions, 'q0', 'q3');
+  const heist = runHeist(buildPlayerDFA(level1, transitions), level1.target);
+  assert.equal(heist.escaped, true);
+  assert.equal(heist.reason, 'intruder');
+  assert.equal(heist.counterexample, '11');
+});
+
+test('without the crossed wires the client is locked out', () => {
+  const transitions = structuredClone(level1.initialTransitions);
+  cut(transitions, 'q0', 'q3');
+  cut(transitions, 'q1', 'q3');
+  const heist = runHeist(buildPlayerDFA(level1, transitions), level1.target);
   assert.equal(heist.escaped, true);
   assert.equal(heist.reason, 'lockout');
   assert.equal(heist.counterexample, '123');
 });
 
-test('adding the missing wire lets the thief through a crossed cable', () => {
-  const transitions = structuredClone(level1.initialTransitions);
-  transitions.q1[2] = 'q2';
-  const wired = buildPlayerDFA(level1, transitions);
-  const heist = runHeist(wired, level1.target);
-  assert.equal(heist.escaped, true);
-  assert.equal(heist.reason, 'intruder');
-  assert.ok(['121', '223'].includes(heist.counterexample));
-});
-
-test('cutting the two crossed cables makes the mechanism equivalent', () => {
+test('adding the missing wire makes the mechanism equivalent', () => {
   const fixed = repaired();
   assert.equal(areEquivalentDFA(fixed, level1.target).equivalent, true);
   assert.equal(runHeist(fixed, level1.target).escaped, false);

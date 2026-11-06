@@ -9,6 +9,7 @@ const app = document.querySelector('#app');
 let playerTransitions = structuredClone(level1.initialTransitions);
 let workshop = null;
 let selectedKey = level1.alphabet[0];
+let cutMode = false;
 
 function loadProgress() {
   try {
@@ -66,26 +67,55 @@ function renderPalette() {
   for (const key of level1.alphabet) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = `key key-${key}${key === selectedKey ? ' is-active' : ''}`;
+    button.className = `key key-${key}`;
+    button.dataset.key = key;
     button.textContent = key;
     button.setAttribute('aria-label', `Llave ${key}`);
-    button.setAttribute('aria-pressed', String(key === selectedKey));
     button.addEventListener('click', () => selectKey(key));
     palette.append(button);
   }
 }
 
-function selectKey(key) {
-  selectedKey = key;
-  document.querySelector('#active-key').textContent = `Llave activa: ${key}`;
+function renderTools() {
+  const activeKey = document.querySelector('#active-key');
+  const scissors = document.querySelector('#scissors');
+  if (!activeKey || !scissors) {
+    return;
+  }
+  activeKey.textContent = cutMode ? 'Herramienta: tijera' : `Llave activa: ${selectedKey}`;
+  scissors.classList.toggle('is-active', cutMode);
+  scissors.setAttribute('aria-pressed', String(cutMode));
   for (const button of document.querySelectorAll('.key')) {
-    const active = button.textContent === key;
+    const active = !cutMode && button.dataset.key === selectedKey;
     button.classList.toggle('is-active', active);
     button.setAttribute('aria-pressed', String(active));
   }
+  const hint = document.querySelector('#tool-hint');
+  hint.textContent = cutMode
+    ? 'Tocá un cable para cortarlo. La tijera corta el cable completo.'
+    : 'Elegí una llave y tocá origen y destino para conectar.';
+}
+
+function selectKey(key) {
+  cutMode = false;
+  selectedKey = key;
   if (workshop) {
     workshop.setSelectedKey(key);
   }
+  renderTools();
+}
+
+function toggleScissors() {
+  cutMode = !cutMode;
+  if (!workshop) {
+    return;
+  }
+  if (cutMode) {
+    workshop.setCutting();
+  } else {
+    workshop.setSelectedKey(selectedKey);
+  }
+  renderTools();
 }
 
 function connectTransition(source, target, symbol) {
@@ -105,19 +135,22 @@ function connectTransition(source, target, symbol) {
   appendLog(`Conectaste la llave ${symbol}: ${source} → ${target}.`);
 }
 
-function cutWire(source, symbol) {
+function cutWire(source, target) {
   const row = playerTransitions[source] ?? {};
-  if (!(symbol in row)) {
+  const symbols = Object.keys(row).filter(symbol => row[symbol] === target);
+  if (symbols.length === 0) {
     return;
   }
-  const target = row[symbol];
-  delete row[symbol];
-  appendLog(`Cortaste el cable ${symbol}: ${source} → ${target}.`);
+  for (const symbol of symbols) {
+    delete row[symbol];
+  }
+  appendLog(`Cortaste el cable ${symbols.join(',')}: ${source} → ${target}.`);
 }
 
 function renderLevel() {
   playerTransitions = structuredClone(level1.initialTransitions);
   selectedKey = level1.alphabet[0];
+  cutMode = false;
   app.innerHTML = `
     <div class="game">
       <header class="game-header">
@@ -142,9 +175,21 @@ function renderLevel() {
             <span><i class="legend-dot legend-accept"></i>Cerrojo</span>
             <span><i class="legend-dot legend-alarm"></i>Alarma implícita</span>
           </div>
-          <h2>Llaves</h2>
-          <div id="palette" class="palette"></div>
-          <p class="hint">Elegí una llave y tocá origen y destino para conectar. Tocá un cable para cortarlo. Un cable que falta manda la llave a la alarma.</p>
+          <h2>Llaves y herramientas</h2>
+          <div class="tools">
+            <div id="palette" class="palette"></div>
+            <button id="scissors" class="tool" type="button" aria-pressed="false" aria-label="Cortar cables">
+              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="6" cy="6" r="3"></circle>
+                <circle cx="6" cy="18" r="3"></circle>
+                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
+                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
+                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
+              </svg>
+              <span>Cortar</span>
+            </button>
+          </div>
+          <p id="tool-hint" class="hint"></p>
           <div class="actions">
             <button id="test-key" class="secondary">Probar la llave</button>
             <button id="heist" class="primary">Iniciar el asalto</button>
@@ -174,7 +219,9 @@ function renderLevel() {
     onCut: cutWire,
   });
   document.querySelector('#test-key').addEventListener('click', handleTestKey);
+  document.querySelector('#scissors').addEventListener('click', toggleScissors);
   document.querySelector('#heist').addEventListener('click', handleHeist);
+  renderTools();
   appendLog('El mecanismo está a medio armar.');
   appendLog('Probá la llave legítima y después llamá al ladrón.');
 }
