@@ -67,15 +67,17 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Estado:** review.
 
-**Archivos:** `index.html`, `styles.css`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/ui/workshop.js`, `tests/level1.test.js`.
+**Archivos:** `index.html`, `styles.css`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/workshop.js`, `tests/level1.test.js`, `tests/thief.test.js`.
 
 **Qué incluye:**
 
 - Pantalla de inicio y pantalla de nivel.
+- **Ficha del contrato persistente** con cliente, número y regla en palabras llanas.
 - Taller SVG con 4 celdas fijas y cables por llave.
 - Fase de reparación: dos cables incorrectos.
 - Botón “Probar la llave” y “Iniciar el asalto”.
 - Juez por equivalencia de AFD y contraejemplo más corto.
+- **Diagnóstico forense** del ladrón: `intruder` (marcas de ganzúa) o `lockout` (la llave del cliente no cedió).
 - Persistencia de progreso en `localStorage`.
 - Modal de victoria.
 
@@ -86,11 +88,12 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 - [x] El ladrón encuentra un contraejemplo de longitud 3 (`121` o `223`).
 - [x] Al cortar los dos cables incorrectos, el mecanismo es equivalente.
 - [x] El mecanismo corregido rechaza `1234`, `12` y `223`.
-- [x] 17 tests totales pasando.
+- [x] El asalto distingue `intruder` de `lockout`.
+- [x] 26 tests totales pasando.
 - [ ] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
-- [ ] La UI no muestra vocabulario académico.
+- [x] La UI del nivel no muestra vocabulario académico (guard en `tests/level1.test.js`).
 
-**Tests:** `node --test tests/level1.test.js`.
+**Tests:** `node --test tests/level1.test.js tests/thief.test.js`.
 
 ## T3 — Nivel 2: AFD con bucle / paridad
 

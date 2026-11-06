@@ -1,6 +1,6 @@
 # Estado del proyecto — El Cerrajero
 
-Actualizado: 2026-11-05.
+Actualizado: 2026-11-06.
 
 ## Resumen
 
@@ -19,10 +19,11 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - Nivel 1:
   - taller SVG con 4 celdas y cables por llave;
   - dos cables incorrectos que el jugador debe cortar;
+  - **ficha del contrato persistente** con cliente y regla en palabras llanas;
   - prueba de la llave legítima `123`;
-  - asalto con contraejemplo concreto;
+  - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
   - modal de victoria y persistencia en `localStorage`.
-- Tests: **17 pasando** con `node --test`.
+- Tests: **26 pasando** con `node --test`.
 
 ## Qué está en revisión
 
@@ -51,8 +52,9 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 
 ```text
 tests/dfa.test.js      12 passing
-tests/level1.test.js    5 passing
-total                  17 passing
+tests/level1.test.js    9 passing
+tests/thief.test.js     5 passing
+total                  26 passing
 ```
 
 Comando: `npm test`.
@@ -67,6 +69,7 @@ Comando: `npm test`.
 
 ## Decisiones recientes
 
+- Se mantiene la ficción del cerrajero. De la idea de la bomba se adaptaron dos cosas: la **ficha del contrato persistente** y el **diagnóstico forense** del ladrón (marcas de ganzúa, no pistas). El modo contrarreloj queda opcional para después del freeze; el demo de dos roles va al guion de T7.
 - Nivel 3 queda como **AFND-λ** (bifurcador + resorte), no como sumidero/complemento.
 - Exactamente **5 niveles**, sin actos extra.
 - Stack: HTML/CSS/JS con módulos ES y SVG, sin framework.

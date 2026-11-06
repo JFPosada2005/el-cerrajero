@@ -82,7 +82,7 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 **Mobile (< 1100 px):** una columna; taller primero; acciones en barra inferior sticky; bitácora colapsable; targets ≥ 44×44 px. Sin scroll horizontal a 360 px.
 
 **Tres lecturas:**
-1. **Objetivo:** cerrojo, llave activa, botón primario.
+1. **Objetivo:** la ficha del contrato, el cerrojo, la llave activa y el botón primario.
 2. **Mecanismo:** celdas, cables, camino iluminado.
 3. **Meta:** bitácora, pistas, progreso.
 
@@ -96,6 +96,7 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 | Botón secundario | superficie 2, borde `--line`, hover borde latón. |
 | Botón ghost | texto muted, hover ink; sin fondo. |
 | Panel | superficie, borde 1 px, radio 16, padding 24; highlight interno de 1 px. |
+| Contrato | tarjeta ivory (fondo `--ink`, texto `#17130A`), radio 12, padding 16; número en latón oscuro `#7A5A12`, cliente y regla en Fraunces; nota en `#5A5348`. Persistente durante el nivel: nunca se colapsa ni se oculta. |
 | Celda (nodo) | 88 px, fill `#111821`, borde 2.5 px latón; aceptar = doble anillo; inicio = bandera; hover glow; activo teal; error coral con shake de 120 ms. |
 | Cable | 2.5 px muted; label en píldora con fondo `--bg`; camino activo teal; resorte = dashed; bifurcador = rombo; engranaje = engranaje pequeño. |
 | Paleta de llaves | 48 px, símbolo visible, anillo activo teal, tooltip con nombre. |

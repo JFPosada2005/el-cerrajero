@@ -1,5 +1,6 @@
 import { level1 } from './game/level1.js';
 import { buildPlayerDFA, runHeist, testKey } from './game/rules.js';
+import { thiefReport } from './game/thief.js';
 import { createWorkshop } from './ui/workshop.js';
 
 const PROGRESS_KEY = 'el-cerrajero:progress';
@@ -46,7 +47,7 @@ function renderStart() {
   const progress = loadProgress();
   app.innerHTML = `
     <main class="start">
-      <p class="eyebrow">Lenguajes de Programación · Proyecto final</p>
+      <p class="eyebrow">Proyecto final</p>
       <h1>El Cerrajero</h1>
       <p class="lead">Sos el mejor cerrajero de la ciudad. Cada bóveda es un mecanismo; cada mecanismo, un secreto. El ladrón ya está afuera.</p>
       <section class="start-card">
@@ -106,13 +107,19 @@ function renderLevel() {
     <div class="game">
       <header class="game-header">
         <div>
-          <p class="eyebrow">Contrato 01</p>
+          <p class="eyebrow">El Cerrajero</p>
           <h1>${level1.title}</h1>
         </div>
         <button id="back-button" class="ghost">Volver</button>
       </header>
       <main class="layout">
         <aside class="panel brief">
+          <section class="contract" aria-label="Contrato del cliente">
+            <p class="contract-number">Contrato ${level1.contract}</p>
+            <h2 class="contract-client">${level1.client}</h2>
+            <p class="contract-rule">${level1.goal}</p>
+            <p class="contract-note">Cualquier otra combinación deja la alarma encendida.</p>
+          </section>
           <h2>El encargo</h2>
           <p>${level1.brief}</p>
           <div class="legend">
@@ -170,16 +177,12 @@ function handleTestKey() {
 function handleHeist() {
   const player = buildPlayerDFA(level1, playerTransitions);
   const result = runHeist(player, level1.target);
+  const report = thiefReport(result, level1);
+  appendLog(report.text, report.tone);
   if (!result.escaped) {
-    appendLog('El ladrón probó todas las combinaciones y se rindió.', 'good');
     workshop.clearHighlight();
     showWin();
     return;
-  }
-  if (result.counterexample === level1.legitimateKey) {
-    appendLog('El cliente no pudo abrir su propia caja: la llave legítima falla.', 'bad');
-  } else {
-    appendLog(`El ladrón entró con "${result.counterexample}".`, 'bad');
   }
   workshop.highlight(testKey(player, result.counterexample).trace);
 }

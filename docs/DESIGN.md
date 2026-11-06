@@ -49,6 +49,10 @@
 
 **Loop per level:** map → contract brief → **Reparar** (tutorial for the new part) → rehearsal with the thief → **Construir** → **Asalto** → win → map.
 
+**Contract card.** The client, the contract number and the rule stay pinned in the workshop while the player builds (`level.contract`, `level.client`, `puzzle.goal`). The card states the condition in plain words, never a table of test cases: *"Abre solo con la secuencia 1 · 2 · 3."*
+
+**Forensic thief.** The thief never hands over a hint. The player sees evidence: the verdict's `reason` separates `intruder` (the mechanism accepted a key the client never gave) from `lockout` (the mechanism rejected the client's own key), and the line names the key that left the mark. The replay of the counterexample on the mechanism is the proof.
+
 | Lvl | Client rule (plain words) | New part | Thief's trick | Hidden model |
 |---|---|---|---|---|
 | 1 | Opens only with 1-2-3; build: 3-1-4 | memory cell | short combinations | DFA, finite language |

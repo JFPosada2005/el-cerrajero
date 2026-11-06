@@ -35,7 +35,7 @@ Acceptance: L3 uses a fork (nondeterminism) and a spring (epsilon transition).
 
 S7 — The Cerrajero fiction.
 Accepted design: the player is a locksmith; each level is a contract; the client gives the rule; the thief tests the mechanism; each level has repair, build, and heist phases.
-Acceptance: the UI uses workshop vocabulary (memory cell, loop gear, fork, spring, stack spring, tape), never formal vocabulary.
+Acceptance: the contract card stays visible during play (client + rule in plain words); the thief's report reads as forensic evidence (pick marks, attempt log), never as a friendly hint; the UI uses workshop vocabulary (memory cell, loop gear, fork, spring, stack spring, tape), never formal vocabulary.
 
 S8 — Scope discipline.
 User: "no vamos a extendernos de mas en esto".
@@ -164,3 +164,17 @@ User: "Algo mas que quiero que se tuviera en cuenta en el diseño tambien en el 
 - Added to `docs/VISUAL-DESIGN.md`: WCAG 2.2 reflow at 320 CSS px, focus-not-obscured check for sticky actions, single-pointer alternative if dragging is added, View Transitions as progressive enhancement, static texture only, corrected library sizes (Motion Mini 3.12 kB minimum, GSAP 27.29 kB, Anime.js ~24.5 KB aggregate with measurement caveat).
 - Added references for WCAG 2.2, MDN, web.dev, Mobbin, Game UI Database and Monument Valley.
 - Engram unavailable during the explorer run; persistence deferred.
+
+### L15 — Bomb-fiction ideas adapted, locksmith kept (2026-11-06)
+
+User: "no, sabes que, dejemoslo con la idea del cerrajero aunque si te parece buena alguna idea que tenia que ver con lo de la bomba y la puedes adaptar al proyecto entonces dime cual y revisamos si la adaptamos"
+
+User: "perfecto, hagamoslo de esa forma"
+
+- The locksmith fiction stays; the bomb is not adopted as the theme.
+- Two ideas were adapted, both inside the freeze F1-F5:
+  1. **Contract card.** The rule of each level lives in a persistent paper card (client, contract number, plain-language rule), not only in the intro copy. Uses `level.contract`, `level.client` and `puzzle.goal` from the schema in `docs/DESIGN.md` §5.
+  2. **Forensic report.** The thief's result reads as evidence ("Marcas de ganzúa en {key}"), not as a hint. `runHeist` now returns `reason: 'intruder' | 'lockout'`, derived from whether the counterexample is accepted by the target.
+- Deferred: optional countdown mode (practice by default, never blocks progress, WCAG 2.2.1), after the freeze.
+- Deferred to T7: two-role demo script (one reader, one operator).
+- RED observed first: 26 tests fail/pass as expected; GREEN after `src/game/thief.js`, `runHeist.reason`, the card markup and tokens.

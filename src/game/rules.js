@@ -16,8 +16,10 @@ export function testKey(player, key) {
 
 export function runHeist(player, target) {
   const result = areEquivalentDFA(player, target);
-  return {
-    escaped: !result.equivalent,
-    counterexample: result.counterexample,
-  };
+  if (result.equivalent) {
+    return { escaped: false, counterexample: null, reason: null };
+  }
+  const acceptedByTarget = simulateDFA(target, result.counterexample).accepted;
+  const reason = acceptedByTarget ? 'lockout' : 'intruder';
+  return { escaped: true, counterexample: result.counterexample, reason };
 }

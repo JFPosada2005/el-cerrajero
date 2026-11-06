@@ -2,9 +2,19 @@ import { createDFA } from '../core/dfa.js';
 
 export const level1 = {
   id: 1,
+  contract: '01',
   title: 'La caja de seguridad',
+  client: 'Banco del Llano',
+  goal: 'Abre solo con la secuencia 1 · 2 · 3.',
   brief:
     'El banco necesita una cerradura que abra solo con la secuencia 1-2-3. El ladrón probará cualquier combinación. Repará el mecanismo antes de que llegue.',
+  thief: {
+    giveUp: 'El ladrón probó todas las combinaciones y se fue con las manos vacías.',
+    lines: {
+      intruder: 'Marcas de ganzúa en {key}. El ladrón entró por ahí.',
+      lockout: 'El cliente probó {key} en su propia caja y la cerradura no cedió.',
+    },
+  },
   alphabet: ['1', '2', '3', '4'],
   states: [
     { id: 'q0', label: 'Entrada', x: 140, y: 270, start: true },
