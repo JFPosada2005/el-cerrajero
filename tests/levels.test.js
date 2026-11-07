@@ -5,6 +5,7 @@ import { acceptsNFA } from '../src/core/nfa.js';
 import { level1 } from '../src/game/level1.js';
 import { level2 } from '../src/game/level2.js';
 import { level3 } from '../src/game/level3.js';
+import { level4 } from '../src/game/level4.js';
 import { LEVELS, getLevel, validateLevel } from '../src/game/levels.js';
 function mutated(base, visit) {
   const copy = structuredClone(base);
@@ -15,6 +16,7 @@ test('getLevel returns each frozen level', () => {
   assert.equal(getLevel(1).id, 1);
   assert.equal(getLevel(2).id, 2);
   assert.equal(getLevel(3).id, 3);
+  assert.equal(getLevel(4).id, 4);
 });
 test('getLevel throws on an unknown id', () => {
   assert.throws(() => getLevel(99), /unknown level 99/);
@@ -23,12 +25,14 @@ test('validateLevel accepts the frozen levels', () => {
   assert.equal(validateLevel(level1), true);
   assert.equal(validateLevel(level2), true);
   assert.equal(validateLevel(level3), true);
+  assert.equal(validateLevel(level4), true);
 });
 test('LEVELS holds the frozen levels in order', () => {
-  assert.equal(LEVELS.length, 3);
+  assert.equal(LEVELS.length, 4);
   assert.equal(LEVELS[0].id, 1);
   assert.equal(LEVELS[1].id, 2);
   assert.equal(LEVELS[2].id, 3);
+  assert.equal(LEVELS[3].id, 4);
 });
 test('validation rejects a duplicate cell id', () => {
   const bad = mutated(level1, (copy) => {
@@ -133,4 +137,22 @@ test('validation rejects a spring wire looping on its own cell', () => {
     copy.phases.repair.blueprint.wires.push({ from: 'w', to: 'w', spring: true });
   });
   assert.throws(() => validateLevel(bad), /spring/);
+});
+test('validation rejects a stack wire without the stack part', () => {
+  const bad = mutated(level4, (copy) => {
+    copy.parts = ['wire', 'gear', 'fork', 'spring'];
+  });
+  assert.throws(() => validateLevel(bad), /stack/);
+});
+test('validation rejects an invalid stack top', () => {
+  const bad = mutated(level4, (copy) => {
+    copy.phases.repair.blueprint.wires[0].stack.top = 'bogus';
+  });
+  assert.throws(() => validateLevel(bad), /stack/);
+});
+test('validation rejects an invalid stack action', () => {
+  const bad = mutated(level4, (copy) => {
+    copy.phases.repair.blueprint.wires[0].stack.action = 'bogus';
+  });
+  assert.throws(() => validateLevel(bad), /stack/);
 });

@@ -68,6 +68,9 @@ function applySpringConnect(blueprint, edit) {
     return { blueprint: cloneBlueprint(blueprint), effect: 'blocked', reason: 'spring-loop' }
   }
   const candidate = { from: edit.from, to: edit.to, spring: true }
+  if (edit.tool.stack !== undefined) {
+    candidate.stack = { top: edit.tool.stack.top, action: edit.tool.stack.action }
+  }
   const found = blueprint.wires.some((wire) => sameWire(wire, candidate))
   if (found) {
     return { blueprint: cloneBlueprint(blueprint), effect: 'kept', reason: null }
@@ -79,6 +82,9 @@ function applySpringConnect(blueprint, edit) {
 
 function applyKeyConnect(parts, blueprint, edit) {
   const candidate = { from: edit.from, to: edit.to, key: edit.tool.key }
+  if (edit.tool.stack !== undefined) {
+    candidate.stack = { top: edit.tool.stack.top, action: edit.tool.stack.action }
+  }
   const identical = blueprint.wires.some((wire) => sameWire(wire, candidate))
   if (identical) {
     return { blueprint: cloneBlueprint(blueprint), effect: 'kept', reason: null }

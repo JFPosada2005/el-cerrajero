@@ -1,5 +1,8 @@
 import { areEquivalentDFA, createDFA, simulateDFA } from '../core/dfa.js';
 import { nfaToDFA } from '../core/nfa.js';
+import { runPDA } from '../core/pda.js';
+import { enumerateWords, randomWords, shortlexCompare } from '../core/order.js';
+import { ORACLES } from './oracles.js';
 
 function withAlphabet(machine, alphabet) {
   return createDFA({ states: machine.states, alphabet, start: machine.start, accept: machine.accept, transitions: machine.transitions });
@@ -12,8 +15,62 @@ function normalized(machine, alphabet) {
   return withAlphabet(machine, alphabet);
 }
 
+function languageCoverage(puzzle, tested, maxSteps) {
+  return { exhaustiveLength: puzzle.judge.exhaustiveLength, tested, families: ['A^nB^n', 'A^(n-1)B^n', 'A^nB^(n-1)'], maxSteps };
+}
+function judgeLanguage(puzzle, machine) {
+  const alphabet = [...machine.alphabet];
+  const oracle = ORACLES[puzzle.target.id];
+  const up = alphabet[0];
+  const down = alphabet[1];
+  const candidates = enumerateWords(alphabet, puzzle.judge.exhaustiveLength);
+  for (let n = 1; n <= puzzle.judge.maxN; n += 1) {
+    candidates.push(up.repeat(n) + down.repeat(n));
+    if (n >= 2) {
+      candidates.push(up.repeat(n - 1) + down.repeat(n));
+      candidates.push(up.repeat(n) + down.repeat(n - 1));
+    }
+  }
+  const sampled = randomWords(alphabet, { seed: puzzle.judge.random.seed, count: puzzle.judge.random.count, minLength: 11, maxLength: puzzle.judge.random.maxLength });
+  for (const word of sampled) {
+    candidates.push(word);
+  }
+  const seen = new Set();
+  const words = [];
+  for (const word of candidates) {
+    if (seen.has(word) === true) {
+      continue;
+    }
+    seen.add(word);
+    words.push(word);
+  }
+  words.sort(shortlexCompare(alphabet));
+  const limits = { maxConfigs: puzzle.judge.limits.maxConfigs, maxStack: puzzle.judge.limits.maxStack };
+  let maxSteps = 0;
+  for (const word of words) {
+    const expected = oracle(word);
+    const run = runPDA(machine, word, limits);
+    if (run.steps > maxSteps) {
+      maxSteps = run.steps;
+    }
+    if (run.outcome === 'limit') {
+      if (expected === true) {
+        return { correct: false, counterexample: word, reason: 'jam', expected: true, actual: null, method: 'bounded', coverage: languageCoverage(puzzle, words.length, maxSteps) };
+      }
+      continue;
+    }
+    if (run.accepted !== expected) {
+      const reason = expected === true ? 'lockout' : 'intruder';
+      return { correct: false, counterexample: word, reason, expected, actual: run.accepted, method: 'bounded', coverage: languageCoverage(puzzle, words.length, maxSteps) };
+    }
+  }
+  return { correct: true, counterexample: null, reason: null, expected: null, actual: null, method: 'bounded', coverage: languageCoverage(puzzle, words.length, maxSteps) };
+}
 export function judge(puzzle, machine) {
   const kind = puzzle.target.kind;
+  if (kind === 'language') {
+    return judgeLanguage(puzzle, machine);
+  }
   if (kind !== 'machine') {
     throw new Error(`judge: unsupported target kind: ${kind}`);
   }

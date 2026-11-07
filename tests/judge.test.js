@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { level1 } from '../src/game/level1.js';
 import { level3 } from '../src/game/level3.js';
+import { level4 } from '../src/game/level4.js';
 import { applyEdit } from '../src/game/blueprint.js';
 import { toMachine } from '../src/game/machines.js';
 import { judge } from '../src/game/judge.js';
@@ -47,8 +48,8 @@ test('a machine that rejects the client key returns lockout', () => {
   assert.equal(verdict.coverage, null);
 });
 test('an unsupported target kind throws', () => {
-  const other = { cells, target: { kind: 'language', id: 'a-n-b-n' } };
-  assert.throws(() => judge(other, machineFor([])), /judge: unsupported target kind: language/);
+  const other = { cells, target: { kind: 'mystery', id: 'nope' } };
+  assert.throws(() => judge(other, machineFor([])), /judge: unsupported target kind: mystery/);
 });
 test('a wrong NFA against an NFA target fails with a concrete counterexample', () => {
   const puzzle = level3.phases.repair;
@@ -75,4 +76,30 @@ test('the repaired NFA passes the exact judge', () => {
   assert.equal(verdict.reason, null);
   assert.equal(verdict.method, 'exact');
   assert.equal(verdict.coverage, null);
+});
+test('a wrong PDA fails the language branch with a concrete counterexample', () => {
+  const puzzle = level4.phases.repair;
+  const keys = level4.keys.map((entry) => entry.symbol);
+  const verdict = judge(puzzle, toMachine(keys, puzzle, structuredClone(puzzle.blueprint), level4.machine));
+  assert.equal(verdict.correct, false);
+  assert.equal(verdict.counterexample, 'A');
+  assert.equal(verdict.reason, 'intruder');
+  assert.equal(verdict.expected, false);
+  assert.equal(verdict.actual, true);
+  assert.equal(verdict.method, 'bounded');
+});
+test('the repaired PDA passes the bounded language judge', () => {
+  const puzzle = level4.phases.repair;
+  const keys = level4.keys.map((entry) => entry.symbol);
+  let blueprint = structuredClone(puzzle.blueprint);
+  const cut = applyEdit(puzzle, level4.parts, blueprint, { type: 'cut-wire', from: 'q1', to: 'q2' });
+  blueprint = cut.blueprint;
+  const added = applyEdit(puzzle, level4.parts, blueprint, { type: 'connect-wire', from: 'q1', to: 'q2', tool: { kind: 'spring', stack: { top: 'base', action: 'keep' } } });
+  blueprint = added.blueprint;
+  const verdict = judge(puzzle, toMachine(keys, puzzle, blueprint, level4.machine));
+  assert.equal(verdict.correct, true);
+  assert.equal(verdict.counterexample, null);
+  assert.equal(verdict.reason, null);
+  assert.equal(verdict.method, 'bounded');
+  assert.equal(verdict.coverage.tested >= 2000, true);
 });

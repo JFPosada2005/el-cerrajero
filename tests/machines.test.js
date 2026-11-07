@@ -56,3 +56,18 @@ test('an NFA puzzle throws for a wire from an unknown cell', () => {
   const keys = level3.keys.map((entry) => entry.symbol);
   assert.throws(() => toMachine(keys, puzzle, { wires: [{ from: 'qx', to: 'w', key: '1' }] }), /unknown cell/);
 });
+test('a PDA puzzle expands any and maps push pop keep with a spring epsilon rule', () => {
+  const puzzle = { cells: [{ id: 'q0', start: true }, { id: 'q1', accept: true }], stack: { base: 'Z', chip: 'X' }, target: { kind: 'language', id: 'a-n-b-n' } };
+  const wires = [{ from: 'q0', to: 'q0', key: 'A', stack: { top: 'any', action: 'push' } }, { from: 'q0', to: 'q1', key: 'B', stack: { top: 'chip', action: 'pop' } }, { from: 'q0', to: 'q1', spring: true, stack: { top: 'base', action: 'keep' } }];
+  const machine = toMachine(['A', 'B'], puzzle, { wires }, 'pda');
+  assert.equal(machine.type, 'pda');
+  assert.deepEqual(machine.stackAlphabet, ['Z', 'X']);
+  assert.equal(machine.stackStart, 'Z');
+  assert.deepEqual(machine.transitions.filter((rule) => rule.read === 'A'), [{ from: 'q0', read: 'A', pop: 'Z', push: 'XZ', to: 'q0' }, { from: 'q0', read: 'A', pop: 'X', push: 'XX', to: 'q0' }]);
+  assert.deepEqual(machine.transitions.filter((rule) => rule.read === 'B'), [{ from: 'q0', read: 'B', pop: 'X', push: '', to: 'q1' }]);
+  assert.deepEqual(machine.transitions.filter((rule) => rule.read === EPSILON), [{ from: 'q0', read: EPSILON, pop: 'Z', push: 'Z', to: 'q1' }]);
+});
+test('a PDA puzzle without a stack throws', () => {
+  const puzzle = { cells: [{ id: 'q0', start: true }, { id: 'q1', accept: true }], target: { kind: 'language', id: 'a-n-b-n' } };
+  assert.throws(() => toMachine(['A', 'B'], puzzle, { wires: [] }, 'pda'), /stack/);
+});
