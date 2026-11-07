@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { level1 } from '../src/game/level1.js';
+import { level1 } from '../src/game/legacy-level.js';
 import { applyEdit } from '../src/game/blueprint.js';
 import { toMachine } from '../src/game/machines.js';
 import { areEquivalentDFA } from '../src/core/dfa.js';

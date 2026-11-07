@@ -249,3 +249,15 @@ User: "bueno, por el momento puede estar bien, dejemos estas cositas de diseño 
 - F2: `src/game/machines.js` (`toMachine` from blueprint to DFA, springs ignored, duplicate key throws) and `src/game/judge.js` (exact judge, alphabet normalized to the target order, `Verdict` with `intruder`/`lockout`).
 - 9 new tests; 88 total passing.
 - Next: F3, the level schema with level 1 moved and level 2 data.
+
+### L23 — Level schema and level 2 data (2026-11-06)
+
+User: "listo, empecemos"
+
+- `src/game/level1.js` is now the Level schema with both phases (repair and build).
+- `src/game/level2.js`: elevator, keys 1-2, gear part, odd-1s repair and ends-with-2-1 build.
+- `src/game/levels.js`: `LEVELS`, `getLevel`, `validateLevel` (cells, wires, target alphabet, examples, thief lines, banned vocabulary).
+- `src/game/legacy-level.js`: temporary adapter that reproduces the old flat level shape from the repair phase, so the current UI keeps working. `main.js` and the test fixtures point to it.
+- Three suites imported the old shape; approved an import-only rewiring to the adapter.
+- 104 tests passing. Commit follows.
+- Next: migrate `main.js` and `graphEditor.js` to the schema, add the two-phase flow, and make level 2 playable.

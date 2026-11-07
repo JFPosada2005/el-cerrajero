@@ -1,5 +1,5 @@
 import { LEVELS, levelStatus } from './game/catalog.js';
-import { level1 } from './game/level1.js';
+import { level1 } from './game/legacy-level.js';
 import { buildPlayerDFA, runHeist, testKey } from './game/rules.js';
 import { thiefReport } from './game/thief.js';
 import { createGraphEditor } from './ui/graphEditor.js';
