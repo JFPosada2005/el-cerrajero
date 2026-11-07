@@ -1,7 +1,9 @@
 import { acceptsDFA } from '../core/dfa.js';
+import { acceptsNFA } from '../core/nfa.js';
 import { level1 } from './level1.js';
 import { level2 } from './level2.js';
-export const LEVELS = [level1, level2];
+import { level3 } from './level3.js';
+export const LEVELS = [level1, level2, level3];
 const BANNED = ['autómata', 'automata', 'afnd', 'afd', 'transición', 'estado', 'lenguaje', 'formal'];
 function checkTopLevel(level) {
   const required = ['id', 'contract', 'title', 'client', 'brief', 'machine', 'workspace', 'keys', 'parts', 'newPart', 'thief', 'phases'];
@@ -10,8 +12,8 @@ function checkTopLevel(level) {
       throw new Error(`level is missing field "${field}"`);
     }
   }
-  if (level.machine !== 'dfa') {
-    throw new Error(`level machine must be "dfa"`);
+  if (level.machine !== 'dfa' && level.machine !== 'nfa') {
+    throw new Error(`level machine must be "dfa" or "nfa"`);
   }
   if (level.workspace !== 'graph') {
     throw new Error(`level workspace must be "graph"`);
@@ -67,6 +69,12 @@ function checkWires(puzzle, level, name) {
       throw new Error(`${name} puzzle wire references unknown cell "${wire.to}"`);
     }
     if (wire.spring === true) {
+      if (level.parts.includes('spring') === false) {
+        throw new Error(`${name} puzzle spring wire requires the spring part`);
+      }
+      if (wire.from === wire.to) {
+        throw new Error(`${name} puzzle spring wire cannot loop on its own cell`);
+      }
       continue;
     }
     if (alphabet.includes(wire.key) === false) {
@@ -96,13 +104,14 @@ function checkExamples(puzzle, name) {
   if (machine === undefined) {
     throw new Error(`${name} puzzle is missing its target machine`);
   }
+  const accepts = machine.type === 'nfa' ? acceptsNFA : acceptsDFA;
   for (const word of puzzle.examples?.open ?? []) {
-    if (acceptsDFA(machine, word) !== true) {
+    if (accepts(machine, word) !== true) {
       throw new Error(`${name} puzzle open example "${word}" is not accepted by the target`);
     }
   }
   for (const word of puzzle.examples?.closed ?? []) {
-    if (acceptsDFA(machine, word) !== false) {
+    if (accepts(machine, word) !== false) {
       throw new Error(`${name} puzzle closed example "${word}" is accepted by the target`);
     }
   }

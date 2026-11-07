@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { acceptsDFA } from '../src/core/dfa.js';
+import { acceptsNFA } from '../src/core/nfa.js';
 import { level1 } from '../src/game/level1.js';
 import { level2 } from '../src/game/level2.js';
+import { level3 } from '../src/game/level3.js';
 import { LEVELS, getLevel, validateLevel } from '../src/game/levels.js';
 function mutated(base, visit) {
   const copy = structuredClone(base);
@@ -12,6 +14,7 @@ function mutated(base, visit) {
 test('getLevel returns each frozen level', () => {
   assert.equal(getLevel(1).id, 1);
   assert.equal(getLevel(2).id, 2);
+  assert.equal(getLevel(3).id, 3);
 });
 test('getLevel throws on an unknown id', () => {
   assert.throws(() => getLevel(99), /unknown level 99/);
@@ -19,11 +22,13 @@ test('getLevel throws on an unknown id', () => {
 test('validateLevel accepts the frozen levels', () => {
   assert.equal(validateLevel(level1), true);
   assert.equal(validateLevel(level2), true);
+  assert.equal(validateLevel(level3), true);
 });
 test('LEVELS holds the frozen levels in order', () => {
-  assert.equal(LEVELS.length, 2);
+  assert.equal(LEVELS.length, 3);
   assert.equal(LEVELS[0].id, 1);
   assert.equal(LEVELS[1].id, 2);
+  assert.equal(LEVELS[2].id, 3);
 });
 test('validation rejects a duplicate cell id', () => {
   const bad = mutated(level1, (copy) => {
@@ -96,4 +101,36 @@ test('level 2 build opens with 21 and 1221', () => {
   assert.equal(acceptsDFA(machine, '21'), true);
   assert.equal(acceptsDFA(machine, '1221'), true);
   assert.equal(acceptsDFA(machine, '12'), false);
+});
+test('level 3 repair examples hold on the day target', () => {
+  const machine = level3.phases.repair.target.machine;
+  assert.equal(machine.type, 'nfa');
+  for (const word of ['122', '1122', '1221']) {
+    assert.equal(acceptsNFA(machine, word), true);
+  }
+  for (const word of ['', '12', '22', '1211']) {
+    assert.equal(acceptsNFA(machine, word), false);
+  }
+});
+test('level 3 build examples hold on the museum target', () => {
+  const machine = level3.phases.build.target.machine;
+  assert.equal(machine.type, 'nfa');
+  for (const word of ['122', '211', '1122', '2211']) {
+    assert.equal(acceptsNFA(machine, word), true);
+  }
+  for (const word of ['', '12', '21', '112', '221']) {
+    assert.equal(acceptsNFA(machine, word), false);
+  }
+});
+test('validation rejects a spring wire without the spring part', () => {
+  const bad = mutated(level3, (copy) => {
+    copy.parts = ['wire', 'gear', 'fork'];
+  });
+  assert.throws(() => validateLevel(bad), /spring/);
+});
+test('validation rejects a spring wire looping on its own cell', () => {
+  const bad = mutated(level3, (copy) => {
+    copy.phases.repair.blueprint.wires.push({ from: 'w', to: 'w', spring: true });
+  });
+  assert.throws(() => validateLevel(bad), /spring/);
 });
