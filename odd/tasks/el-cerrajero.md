@@ -240,3 +240,12 @@ User: "hazlo mas bien como menu luego de darle a play, tirar los niveles asi de 
 - Map layout fixed: full width up to 1500 px, five shrinkable columns, no horizontal scrollbar; wraps to 3/2/1 columns below 1100/760/520 px.
 - F2 started: `src/game/blueprint.js` with pure `applyEdit` for graph blueprints (cut, identical kept, gear gate, fork move/add, spring loop) and 14 tests.
 - 79 tests passing. No push this time: the owner did not authorize it for this slice.
+
+### L22 — Machines and exact judge (2026-11-06)
+
+User: "bueno, por el momento puede estar bien, dejemos estas cositas de diseño estetico y artistico para cuando los niveles esten completados"
+
+- Aesthetic work is frozen until the five levels are complete. The focus moves to the engine and level content.
+- F2: `src/game/machines.js` (`toMachine` from blueprint to DFA, springs ignored, duplicate key throws) and `src/game/judge.js` (exact judge, alphabet normalized to the target order, `Verdict` with `intruder`/`lockout`).
+- 9 new tests; 88 total passing.
+- Next: F3, the level schema with level 1 moved and level 2 data.
