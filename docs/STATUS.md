@@ -28,7 +28,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - límites de configuraciones y de pila (`truncated`);
   - frames con estado, pila y regla.
 - **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
-- **Niveles 1, 2 y 3 jugables** con el flujo reparar → construir → asalto:
+- **Niveles 1, 2, 3 y 4 jugables** con el flujo reparar → construir → asalto:
   - taller SVG con celdas por fase y **un cable por par de celdas**, con todos sus valores en una etiqueta;
   - conectar con clic en origen → destino; **cortar con la tijera**; Escape cancela una selección pendiente;
   - **ficha del contrato persistente** con cliente y regla en palabras llanas;
@@ -38,7 +38,8 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **Nivel 1:** reparar `1-2-3` y construir `3-1-4`.
 - **Nivel 2 (ascensor):** engranaje, paridad de `1` en la reparación y “termina en `2-1`” en la construcción.
 - **Nivel 3 (museo):** AFND con épsilon, bifurcador y resorte; dos ramales (`1-2-2` y `2-1-1`).
-- Tests: **170 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto, esquema de niveles, niveles 1-3 y los motores AFD/AFND/AP.
+- **Nivel 4 (teatro):** AP con pila, giros balanceados y `A^n B^n`; juez acotado (evidencia, no prueba) y panel de pila.
+- Tests: **190 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto y acotado, esquema de niveles, niveles 1-4 y los motores AFD/AFND/AP.
 
 ## Qué está en revisión
 
@@ -60,7 +61,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
 4. **T4 (nivel 3, AFND-λ) listo:** motor, datos y UI de resortes; pendiente el smoke test de navegador.
-5. **T5 (nivel 4, AP) en curso:** motor PDA listo; faltan los datos del teatro, los oráculos y el juez acotado, el adaptador y el panel de pila.
+5. **T5 (nivel 4, AP) listo:** motor, datos, oráculos, juez acotado y UI de pila; pendiente el smoke test de navegador.
 6. Implementar T6 (MT).
 7. Remaster visual (animaciones, texturas, sonido) recién cuando los 5 niveles funcionen.
 8. T9: completar [`docs/SOLUTIONS.md`](SOLUTIONS.md) con los niveles 4-5 antes de la presentación.
@@ -76,15 +77,17 @@ tests/limits.test.js     4 passing
 tests/level1.test.js     5 passing
 tests/level2.test.js     4 passing
 tests/level3.test.js     4 passing
+tests/level4.test.js     5 passing
 tests/thief.test.js      5 passing
-tests/graphEditor.test.js  15 passing
+tests/graphEditor.test.js  18 passing
 tests/catalog.test.js   12 passing
 tests/blueprint.test.js 14 passing
-tests/machines.test.js   7 passing
-tests/judge.test.js      6 passing
-tests/levels.test.js    20 passing
+tests/machines.test.js   9 passing
+tests/judge.test.js      8 passing
+tests/levels.test.js    23 passing
+tests/oracles.test.js    5 passing
 tests/pda.test.js       20 passing
-total                  170 passing
+total                  190 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).

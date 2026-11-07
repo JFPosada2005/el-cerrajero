@@ -70,7 +70,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | done | `04be402` |
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | done | `7e60eea` |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | in progress (NFA core done) | - |
-| T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
+| T5 | PDA core + Level 4 (stack) | S5, S9 | inline | review | `cf07e65` |
 | T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
@@ -313,3 +313,16 @@ User: "por el momento esta funcionando bastante bien"
 - 20 tests; 170 total.
 - Fixed two literal NUL bytes the worker left as key separators (replaced with `\0` escapes; same runtime string, clean source).
 - Next: level 4 data (theater), oracles plus bounded judge, PDA adapter and the stack panel UI.
+
+### L29 — Level 4 playable: stack UI and bounded judge (2026-11-06)
+
+User: "perfecto, continua y termina el nivel 4 para revisar que tal se comporta"
+
+- `oracles.js` with `balanced-turns` and `a-n-b-n`; `level4.js` with the theater, the buggy spring (`da igual`) and the blank `A^n B^n` build.
+- `machines.js` builds a PDA from wires: `any` expands per stack symbol; `push`/`pop`/`keep` map to the top-first stack semantics; springs become ε rules.
+- `judge.js` bounded language branch: 2,047 exhaustive words + families up to n=16 + 200 seeded random words, shortlex-first mismatch, `jam`/`lockout`/`intruder`, coverage. Evidence, not proof.
+- `blueprint.js` now carries `tool.stack` on connect (approved pass-through).
+- UI: stack labels (`A · base · +ficha`), **si arriba hay** / **acción** pickers, and a **Pila** panel fed by the last PDA frame.
+- Level 4 playable on the map; 190 tests passing.
+- `docs/SOLUTIONS.md` has the level 4 repair and build.
+- Next: browser smoke test of contract 04, then level 5 (TM).
