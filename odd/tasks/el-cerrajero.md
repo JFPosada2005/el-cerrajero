@@ -201,3 +201,13 @@ User: "no, arreglalo, no sirve, ya no se pueden conectar los cables usando las l
 - **Secuencia del nivel 1:** `2` (intruso) → cortar → `11` (intruso) → cortar → `123` (lockout) → conectar el cable faltante → equivalente. Cada cable de escombro lleva una sola llave, así el corte con tijera no es ambiguo.
 - **Guard de regresión:** `tests/workshop.test.js` (DOM falso) cubre conectar, propagación de la llave activa, cables inertes, corte con tijera, Enter y etiquetas multi-llave.
 - **Evidencia:** RED primero; GREEN con 33 tests.
+
+### L18 — Cache root cause and editor rename (2026-11-06)
+
+User: "encargate tu de tomar las decisiones conmigo y siempre que sea a programar manda al worker, definitivamente no esta sirviendo, siguen sin conectar las celdas, cortar no hace nada."
+
+- **Evidencia del log:** el navegador pidió `main.js`, `level1.js`, `rules.js` y `thief.js`, pero **nunca** `src/ui/workshop.js`. Seguía usando el módulo anterior a la corrección. `Cache-Control: no-store` solo evita guardar entradas nuevas; no invalida las viejas.
+- **Arreglo:** el editor pasó a una URL que el navegador nunca vio: `src/ui/workshop.js` → `src/ui/graphEditor.js`, `createWorkshop` → `createGraphEditor`. La URL vieja ahora da 404; la nueva, 200.
+- **Marcador de build:** la pantalla de inicio muestra `build 4` para identificar de un vistazo qué versión está corriendo.
+- **Delegación:** la implementación la hizo `gentle-ai-worker`; el padre corrigió dos frases que el reemplazo literal dejó incoherentes en `DESIGN.md` y verificó las URLs servidas.
+- **Evidencia del worker:** `node --test` 33/33; `node --check` limpio.

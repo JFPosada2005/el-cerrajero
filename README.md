@@ -59,7 +59,7 @@ No hay dependencias externas ni build step. El juego es HTML, CSS, JavaScript co
 │   │   ├── level1.js       # datos del nivel 1
 │   │   └── rules.js        # construcción del autómata del jugador, juez, asalto
 │   └── ui/
-│       └── workshop.js     # editor SVG del taller
+│       └── graphEditor.js  # editor SVG del taller
 ├── tests/                  # pruebas con node --test
 ├── docs/                   # diseño, tareas, estado
 ├── odd/tasks/              # documento ODD

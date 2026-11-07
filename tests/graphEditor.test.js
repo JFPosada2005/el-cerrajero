@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { level1 } from '../src/game/level1.js';
-import { createWorkshop } from '../src/ui/workshop.js';
+import { createGraphEditor } from '../src/ui/graphEditor.js';
 
 function element(tag) {
   const listeners = new Map();
@@ -60,7 +60,7 @@ function setup(editTransitions) {
   }
   const calls = { connect: [], cut: [] };
   const svg = element('svg');
-  const editor = createWorkshop({
+  const editor = createGraphEditor({
     svg,
     level: level1,
     transitions,

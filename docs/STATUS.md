@@ -55,7 +55,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 tests/dfa.test.js       12 passing
 tests/level1.test.js     8 passing
 tests/thief.test.js      5 passing
-tests/workshop.test.js   8 passing
+tests/graphEditor.test.js   8 passing
 total                   33 passing
 ```
 
@@ -75,7 +75,8 @@ Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: 
 - **Corte de cables:** hay una **tijera** explícita en la paleta. Con la tijera activa, un clic sobre el cable lo corta completo; las celdas se atenúan y los cables pasan a ser objetivos. Conectar vuelve a elegir una llave.
 - **Un cable por par de celdas:** todos sus valores van en una sola etiqueta (`1,2`). No se dibujan cables paralelos.
 - **Servidor sin caché:** `serve.py` agrega `Cache-Control: no-store` para que el navegador no mezcle módulos viejos y nuevos (fue la causa de un editor roto).
-- **Test de DOM:** `tests/workshop.test.js` cubre conectar, cortar y teclado sin navegador.
+- **Editor renombrado:** `src/ui/graphEditor.js` (antes `workshop.js`). La URL nueva fuerza al navegador a descargar el módulo aunque tenga el viejo en caché. La pantalla de inicio muestra `build 4`.
+- **Test de DOM:** `tests/graphEditor.test.js` cubre conectar, cortar y teclado sin navegador.
 - **Nivel 1:** el mecanismo inicial parte incompleto (falta un cable) además de tener dos cruzados, para que no se sienta casi resuelto.
 - Se mantiene la ficción del cerrajero. De la idea de la bomba se adaptaron dos cosas: la **ficha del contrato persistente** y el **diagnóstico forense** del ladrón (marcas de ganzúa, no pistas). El modo contrarreloj queda opcional para después del freeze; el demo de dos roles va al guion de T7.
 - Nivel 3 queda como **AFND-λ** (bifurcador + resorte), no como sumidero/complemento.

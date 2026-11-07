@@ -1,7 +1,7 @@
 import { level1 } from './game/level1.js';
 import { buildPlayerDFA, runHeist, testKey } from './game/rules.js';
 import { thiefReport } from './game/thief.js';
-import { createWorkshop } from './ui/workshop.js';
+import { createGraphEditor } from './ui/graphEditor.js';
 
 const PROGRESS_KEY = 'el-cerrajero:progress';
 const app = document.querySelector('#app');
@@ -55,7 +55,7 @@ function renderStart() {
         <p>Cinco contratos. Cinco mecanismos. Una regla: la bóveda abre solo para la llave correcta.</p>
         <button id="start-button" class="primary">Aceptar el contrato</button>
       </section>
-      <p class="progress">Contratos completados: ${progress.completed.length} / 5</p>
+      <p class="progress">Contratos completados: ${progress.completed.length} / 5 · build 4</p>
     </main>
   `;
   document.querySelector('#start-button').addEventListener('click', renderLevel);
@@ -211,7 +211,7 @@ function renderLevel() {
   `;
   document.querySelector('#back-button').addEventListener('click', renderStart);
   renderPalette();
-  workshop = createWorkshop({
+  workshop = createGraphEditor({
     svg: document.querySelector('#canvas'),
     level: level1,
     transitions: playerTransitions,

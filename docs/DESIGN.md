@@ -544,7 +544,7 @@ These show only what differs from level 1. Client names are placeholder content.
 
 | Component | Inputs | Outputs and methods | Must not know |
 |---|---|---|---|
-| `graphEditor.js` (evolves from `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)` with `{ kind: 'key', key } \| { kind: 'cut' }`; `light({ cells, wires })`, `clearLight()`; emits `{ type: 'connect-wire', from, to, tool }` or `{ type: 'cut-wire', from, to }` | gating rules, acceptance, determinism |
+| `graphEditor.js` (formerly `workshop.js`) | `{ svg, cells, wires, describeWire, onEdit }` | `setTool(tool)` with `{ kind: 'key', key } \| { kind: 'cut' }`; `light({ cells, wires })`, `clearLight()`; emits `{ type: 'connect-wire', from, to, tool }` or `{ type: 'cut-wire', from, to }` | gating rules, acceptance, determinism |
 | `geometry.js` | cell positions | `edgeGeometry`, `loopGeometry`, `springPath` | — |
 | `palette.js` | keys, parts, stack labels | `onSelect(tool)`, where tool = `{ kind: 'key', key } \| { kind: 'spring' }` plus `stack` on L4 | — |
 | `stackPanel.js` | `{ root, labels }` | `show(stack)`, `pulse('push' \| 'pop')` | the symbols `Z` / `X` (gets labels) |
@@ -673,7 +673,7 @@ docs/       DESIGN.md  STATUS.md  TASKS.md  SMOKE.md
 2. F2: `blueprint` (graph), `machines`, `judge` (exact), `format`, `thief`.
 3. F3: `levels.js`, level 1 moved to the schema with its build phase.
 4. F4: `flow`, `progress`.
-5. F5: turn `workshop.js` into `graphEditor.js` with `describeWire`; make `main.js` data-driven.
+5. F5: add `describeWire` and `applyEdit` gating to `graphEditor.js`; make `main.js` data-driven.
 
 Then tag "contracts frozen" in TASKS.md.
 
@@ -769,6 +769,6 @@ All probes ran in the scratch copy with `HOME`/`TMP` pointing inside it.
 - `src/main.js`: `setItem` must stay inside a try/catch. Already fixed in the current `saveProgress`.
 - `src/main.js`: the course credit line that contained "Lenguajes" was removed on 2026-11-06; no allow-list is needed.
 - `src/main.js`: level 1 is hard-coded. Fix in F5 (data-driven levels).
-- `src/ui/workshop.js`: clicking the same cell twice makes an ungated self-loop. Fix in F5 with `applyEdit`. Escape cancels a pending selection.
+- `src/ui/graphEditor.js`: clicking the same cell twice makes an ungated self-loop. Fix in F5 with `applyEdit`. Escape cancels a pending selection.
 - ODD doc: the T1/T2 commit rows were updated after this design was written; verify against the current file.
 - ODD doc: add a log entry recording the user's explicit request to create the repo and the initial push.

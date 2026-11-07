@@ -67,7 +67,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Estado:** review.
 
-**Archivos:** `index.html`, `styles.css`, `serve.py`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/workshop.js`, `tests/level1.test.js`, `tests/thief.test.js`, `tests/workshop.test.js`.
+**Archivos:** `index.html`, `styles.css`, `serve.py`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/graphEditor.js`, `tests/level1.test.js`, `tests/thief.test.js`, `tests/graphEditor.test.js`.
 
 **Qué incluye:**
 
@@ -96,7 +96,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 - [ ] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
 - [x] La UI del nivel no muestra vocabulario académico (guard en `tests/level1.test.js`).
 
-**Tests:** `node --test tests/level1.test.js tests/thief.test.js tests/workshop.test.js`.
+**Tests:** `node --test tests/level1.test.js tests/thief.test.js tests/graphEditor.test.js`.
 
 ## T3 — Nivel 2: AFD con bucle / paridad
 
@@ -108,7 +108,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Pieza nueva:** engranaje de bucle.
 
-**Archivos:** `src/game/level2.js`, `src/game/rules.js` (generalizar si hace falta), `src/ui/workshop.js` (modo construir si el diseño lo pide), `tests/level2.test.js`, `src/main.js`.
+**Archivos:** `src/game/level2.js`, `src/game/rules.js` (generalizar si hace falta), `src/ui/graphEditor.js` (modo construir si el diseño lo pide), `tests/level2.test.js`, `src/main.js`.
 
 **Criterios de aceptación:**
 
@@ -127,7 +127,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Objetivo:** implementar no determinismo y clausura épsilon, y usarlos como mecánica.
 
-**Archivos:** `src/core/nfa.js`, `tests/nfa.test.js`, `src/game/level3.js`, `tests/level3.test.js`, `src/ui/workshop.js`, `src/main.js`.
+**Archivos:** `src/core/nfa.js`, `tests/nfa.test.js`, `src/game/level3.js`, `tests/level3.test.js`, `src/ui/graphEditor.js`, `src/main.js`.
 
 **Criterios de aceptación:**
 
@@ -246,7 +246,7 @@ Una vez congelado `docs/DESIGN.md`:
 
 - Forma de un nivel (`LevelSpec`) y del autómata del jugador.
 - Contrato del juez: `judge(player, target) -> { correct, counterexample, reason }`.
-- Contrato del taller: `createWorkshop({ svg, level, machine, onToggle })`.
+- Contrato del taller: `createGraphEditor({ svg, level, transitions, onConnect, onCut })`.
 - Contrato de persistencia: `loadProgress`, `saveProgress`.
 - Vocabulario de UI prohibido: AFD, AFND, AP, MT, autómata, lenguaje, estado, transición.
 

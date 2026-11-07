@@ -43,7 +43,7 @@ function edgeGeometry(from, to) {
   };
 }
 
-export function createWorkshop({ svg, level, transitions, onConnect, onCut }) {
+export function createGraphEditor({ svg, level, transitions, onConnect, onCut }) {
   const states = nodeMap(level);
   let tool = { kind: 'key', key: level.alphabet[0] };
   let pendingSource = null;
