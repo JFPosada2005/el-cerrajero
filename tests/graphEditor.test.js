@@ -180,3 +180,25 @@ test('the cut label names a spring as a resorte', () => {
   assert.equal(wires.length, 1);
   assert.equal(wires[0].attributes['aria-label'], 'Cortar resorte: Entrada a Celda 1');
 });
+const pdaStack = { base: 'Z', chip: 'X', labels: { base: 'base', chip: 'ficha' } };
+const pdaCells = [{ id: 'q0', label: 'Entrada', x: 100, y: 260 }, { id: 'q1', label: 'Celda 1', x: 300, y: 260 }];
+function setupStack(wires) {
+  const svg = element('svg');
+  createGraphEditor({ svg, cells: pdaCells, alphabet: ['A', 'B'], blueprint: { wires }, stack: pdaStack, onConnect: () => {}, onCut: () => {} });
+  return svg;
+}
+test('a key wire with a stack condition shows the key, top and action', () => {
+  const svg = setupStack([{ from: 'q0', to: 'q1', key: 'A', stack: { top: 'base', action: 'push' } }]);
+  const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
+  assert.deepEqual(labels, ['A · base · +ficha']);
+});
+test('a spring with a stack condition shows the top and action', () => {
+  const svg = setupStack([{ from: 'q0', to: 'q1', spring: true, stack: { top: 'base', action: 'keep' } }]);
+  const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
+  assert.deepEqual(labels, ['base · =']);
+});
+test('wires with different stack conditions render separate labels', () => {
+  const svg = setupStack([{ from: 'q0', to: 'q1', key: 'A', stack: { top: 'any', action: 'push' } }, { from: 'q0', to: 'q1', key: 'A', stack: { top: 'chip', action: 'pop' } }]);
+  const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
+  assert.deepEqual(labels, ['A · da igual · +ficha', 'A · ficha · -ficha']);
+});

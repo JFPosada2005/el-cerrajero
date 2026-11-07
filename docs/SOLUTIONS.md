@@ -87,9 +87,39 @@ Sin romper la rama de día, agregar:
 - `Noche 1 —1→ Noche 2`
 - `Noche 2 —1→ Cerrojo`
 
-## Niveles 4-5
+## Nivel 4 — El teatro (AP con pila)
 
-Pendientes de implementación. Este documento se completa cuando cada nivel esté jugable.
+En este nivel cada cable y cada resorte lleva su condición de pila: **si arriba hay** (da igual / base / ficha) y **acción** (no tocar / cargar / soltar). La etiqueta del cable la muestra, por ejemplo `A · base · +ficha`.
 
-- **Nivel 4:** AP con pila (giros balanceados / `A^n B^n`).
+### Reparación: giros balanceados, nunca vacío
+
+Cortar:
+
+- `Trabajo —resorte→ Cerrojo` (el resorte quedó con “da igual” y deja pasar `A`)
+
+Conectar (con **si arriba hay: base** y **acción: no tocar** elegidos en la paleta):
+
+- `Trabajo —resorte→ Cerrojo` (base, no tocar)
+
+Resultado:
+
+```text
+Entrada —A→ Trabajo (da igual, cargar)
+Trabajo —A→ Trabajo (da igual, cargar)
+Trabajo —B→ Trabajo (ficha, soltar)
+Trabajo —resorte→ Cerrojo (base, no tocar)
+```
+
+### Construcción: abre solo con `A^n B^n`, n ≥ 1
+
+- `Entrada —A→ Cargando` (da igual, cargar)
+- `Cargando —A→ Cargando` (da igual, cargar)
+- `Cargando —B→ Soltando` (ficha, soltar)
+- `Soltando —B→ Soltando` (ficha, soltar)
+- `Soltando —resorte→ Cerrojo` (base, no tocar)
+
+## Nivel 5
+
+Pendiente de implementación. Este documento se completa cuando el nivel esté jugable.
+
 - **Nivel 5:** MT (incremento y suma binaria).

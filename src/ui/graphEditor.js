@@ -31,7 +31,7 @@ function edgeGeometry(from, to) {
   const controlY = midY + ux * curve;
   return { path: `M ${startX} ${startY} Q ${controlX} ${controlY} ${endX} ${endY}`, labelX: 0.25 * startX + 0.5 * controlX + 0.25 * endX, labelY: 0.25 * startY + 0.5 * controlY + 0.25 * endY };
 }
-export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, onCut }) {
+export function createGraphEditor({ svg, cells, alphabet, blueprint, stack = null, onConnect, onCut }) {
   const states = nodeMap(cells);
   let current = blueprint;
   let tool = { kind: 'key', key: alphabet[0] };
@@ -40,13 +40,43 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
   function isCutting() {
     return tool.kind === 'cut';
   }
+  function stackOf(wire) {
+    if (wire.stack !== undefined) {
+      return wire.stack;
+    }
+    return { top: 'any', action: 'keep' };
+  }
+  function topLabel(top) {
+    if (top === 'any') {
+      return 'da igual';
+    }
+    return stack.labels[top];
+  }
+  function actionLabel(action) {
+    if (action === 'push') {
+      return '+ficha';
+    }
+    if (action === 'pop') {
+      return '-ficha';
+    }
+    return '=';
+  }
+  function groupLabel(group) {
+    const top = topLabel(group.top);
+    const action = actionLabel(group.action);
+    if (group.spring) {
+      return `${top} · ${action}`;
+    }
+    return `${group.symbols.join(',')} · ${top} · ${action}`;
+  }
   function wireGroups() {
     const groups = new Map();
     for (const wire of current.wires) {
       const spring = wire.spring === true;
-      const key = `${wire.from}\u0000${wire.to}\u0000${spring}`;
+      const condition = stack === null ? null : stackOf(wire);
+      const key = stack === null ? `${wire.from}\u0000${wire.to}\u0000${spring}` : `${wire.from}\u0000${wire.to}\u0000${spring}\u0000${condition.top}\u0000${condition.action}`;
       if (groups.has(key) === false) {
-        groups.set(key, { source: wire.from, target: wire.to, spring, symbols: [] });
+        groups.set(key, { source: wire.from, target: wire.to, spring, symbols: [], top: condition === null ? null : condition.top, action: condition === null ? null : condition.action });
       }
       if (spring === false) {
         groups.get(key).symbols.push(wire.key);
@@ -107,11 +137,12 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
         attributes.role = 'button';
         attributes.tabindex = '0';
       }
+      const caption = stack === null ? group.symbols.join(',') : groupLabel(group);
       if (cutting && group.spring) {
-        attributes['aria-label'] = `Cortar resorte: ${from.label} a ${to.label}`;
+        attributes['aria-label'] = stack === null ? `Cortar resorte: ${from.label} a ${to.label}` : `Cortar resorte ${caption}: ${from.label} a ${to.label}`;
       }
       if (cutting && group.spring === false) {
-        attributes['aria-label'] = `Cortar cable ${group.symbols.join(',')}: ${from.label} a ${to.label}`;
+        attributes['aria-label'] = `Cortar cable ${caption}: ${from.label} a ${to.label}`;
       }
       const wire = svgElement('g', attributes);
       wire.append(svgElement('path', { d: geometry.path, class: 'edge-hit' }));
@@ -120,10 +151,10 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
         edgeClass = `edge is-spring${isLit ? ' is-lit' : ''}`;
       }
       wire.append(svgElement('path', { d: geometry.path, class: edgeClass, 'marker-end': isLit ? 'url(#arrow-lit)' : 'url(#arrow)' }));
-      if (group.spring === false) {
-        const label = svgElement('text', { x: geometry.labelX, y: geometry.labelY, class: 'edge-label' });
-        label.textContent = group.symbols.join(',');
-        wire.append(label);
+      if (group.spring === false || stack !== null) {
+        const text = svgElement('text', { x: geometry.labelX, y: geometry.labelY, class: 'edge-label' });
+        text.textContent = caption;
+        wire.append(text);
       }
       if (cutting) {
         wire.addEventListener('click', () => handleWireClick(group.source, group.target));
