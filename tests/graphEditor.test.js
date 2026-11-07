@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { level1 } from '../src/game/legacy-level.js';
+import { level1 } from '../src/game/level1.js';
 import { createGraphEditor } from '../src/ui/graphEditor.js';
-
+const repair = level1.phases.repair;
+const cells = repair.cells;
+const alphabet = level1.keys.map((entry) => entry.symbol);
 function element(tag) {
   const listeners = new Map();
   return {
@@ -32,11 +34,9 @@ function element(tag) {
     },
   };
 }
-
 globalThis.document = {
   createElementNS: (namespace, tag) => element(tag),
 };
-
 function collect(nodes, className) {
   const found = [];
   for (const node of nodes) {
@@ -48,35 +48,32 @@ function collect(nodes, className) {
   }
   return found;
 }
-
 function byLabel(nodes, label) {
-  return nodes.find(node => node.attributes['aria-label'] === label);
+  return nodes.find((node) => node.attributes['aria-label'] === label);
 }
-
-function setup(editTransitions) {
-  const transitions = structuredClone(level1.initialTransitions);
-  if (editTransitions) {
-    editTransitions(transitions);
-  }
+function setup(wires) {
+  const blueprint = { wires: wires ?? structuredClone(repair.blueprint.wires) };
   const calls = { connect: [], cut: [] };
   const svg = element('svg');
   const editor = createGraphEditor({
     svg,
-    level: level1,
-    transitions,
+    cells,
+    alphabet,
+    blueprint,
     onConnect: (...args) => calls.connect.push(args),
     onCut: (...args) => calls.cut.push(args),
   });
-  return { svg, editor, calls, transitions };
+  return { svg, editor, calls, blueprint };
 }
-
+function multiKeyWires() {
+  return [{ from: 'q0', to: 'q1', key: '1' }, { from: 'q0', to: 'q1', key: '2' }, { from: 'q2', to: 'q3', key: '3' }];
+}
 test('clicking two cells connects them with the active key', () => {
   const { svg, calls } = setup();
   byLabel(collect(svg.children, 'state'), 'Entrada').fire('click');
   byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
   assert.deepEqual(calls.connect, [['q0', 'q1', '1']]);
 });
-
 test('the active key reaches the editor', () => {
   const { svg, editor, calls } = setup();
   editor.setSelectedKey('2');
@@ -84,7 +81,6 @@ test('the active key reaches the editor', () => {
   byLabel(collect(svg.children, 'state'), 'Celda 2').fire('click');
   assert.deepEqual(calls.connect, [['q0', 'q2', '2']]);
 });
-
 test('wires are inert until the scissors tool is active', () => {
   const { svg, calls } = setup();
   const wire = collect(svg.children, 'wire')[0];
@@ -92,7 +88,6 @@ test('wires are inert until the scissors tool is active', () => {
   wire.fire('click');
   assert.deepEqual(calls.cut, []);
 });
-
 test('the scissors tool turns every cable into a cut target', () => {
   const { svg, editor, calls } = setup();
   editor.setCutting();
@@ -100,17 +95,30 @@ test('the scissors tool turns every cable into a cut target', () => {
   assert.ok(wires.length > 0);
   assert.equal(wires[0].attributes.tabindex, '0');
   wires[0].fire('click');
-  assert.equal(calls.cut.length, 1);
+  assert.deepEqual(calls.cut, [['q0', 'q1']]);
 });
-
+test('the scissors cut the whole cable with one call', () => {
+  const { svg, editor, calls } = setup(multiKeyWires());
+  editor.setCutting();
+  const wires = collect(svg.children, 'wire');
+  const target = wires.find((wire) => wire.attributes['aria-label'] === 'Cortar cable 1,2: Entrada a Celda 1');
+  target.fire('click');
+  assert.deepEqual(calls.cut, [['q0', 'q1']]);
+});
 test('Enter cuts a cable in scissors mode', () => {
   const { svg, editor, calls } = setup();
   editor.setCutting();
   const wires = collect(svg.children, 'wire');
   wires[0].fire('keydown', { key: 'Enter', preventDefault() {} });
-  assert.equal(calls.cut.length, 1);
+  assert.deepEqual(calls.cut, [['q0', 'q1']]);
 });
-
+test('Space cuts a cable in scissors mode', () => {
+  const { svg, editor, calls } = setup();
+  editor.setCutting();
+  const wires = collect(svg.children, 'wire');
+  wires[0].fire('keydown', { key: ' ', preventDefault() {} });
+  assert.deepEqual(calls.cut, [['q0', 'q1']]);
+});
 test('clicking a cell in scissors mode does not connect', () => {
   const { svg, editor, calls } = setup();
   editor.setCutting();
@@ -118,22 +126,32 @@ test('clicking a cell in scissors mode does not connect', () => {
   byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
   assert.deepEqual(calls.connect, []);
 });
-
-test('a cable with several keys is drawn once with all its labels', () => {
-  const { svg } = setup(transitions => {
-    transitions.q0[2] = 'q1';
-  });
-  const labels = collect(svg.children, 'edge-label').map(node => node.textContent);
-  assert.ok(labels.includes('1,2'));
-  assert.equal(collect(svg.children, 'wire').length, 3);
+test('Escape cancels a pending cell', () => {
+  const { svg, calls } = setup();
+  byLabel(collect(svg.children, 'state'), 'Entrada').fire('click');
+  svg.fire('keydown', { key: 'Escape' });
+  byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
+  byLabel(collect(svg.children, 'state'), 'Celda 2').fire('click');
+  assert.deepEqual(calls.connect, [['q1', 'q2', '1']]);
 });
-
+test('a cable with several keys is drawn once with all its labels', () => {
+  const { svg } = setup(multiKeyWires());
+  const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
+  assert.ok(labels.includes('1,2'));
+  assert.equal(collect(svg.children, 'wire').length, 2);
+});
 test('the cut label names every key on the cable', () => {
-  const { svg, editor } = setup(transitions => {
-    transitions.q0[2] = 'q1';
-  });
+  const { svg, editor } = setup(multiKeyWires());
   editor.setCutting();
   const wires = collect(svg.children, 'wire');
-  const target = wires.find(wire => wire.attributes['aria-label'] === 'Cortar cable 1,2: Entrada a Celda 1');
+  const target = wires.find((wire) => wire.attributes['aria-label'] === 'Cortar cable 1,2: Entrada a Celda 1');
   assert.ok(target);
+});
+test('setBlueprint replaces the cables and re-renders', () => {
+  const { svg, editor } = setup();
+  assert.equal(collect(svg.children, 'wire').length, 4);
+  editor.setBlueprint({ wires: [] });
+  assert.equal(collect(svg.children, 'wire').length, 0);
+  editor.setBlueprint({ wires: multiKeyWires() });
+  assert.equal(collect(svg.children, 'wire').length, 2);
 });

@@ -1,23 +1,22 @@
 import { LEVELS, levelStatus } from './game/catalog.js';
-import { level1 } from './game/legacy-level.js';
-import { buildPlayerDFA, runHeist, testKey } from './game/rules.js';
+import { getLevel } from './game/levels.js';
+import { applyEdit } from './game/blueprint.js';
+import { toMachine } from './game/machines.js';
+import { runDFA } from './core/dfa.js';
+import { judge } from './game/judge.js';
 import { thiefReport } from './game/thief.js';
 import { createGraphEditor } from './ui/graphEditor.js';
-
 const PROGRESS_KEY = 'el-cerrajero:progress';
 const app = document.querySelector('#app');
-
-let playerTransitions = structuredClone(level1.initialTransitions);
+const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
-let selectedKey = level1.alphabet[0];
+let selectedKey = null;
 let cutMode = false;
-
 const ICON_LOCK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
 const ICON_KEY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="16" r="4"></circle><path d="M11 13 20 4"></path><path d="M16 8l3 3"></path><path d="M13.5 10.5l2.5 2.5"></path></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>';
 const ICON_CROWN = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3L12 5l5.5 6L21 8l-1.6 10H4.6L3 8z"></path><path d="M5 21h14"></path></svg>';
 const ICON_PLAY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8z"></path></svg>';
-
 function statusWord(status) {
   if (status === 'completed') {
     return 'Completado';
@@ -27,7 +26,6 @@ function statusWord(status) {
   }
   return 'Bloqueado';
 }
-
 function statusIcon(status) {
   if (status === 'completed') {
     return ICON_CHECK;
@@ -37,16 +35,23 @@ function statusIcon(status) {
   }
   return ICON_LOCK;
 }
-
+function levelAlphabet() {
+  return state.level.keys.map((entry) => entry.symbol);
+}
+function phaseWord() {
+  if (state.phase === 'repair') {
+    return 'Reparación';
+  }
+  return 'Construcción';
+}
 function handleLevelOpen(level) {
   if (level.playable) {
-    renderLevel();
+    startLevel(level.id);
     return;
   }
   const note = document.querySelector('#map-note');
   note.textContent = `El contrato ${level.contract} todavía está en preparación.`;
 }
-
 function buildLevelCard(level, progress) {
   const status = levelStatus(level, progress);
   const card = document.createElement('article');
@@ -99,20 +104,21 @@ function buildLevelCard(level, progress) {
   card.append(statusRow);
   return card;
 }
-
 function loadProgress() {
   try {
     const raw = localStorage.getItem(PROGRESS_KEY);
-    if (!raw) {
+    if (raw === null) {
       return { completed: [] };
     }
     const parsed = JSON.parse(raw);
-    return { completed: Array.isArray(parsed.completed) ? parsed.completed : [] };
+    if (Array.isArray(parsed.completed)) {
+      return { completed: parsed.completed };
+    }
+    return { completed: [] };
   } catch {
     return { completed: [] };
   }
 }
-
 function saveProgress(progress) {
   try {
     localStorage.setItem(PROGRESS_KEY, JSON.stringify(progress));
@@ -120,19 +126,21 @@ function saveProgress(progress) {
     return;
   }
 }
-
 function appendLog(message, tone = '') {
   const log = document.querySelector('#log');
-  if (!log) {
+  if (log === null) {
     return;
   }
   const item = document.createElement('li');
-  item.className = `log-item${tone ? ` ${tone}` : ''}`;
+  if (tone === '') {
+    item.className = 'log-item';
+  } else {
+    item.className = `log-item ${tone}`;
+  }
   item.textContent = message;
   log.append(item);
   log.scrollTop = log.scrollHeight;
 }
-
 function renderTitle() {
   const progress = loadProgress();
   app.replaceChildren();
@@ -165,7 +173,6 @@ function renderTitle() {
   main.append(progressLine);
   app.append(main);
 }
-
 function renderMap() {
   const progress = loadProgress();
   app.replaceChildren();
@@ -208,54 +215,64 @@ function renderMap() {
   main.append(progressLine);
   app.append(main);
 }
-
 function renderPalette() {
   const palette = document.querySelector('#palette');
   palette.replaceChildren();
-  for (const key of level1.alphabet) {
+  for (const entry of state.level.keys) {
     const button = document.createElement('button');
     button.type = 'button';
-    button.className = `key key-${key}`;
-    button.dataset.key = key;
-    button.textContent = key;
-    button.setAttribute('aria-label', `Llave ${key}`);
-    button.addEventListener('click', () => selectKey(key));
+    button.className = `key key-${entry.symbol}`;
+    button.dataset.key = entry.symbol;
+    button.textContent = entry.symbol;
+    button.setAttribute('aria-label', `Llave ${entry.symbol}`);
+    button.addEventListener('click', () => selectKey(entry.symbol));
     palette.append(button);
   }
 }
-
 function renderTools() {
   const activeKey = document.querySelector('#active-key');
   const scissors = document.querySelector('#scissors');
-  if (!activeKey || !scissors) {
+  if (activeKey === null || scissors === null) {
     return;
   }
-  activeKey.textContent = cutMode ? 'Herramienta: tijera' : `Llave activa: ${selectedKey}`;
-  scissors.classList.toggle('is-active', cutMode);
+  if (cutMode) {
+    activeKey.textContent = 'Herramienta: tijera';
+  } else {
+    activeKey.textContent = `Llave activa: ${selectedKey}`;
+  }
+  if (cutMode) {
+    scissors.classList.add('is-active');
+  } else {
+    scissors.classList.remove('is-active');
+  }
   scissors.setAttribute('aria-pressed', String(cutMode));
   for (const button of document.querySelectorAll('.key')) {
-    const active = !cutMode && button.dataset.key === selectedKey;
-    button.classList.toggle('is-active', active);
+    const active = cutMode === false && button.dataset.key === selectedKey;
+    if (active) {
+      button.classList.add('is-active');
+    } else {
+      button.classList.remove('is-active');
+    }
     button.setAttribute('aria-pressed', String(active));
   }
   const hint = document.querySelector('#tool-hint');
-  hint.textContent = cutMode
-    ? 'Tocá un cable para cortarlo. La tijera corta el cable completo.'
-    : 'Elegí una llave y tocá origen y destino para conectar.';
+  if (cutMode) {
+    hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
+  } else {
+    hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
+  }
 }
-
 function selectKey(key) {
   cutMode = false;
   selectedKey = key;
-  if (workshop) {
+  if (workshop !== null) {
     workshop.setSelectedKey(key);
   }
   renderTools();
 }
-
 function toggleScissors() {
-  cutMode = !cutMode;
-  if (!workshop) {
+  cutMode = cutMode === false;
+  if (workshop === null) {
     return;
   }
   if (cutMode) {
@@ -265,160 +282,304 @@ function toggleScissors() {
   }
   renderTools();
 }
-
-function connectTransition(source, target, symbol) {
-  const row = playerTransitions[source] ?? {};
-  playerTransitions[source] = row;
-  if (row[symbol] === target) {
-    appendLog(`Ese cable ya está puesto: ${source} → ${target}.`);
-    return;
+function cableKeys(from, to) {
+  const keys = [];
+  for (const wire of state.blueprint.wires) {
+    if (wire.from === from && wire.to === to && wire.spring !== true) {
+      keys.push(wire.key);
+    }
   }
-  if (symbol in row) {
-    const previous = row[symbol];
-    row[symbol] = target;
-    appendLog(`Moviste la llave ${symbol}: ${previous} → ${target}.`);
-    return;
-  }
-  row[symbol] = target;
-  appendLog(`Conectaste la llave ${symbol}: ${source} → ${target}.`);
+  return keys.join(',');
 }
-
-function cutWire(source, target) {
-  const row = playerTransitions[source] ?? {};
-  const symbols = Object.keys(row).filter(symbol => row[symbol] === target);
-  if (symbols.length === 0) {
+function previousTarget(from, key) {
+  const found = state.blueprint.wires.find((wire) => wire.from === from && wire.key === key && wire.spring !== true);
+  if (found === undefined) {
+    return null;
+  }
+  return found.to;
+}
+function handleConnect(from, to, key) {
+  const before = previousTarget(from, key);
+  const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'connect-wire', from, to, tool: { kind: 'key', key } });
+  if (result.effect === 'blocked') {
+    if (result.reason === 'needs-gear') {
+      appendLog('Ese cable necesita un engranaje para cerrar sobre la misma celda.', 'bad');
+    } else {
+      appendLog('Ese cable no se puede conectar sobre la misma celda.', 'bad');
+    }
     return;
   }
-  for (const symbol of symbols) {
-    delete row[symbol];
+  if (result.effect === 'kept') {
+    appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
+    return;
   }
-  appendLog(`Cortaste el cable ${symbols.join(',')}: ${source} → ${target}.`);
+  state.blueprint = result.blueprint;
+  workshop.setBlueprint(state.blueprint);
+  if (result.effect === 'moved') {
+    appendLog(`Moviste la llave ${key}: ${before} → ${to}.`);
+    return;
+  }
+  appendLog(`Conectaste la llave ${key}: ${from} → ${to}.`);
 }
-
-function renderLevel() {
-  playerTransitions = structuredClone(level1.initialTransitions);
-  selectedKey = level1.alphabet[0];
+function handleCut(from, to) {
+  const keys = cableKeys(from, to);
+  const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'cut-wire', from, to });
+  if (result.effect === 'kept') {
+    appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
+    return;
+  }
+  state.blueprint = result.blueprint;
+  workshop.setBlueprint(state.blueprint);
+  appendLog(`Cortaste el cable ${keys}: ${from} → ${to}.`);
+}
+function startLevel(id) {
+  state.level = getLevel(id);
+  state.phase = 'repair';
+  state.puzzle = state.level.phases.repair;
+  state.blueprint = structuredClone(state.puzzle.blueprint);
+  selectedKey = state.level.keys[0].symbol;
   cutMode = false;
-  app.innerHTML = `
-    <div class="game">
-      <header class="game-header">
-        <div>
-          <p class="eyebrow">El Cerrajero</p>
-          <h1>${level1.title}</h1>
-        </div>
-        <button id="back-button" class="ghost">Volver</button>
-      </header>
-      <main class="layout">
-        <aside class="panel brief">
-          <section class="contract" aria-label="Contrato del cliente">
-            <p class="contract-number">Contrato ${level1.contract}</p>
-            <h2 class="contract-client">${level1.client}</h2>
-            <p class="contract-rule">${level1.goal}</p>
-            <p class="contract-note">Cualquier otra combinación deja la alarma encendida.</p>
-          </section>
-          <h2>El encargo</h2>
-          <p>${level1.brief}</p>
-          <div class="legend">
-            <span><i class="legend-dot legend-start"></i>Entrada</span>
-            <span><i class="legend-dot legend-accept"></i>Cerrojo</span>
-            <span><i class="legend-dot legend-alarm"></i>Alarma implícita</span>
-          </div>
-          <h2>Llaves y herramientas</h2>
-          <div class="tools">
-            <div id="palette" class="palette"></div>
-            <button id="scissors" class="tool" type="button" aria-pressed="false" aria-label="Cortar cables">
-              <svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <circle cx="6" cy="6" r="3"></circle>
-                <circle cx="6" cy="18" r="3"></circle>
-                <line x1="20" y1="4" x2="8.12" y2="15.88"></line>
-                <line x1="14.47" y1="14.48" x2="20" y2="20"></line>
-                <line x1="8.12" y1="8.12" x2="12" y2="12"></line>
-              </svg>
-              <span>Cortar</span>
-            </button>
-          </div>
-          <p id="tool-hint" class="hint"></p>
-          <div class="actions">
-            <button id="test-key" class="secondary">Probar la llave</button>
-            <button id="heist" class="primary">Iniciar el asalto</button>
-          </div>
-        </aside>
-        <section class="panel workshop">
-          <div class="workshop-head">
-            <h2>Taller</h2>
-            <span id="active-key" class="active-key">Llave activa: ${selectedKey}</span>
-          </div>
-          <svg id="canvas" viewBox="0 0 820 520" role="img" aria-label="Mecanismo de la cerradura"></svg>
-        </section>
-        <aside class="panel log-panel">
-          <h2>Bitácora</h2>
-          <ul id="log" class="log" aria-live="polite" aria-label="Bitácora del taller"></ul>
-        </aside>
-      </main>
-    </div>
-  `;
-  document.querySelector('#back-button').addEventListener('click', renderMap);
-  renderPalette();
-  workshop = createGraphEditor({
-    svg: document.querySelector('#canvas'),
-    level: level1,
-    transitions: playerTransitions,
-    onConnect: connectTransition,
-    onCut: cutWire,
-  });
-  document.querySelector('#test-key').addEventListener('click', handleTestKey);
-  document.querySelector('#scissors').addEventListener('click', toggleScissors);
-  document.querySelector('#heist').addEventListener('click', handleHeist);
-  renderTools();
-  appendLog('El mecanismo está a medio armar.');
-  appendLog('Probá la llave legítima y después llamá al ladrón.');
+  renderWorkshop();
 }
-
-function handleTestKey() {
-  const player = buildPlayerDFA(level1, playerTransitions);
-  const result = testKey(player, level1.legitimateKey);
-  if (result.accepted) {
-    appendLog(`La llave ${level1.legitimateKey} abrió la caja.`, 'good');
-  } else {
-    appendLog(`La llave ${level1.legitimateKey} no abrió la caja.`, 'bad');
+function startBuild() {
+  state.phase = 'build';
+  state.puzzle = state.level.phases.build;
+  state.blueprint = structuredClone(state.puzzle.blueprint);
+  selectedKey = state.level.keys[0].symbol;
+  cutMode = false;
+  renderWorkshop();
+}
+function renderWorkshop() {
+  app.replaceChildren();
+  const shell = document.createElement('div');
+  shell.className = 'game';
+  const header = document.createElement('header');
+  header.className = 'game-header';
+  const headerText = document.createElement('div');
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'El Cerrajero';
+  const title = document.createElement('h1');
+  title.textContent = `Contrato ${state.level.contract} · ${phaseWord()}`;
+  headerText.append(eyebrow);
+  headerText.append(title);
+  const back = document.createElement('button');
+  back.id = 'back-button';
+  back.type = 'button';
+  back.className = 'ghost';
+  back.textContent = 'Volver';
+  back.addEventListener('click', renderMap);
+  header.append(headerText);
+  header.append(back);
+  const layout = document.createElement('main');
+  layout.className = 'layout';
+  const brief = document.createElement('aside');
+  brief.className = 'panel brief';
+  const contract = document.createElement('section');
+  contract.className = 'contract';
+  contract.setAttribute('aria-label', 'Contrato del cliente');
+  const number = document.createElement('p');
+  number.className = 'contract-number';
+  number.textContent = `Contrato ${state.level.contract}`;
+  const client = document.createElement('h2');
+  client.className = 'contract-client';
+  client.textContent = state.level.client;
+  const rule = document.createElement('p');
+  rule.className = 'contract-rule';
+  rule.textContent = state.puzzle.goal;
+  const note = document.createElement('p');
+  note.className = 'contract-note';
+  note.textContent = 'Cualquier otra combinación deja la alarma encendida.';
+  contract.append(number);
+  contract.append(client);
+  contract.append(rule);
+  contract.append(note);
+  const briefTitle = document.createElement('h2');
+  briefTitle.textContent = 'El encargo';
+  const intro = document.createElement('p');
+  intro.textContent = state.puzzle.intro;
+  const legend = document.createElement('div');
+  legend.className = 'legend';
+  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
+    const entry = document.createElement('span');
+    const icon = document.createElement('i');
+    icon.className = `legend-dot ${dot}`;
+    entry.append(icon);
+    entry.append(word);
+    legend.append(entry);
   }
-  workshop.highlight(result.trace);
+  const toolsTitle = document.createElement('h2');
+  toolsTitle.textContent = 'Llaves y herramientas';
+  const tools = document.createElement('div');
+  tools.className = 'tools';
+  const palette = document.createElement('div');
+  palette.id = 'palette';
+  palette.className = 'palette';
+  const scissors = document.createElement('button');
+  scissors.id = 'scissors';
+  scissors.type = 'button';
+  scissors.className = 'tool';
+  scissors.setAttribute('aria-pressed', 'false');
+  scissors.setAttribute('aria-label', 'Cortar cables');
+  scissors.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>';
+  const scissorsLabel = document.createElement('span');
+  scissorsLabel.textContent = 'Cortar';
+  scissors.append(scissorsLabel);
+  tools.append(palette);
+  tools.append(scissors);
+  const hint = document.createElement('p');
+  hint.id = 'tool-hint';
+  hint.className = 'hint';
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const probe = document.createElement('button');
+  probe.id = 'test-key';
+  probe.type = 'button';
+  probe.className = 'secondary';
+  probe.textContent = 'Probar la llave';
+  const assault = document.createElement('button');
+  assault.id = 'heist';
+  assault.type = 'button';
+  assault.className = 'primary';
+  if (state.phase === 'repair') {
+    assault.textContent = 'Ensayo';
+  } else {
+    assault.textContent = 'Asalto';
+  }
+  actions.append(probe);
+  actions.append(assault);
+  brief.append(contract);
+  brief.append(briefTitle);
+  brief.append(intro);
+  brief.append(legend);
+  brief.append(toolsTitle);
+  brief.append(tools);
+  brief.append(hint);
+  brief.append(actions);
+  const shop = document.createElement('section');
+  shop.className = 'panel workshop';
+  const shopHead = document.createElement('div');
+  shopHead.className = 'workshop-head';
+  const shopTitle = document.createElement('h2');
+  shopTitle.textContent = 'Taller';
+  const active = document.createElement('span');
+  active.id = 'active-key';
+  active.className = 'active-key';
+  active.textContent = `Llave activa: ${selectedKey}`;
+  shopHead.append(shopTitle);
+  shopHead.append(active);
+  const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  canvas.id = 'canvas';
+  canvas.setAttribute('viewBox', '0 0 820 520');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
+  shop.append(shopHead);
+  shop.append(canvas);
+  const logPanel = document.createElement('aside');
+  logPanel.className = 'panel log-panel';
+  const logTitle = document.createElement('h2');
+  logTitle.textContent = 'Bitácora';
+  const log = document.createElement('ul');
+  log.id = 'log';
+  log.className = 'log';
+  log.setAttribute('aria-live', 'polite');
+  log.setAttribute('aria-label', 'Bitácora del taller');
+  logPanel.append(logTitle);
+  logPanel.append(log);
+  layout.append(brief);
+  layout.append(shop);
+  layout.append(logPanel);
+  shell.append(header);
+  shell.append(layout);
+  app.append(shell);
+  renderPalette();
+  workshop = createGraphEditor({ svg: document.querySelector('#canvas'), cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, onConnect: handleConnect, onCut: handleCut });
+  document.querySelector('#test-key').addEventListener('click', handleProbe);
+  document.querySelector('#scissors').addEventListener('click', toggleScissors);
+  document.querySelector('#heist').addEventListener('click', handleAssault);
+  renderTools();
+  appendLog(state.puzzle.intro);
+  if (state.phase === 'repair') {
+    appendLog('Probá la llave y después pedí el ensayo.');
+  } else {
+    appendLog('Probá la llave y después lanzá el asalto.');
+  }
 }
-
-function handleHeist() {
-  const player = buildPlayerDFA(level1, playerTransitions);
-  const result = runHeist(player, level1.target);
-  const report = thiefReport(result, level1);
+function handleProbe() {
+  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
+  const word = state.puzzle.examples.open[0];
+  const result = runDFA(machine, word, { record: true });
+  if (result.accepted) {
+    appendLog(`La llave ${word} abrió la caja.`, 'good');
+  } else {
+    appendLog(`La llave ${word} no abrió la caja.`, 'bad');
+  }
+  workshop.highlight(result.frames.map((frame) => frame.state));
+}
+function handleAssault() {
+  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
+  const verdict = judge(state.puzzle, machine);
+  const report = thiefReport(verdict, state.level);
   appendLog(report.text, report.tone);
-  if (!result.escaped) {
+  if (verdict.correct) {
     workshop.clearHighlight();
-    showWin();
+    if (state.phase === 'repair' && state.level.phases.build !== undefined) {
+      showRepairModal();
+    } else {
+      showWin();
+    }
     return;
   }
-  workshop.highlight(testKey(player, result.counterexample).trace);
-}
-
-function showWin() {
-  const progress = loadProgress();
-  if (!progress.completed.includes(level1.id)) {
-    progress.completed.push(level1.id);
-    saveProgress(progress);
+  if (verdict.counterexample !== null) {
+    const replay = runDFA(machine, verdict.counterexample, { record: true });
+    workshop.highlight(replay.frames.map((frame) => frame.state));
   }
+}
+function openModal(eyebrow, title, body, actionLabel, onAction) {
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop';
-  backdrop.innerHTML = `
-    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="win-title">
-      <p class="eyebrow">Contrato 01</p>
-      <h2 id="win-title">Bóveda asegurada</h2>
-      <p>El ladrón se rindió. El banco ya puede dormir.</p>
-      <button id="modal-home" class="primary">Volver al inicio</button>
-    </section>
-  `;
-  document.body.append(backdrop);
-  document.querySelector('#modal-home').addEventListener('click', () => {
+  const modal = document.createElement('section');
+  modal.className = 'modal';
+  modal.setAttribute('role', 'dialog');
+  modal.setAttribute('aria-modal', 'true');
+  const brow = document.createElement('p');
+  brow.className = 'eyebrow';
+  brow.textContent = eyebrow;
+  const heading = document.createElement('h2');
+  heading.textContent = title;
+  const text = document.createElement('p');
+  text.textContent = body;
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'primary';
+  button.textContent = actionLabel;
+  button.addEventListener('click', () => {
     backdrop.remove();
-    renderMap();
+    onAction();
   });
+  modal.append(brow);
+  modal.append(heading);
+  modal.append(text);
+  modal.append(button);
+  backdrop.append(modal);
+  backdrop.tabIndex = -1;
+  backdrop.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      backdrop.remove();
+    }
+  });
+  document.body.append(backdrop);
+  button.focus();
 }
-
+function showRepairModal() {
+  openModal(`Contrato ${state.level.contract}`, 'Mecanismo reparado', state.level.phases.build.goal, 'Construir el nuevo', startBuild);
+}
+function showWin() {
+  const progress = loadProgress();
+  if (progress.completed.includes(state.level.id) === false) {
+    progress.completed.push(state.level.id);
+    saveProgress(progress);
+  }
+  openModal(`Contrato ${state.level.contract}`, 'Bóveda asegurada', state.level.thief.giveUp, 'Volver al mapa', renderMap);
+}
 renderTitle();
