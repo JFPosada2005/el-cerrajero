@@ -185,7 +185,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Incluye:**
 
-- Mapa de contratos con desbloqueo.
+- [x] Mapa de contratos con desbloqueo, candados y jefe con corona.
 - Persistencia de progreso por nivel.
 - Transiciones y feedback visual.
 - Sonido opcional o feedback háptico visual.

@@ -680,3 +680,148 @@ button:active {
     scroll-behavior: auto !important;
   }
 }
+
+.map-screen {
+  max-width: 980px;
+}
+
+.map-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: var(--space-4);
+  width: 100%;
+}
+
+.level-card {
+  background: linear-gradient(180deg, var(--panel-2), var(--panel));
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  justify-items: start;
+  align-content: start;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transition:
+    transform var(--duration-fast) var(--ease-out),
+    border-color var(--duration-fast) var(--ease-out);
+}
+
+.level-card.is-available {
+  border-color: var(--brass);
+}
+
+.level-card.is-completed {
+  border-color: var(--brass);
+}
+
+.level-card.is-locked {
+  opacity: 0.6;
+}
+
+.level-card[data-boss="true"] {
+  border-color: var(--violet);
+}
+
+.level-card.is-available:hover {
+  transform: translateY(-2px);
+}
+
+.level-card.is-completed:hover {
+  transform: translateY(-2px);
+}
+
+.level-medallion {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--brass);
+  border-radius: var(--radius-pill);
+  color: var(--brass-2);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1rem;
+}
+
+.level-card.is-locked .level-medallion {
+  border-color: var(--line);
+  color: var(--muted);
+}
+
+.level-card[data-boss="true"] .level-medallion {
+  border-color: var(--violet);
+  color: var(--violet);
+}
+
+.level-contract {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-title {
+  margin: 0;
+  color: var(--ink);
+  font-size: 1.25rem;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.level-client {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.boss-label {
+  margin: 0;
+  color: var(--violet);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-status {
+  display: flex;
+  width: 100%;
+  margin-top: var(--space-2);
+}
+
+.level-status button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.level-card.is-available .level-status button {
+  border-color: var(--brass);
+}
+
+.level-card.is-completed .level-status button {
+  border-color: var(--brass);
+  color: var(--brass-2);
+}
+
+.level-status button:disabled {
+  cursor: not-allowed;
+  color: var(--muted);
+}
+
+.level-status button:not(:disabled):hover {
+  border-color: var(--brass-2);
+  transform: translateY(-1px);
+}
+
+.map-note {
+  min-height: 1.5em;
+  color: var(--muted);
+  font-size: 0.9rem;
+}

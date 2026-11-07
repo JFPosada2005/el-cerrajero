@@ -219,3 +219,13 @@ User: "me parece bien, ya funciona todas estas opciones bien, cual es el siguien
 - T2 closes: the owner verified connect, cut with scissors, keyboard and the contract card in the browser.
 - 33 tests passing. Commit `04be402`.
 - Next: freeze F1 (`symbols`, `limits`, `order`, `runDFA`, stricter `validateDFA`), delegated to the worker.
+
+### L20 — Level map selector and first demo push (2026-11-06)
+
+User: "dejemos un selector de niveles antes de ir a alguno en especifico, que los bloqueados aparezcan con un candado y se vayan desbloqueando a medida que se pasa al siguiente nivel, que el nivel del jefe tenga otro simbolo que represente que va a ser mas complicado. has push con este primer demo con 1 nivel como completado por el momento"
+
+- F1 freeze landed: `symbols.js`, `limits.js`, `order.js`, `runDFA` frames, stricter `validateDFA`. 64 tests after the map.
+- `src/game/catalog.js`: 5 contracts, `levelStatus` (completed / available / locked).
+- Map screen: 5 cards, padlock on locked, key on available, check on completed, crown + "Jefe final" on level 5. Locked cards are disabled buttons; unlocked-but-unimplemented levels show a polite note.
+- Only level 1 is playable; the other cards unlock visually as the previous contract is completed.
+- The owner explicitly authorized the push of this first demo with one completed level.

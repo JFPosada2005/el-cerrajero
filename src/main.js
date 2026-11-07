@@ -1,3 +1,4 @@
+import { LEVELS, levelStatus } from './game/catalog.js';
 import { level1 } from './game/level1.js';
 import { buildPlayerDFA, runHeist, testKey } from './game/rules.js';
 import { thiefReport } from './game/thief.js';
@@ -10,6 +11,93 @@ let playerTransitions = structuredClone(level1.initialTransitions);
 let workshop = null;
 let selectedKey = level1.alphabet[0];
 let cutMode = false;
+
+const ICON_LOCK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
+const ICON_KEY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="16" r="4"></circle><path d="M11 13 20 4"></path><path d="M16 8l3 3"></path><path d="M13.5 10.5l2.5 2.5"></path></svg>';
+const ICON_CHECK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>';
+const ICON_CROWN = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3L12 5l5.5 6L21 8l-1.6 10H4.6L3 8z"></path><path d="M5 21h14"></path></svg>';
+
+function statusWord(status) {
+  if (status === 'completed') {
+    return 'Completado';
+  }
+  if (status === 'available') {
+    return 'Disponible';
+  }
+  return 'Bloqueado';
+}
+
+function statusIcon(status) {
+  if (status === 'completed') {
+    return ICON_CHECK;
+  }
+  if (status === 'available') {
+    return ICON_KEY;
+  }
+  return ICON_LOCK;
+}
+
+function handleLevelOpen(level) {
+  if (level.playable) {
+    renderLevel();
+    return;
+  }
+  const note = document.querySelector('#map-note');
+  note.textContent = `El contrato ${level.contract} todavía está en preparación.`;
+}
+
+function buildLevelCard(level, progress) {
+  const status = levelStatus(level, progress);
+  const card = document.createElement('article');
+  card.className = `level-card is-${status}`;
+  card.setAttribute('role', 'listitem');
+  if (level.boss) {
+    card.setAttribute('data-boss', 'true');
+  }
+  const medallion = document.createElement('div');
+  medallion.className = 'level-medallion';
+  if (level.boss) {
+    medallion.innerHTML = ICON_CROWN;
+  } else {
+    medallion.textContent = level.contract;
+  }
+  const contract = document.createElement('p');
+  contract.className = 'level-contract';
+  contract.textContent = `Contrato ${level.contract}`;
+  const heading = document.createElement('h2');
+  heading.className = 'level-title';
+  heading.textContent = level.title;
+  const client = document.createElement('p');
+  client.className = 'level-client';
+  client.textContent = level.client;
+  card.append(medallion);
+  card.append(contract);
+  card.append(heading);
+  card.append(client);
+  if (level.boss) {
+    const bossLabel = document.createElement('p');
+    bossLabel.className = 'boss-label';
+    bossLabel.textContent = 'Jefe final';
+    card.append(bossLabel);
+  }
+  const statusRow = document.createElement('div');
+  statusRow.className = 'level-status';
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.innerHTML = statusIcon(status);
+  const label = document.createElement('span');
+  label.textContent = statusWord(status);
+  button.append(label);
+  button.setAttribute('aria-label', `Contrato ${level.contract}: ${level.title}, ${statusWord(status)}`);
+  if (status === 'locked') {
+    button.disabled = true;
+  } else {
+    button.addEventListener('click', () => handleLevelOpen(level));
+  }
+  statusRow.append(button);
+  card.append(statusRow);
+  return card;
+}
 
 function loadProgress() {
   try {
@@ -46,19 +134,37 @@ function appendLog(message, tone = '') {
 
 function renderStart() {
   const progress = loadProgress();
-  app.innerHTML = `
-    <main class="start">
-      <p class="eyebrow">Proyecto final</p>
-      <h1>El Cerrajero</h1>
-      <p class="lead">Sos el mejor cerrajero de la ciudad. Cada bóveda es un mecanismo; cada mecanismo, un secreto. El ladrón ya está afuera.</p>
-      <section class="start-card">
-        <p>Cinco contratos. Cinco mecanismos. Una regla: la bóveda abre solo para la llave correcta.</p>
-        <button id="start-button" class="primary">Aceptar el contrato</button>
-      </section>
-      <p class="progress">Contratos completados: ${progress.completed.length} / 5 · build 4</p>
-    </main>
-  `;
-  document.querySelector('#start-button').addEventListener('click', renderLevel);
+  app.replaceChildren();
+  const main = document.createElement('main');
+  main.className = 'start map-screen';
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'Proyecto final';
+  const title = document.createElement('h1');
+  title.textContent = 'El Cerrajero';
+  const lead = document.createElement('p');
+  lead.className = 'lead';
+  lead.textContent = 'Sos el mejor cerrajero de la ciudad. Cada bóveda es un mecanismo; cada mecanismo, un secreto. El ladrón ya está afuera.';
+  const grid = document.createElement('div');
+  grid.className = 'map-grid';
+  grid.setAttribute('role', 'list');
+  for (const level of LEVELS) {
+    grid.append(buildLevelCard(level, progress));
+  }
+  const note = document.createElement('p');
+  note.id = 'map-note';
+  note.className = 'map-note';
+  note.setAttribute('aria-live', 'polite');
+  const progressLine = document.createElement('p');
+  progressLine.className = 'progress';
+  progressLine.textContent = `Contratos completados: ${progress.completed.length} / 5 · build 4`;
+  main.append(eyebrow);
+  main.append(title);
+  main.append(lead);
+  main.append(grid);
+  main.append(note);
+  main.append(progressLine);
+  app.append(main);
 }
 
 function renderPalette() {

@@ -16,6 +16,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - minimización por refinamiento de particiones;
   - equivalencia por BFS del producto;
   - contraejemplo más corto.
+- **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
 - Nivel 1:
   - taller SVG con 4 celdas y **un cable por par de celdas**, con todos sus valores en una etiqueta;
   - mecanismo inicial **incompleto**: falta un cable y sobran dos;
@@ -24,7 +25,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - prueba de la llave legítima `123`;
   - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
   - modal de victoria y persistencia en `localStorage`.
-- Tests: **33 pasando** con `node --test`, incluido un test de DOM del editor.
+- Tests: **64 pasando** con `node --test`, incluido un test de DOM del editor.
 
 ## Qué está en revisión
 
@@ -38,25 +39,29 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **D6 aprobado:** el nivel 3 usa “contiene 1-2-2 o 2-1-1”, para que el bifurcador sea necesario.
 - **Addendum visual:** [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md) con la dirección “precisión noir”, tokens, tipografía Fraunces + Inter, motion, accesibilidad y checklist “no retro”.
 - **Investigación visual adicional integrada:** reflow 320 px, foco no obscurecido por sticky, alternativa a drag, View Transitions progresiva, textura estática y tamaños de librerías corregidos.
-- Los contratos se congelan con F1-F5.
+- **F1 congelado:** `symbols`, `limits`, `order`, `runDFA` con frames y `validateDFA` estricto. F2-F5 en curso.
 
 ## Qué sigue
 
-1. Congelar interfaces (F1-F5) y aplicar la base visual.
+1. **F1 hecho.** Sigue F2 (blueprint, machines, juez exacto, format, thief), F3 (levels + build de L1), F4 (flow, progress) y F5 (main data-driven).
 2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
-4. Implementar T3 (nivel 2) y T4 (AFND) en ramas separadas.
+4. Implementar T3 (nivel 2) y T4 (AFND) sobre contratos congelados.
 5. Implementar T5 (AP) y T6 (MT).
-6. Pulido T7 y informe T8.
+6. Remaster visual (animaciones, texturas, sonido) recién cuando los 5 niveles funcionen.
+7. Pulido T7 e informe T8.
 
 ## Tests
 
 ```text
-tests/dfa.test.js       12 passing
+tests/dfa.test.js       23 passing
+tests/order.test.js      5 passing
+tests/limits.test.js     4 passing
 tests/level1.test.js     8 passing
 tests/thief.test.js      5 passing
 tests/graphEditor.test.js   8 passing
-total                   33 passing
+tests/catalog.test.js   11 passing
+total                   64 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).
