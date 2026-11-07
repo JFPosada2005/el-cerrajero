@@ -16,6 +16,7 @@ const ICON_LOCK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="
 const ICON_KEY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="16" r="4"></circle><path d="M11 13 20 4"></path><path d="M16 8l3 3"></path><path d="M13.5 10.5l2.5 2.5"></path></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>';
 const ICON_CROWN = '<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8l3.5 3L12 5l5.5 6L21 8l-1.6 10H4.6L3 8z"></path><path d="M5 21h14"></path></svg>';
+const ICON_PLAY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l14 8-14 8z"></path></svg>';
 
 function statusWord(status) {
   if (status === 'completed') {
@@ -132,11 +133,11 @@ function appendLog(message, tone = '') {
   log.scrollTop = log.scrollHeight;
 }
 
-function renderStart() {
+function renderTitle() {
   const progress = loadProgress();
   app.replaceChildren();
   const main = document.createElement('main');
-  main.className = 'start map-screen';
+  main.className = 'start title-screen';
   const eyebrow = document.createElement('p');
   eyebrow.className = 'eyebrow';
   eyebrow.textContent = 'Proyecto final';
@@ -145,11 +146,54 @@ function renderStart() {
   const lead = document.createElement('p');
   lead.className = 'lead';
   lead.textContent = 'Sos el mejor cerrajero de la ciudad. Cada bóveda es un mecanismo; cada mecanismo, un secreto. El ladrón ya está afuera.';
-  const grid = document.createElement('div');
-  grid.className = 'map-grid';
-  grid.setAttribute('role', 'list');
+  const button = document.createElement('button');
+  button.id = 'play-button';
+  button.type = 'button';
+  button.className = 'primary';
+  button.innerHTML = ICON_PLAY;
+  const label = document.createElement('span');
+  label.textContent = 'Jugar';
+  button.append(label);
+  button.addEventListener('click', renderMap);
+  const progressLine = document.createElement('p');
+  progressLine.className = 'progress';
+  progressLine.textContent = `Contratos completados: ${progress.completed.length} / 5 · build 4`;
+  main.append(eyebrow);
+  main.append(title);
+  main.append(lead);
+  main.append(button);
+  main.append(progressLine);
+  app.append(main);
+}
+
+function renderMap() {
+  const progress = loadProgress();
+  app.replaceChildren();
+  const main = document.createElement('main');
+  main.className = 'start map-screen';
+  const head = document.createElement('div');
+  head.className = 'map-head';
+  const headText = document.createElement('div');
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'Contratos';
+  const title = document.createElement('h1');
+  title.textContent = 'Elegí un contrato';
+  headText.append(eyebrow);
+  headText.append(title);
+  const back = document.createElement('button');
+  back.id = 'map-back';
+  back.type = 'button';
+  back.className = 'ghost';
+  back.textContent = 'Volver';
+  back.addEventListener('click', renderTitle);
+  head.append(headText);
+  head.append(back);
+  const strip = document.createElement('div');
+  strip.className = 'map-strip';
+  strip.setAttribute('role', 'list');
   for (const level of LEVELS) {
-    grid.append(buildLevelCard(level, progress));
+    strip.append(buildLevelCard(level, progress));
   }
   const note = document.createElement('p');
   note.id = 'map-note';
@@ -158,10 +202,8 @@ function renderStart() {
   const progressLine = document.createElement('p');
   progressLine.className = 'progress';
   progressLine.textContent = `Contratos completados: ${progress.completed.length} / 5 · build 4`;
-  main.append(eyebrow);
-  main.append(title);
-  main.append(lead);
-  main.append(grid);
+  main.append(head);
+  main.append(strip);
   main.append(note);
   main.append(progressLine);
   app.append(main);
@@ -315,7 +357,7 @@ function renderLevel() {
       </main>
     </div>
   `;
-  document.querySelector('#back-button').addEventListener('click', renderStart);
+  document.querySelector('#back-button').addEventListener('click', renderMap);
   renderPalette();
   workshop = createGraphEditor({
     svg: document.querySelector('#canvas'),
@@ -375,8 +417,8 @@ function showWin() {
   document.body.append(backdrop);
   document.querySelector('#modal-home').addEventListener('click', () => {
     backdrop.remove();
-    renderStart();
+    renderMap();
   });
 }
 
-renderStart();
+renderTitle();

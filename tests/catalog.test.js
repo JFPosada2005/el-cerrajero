@@ -7,6 +7,10 @@ test('the catalog holds five contracts in order', () => {
   assert.deepEqual(LEVELS.map((level) => level.contract), ['01', '02', '03', '04', '05']);
 });
 
+test('the strip renders contracts left to right in order', () => {
+  assert.deepEqual(LEVELS.map((level) => level.id), [1, 2, 3, 4, 5]);
+});
+
 test('only the fifth contract is the final boss', () => {
   const bosses = LEVELS.filter((level) => level.boss);
   assert.equal(bosses.length, 1);
