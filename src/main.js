@@ -3,6 +3,7 @@ import { getLevel } from './game/levels.js';
 import { applyEdit } from './game/blueprint.js';
 import { toMachine } from './game/machines.js';
 import { runDFA } from './core/dfa.js';
+import { runNFA } from './core/nfa.js';
 import { judge } from './game/judge.js';
 import { thiefReport } from './game/thief.js';
 import { createGraphEditor } from './ui/graphEditor.js';
@@ -12,6 +13,7 @@ const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
 let selectedKey = null;
 let cutMode = false;
+let springMode = false;
 const ICON_LOCK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="11" width="14" height="9" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>';
 const ICON_KEY = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="16" r="4"></circle><path d="M11 13 20 4"></path><path d="M16 8l3 3"></path><path d="M13.5 10.5l2.5 2.5"></path></svg>';
 const ICON_CHECK = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12.5l5 5L20 6.5"></path></svg>';
@@ -237,6 +239,8 @@ function renderTools() {
   }
   if (cutMode) {
     activeKey.textContent = 'Herramienta: tijera';
+  } else if (springMode) {
+    activeKey.textContent = 'Herramienta: resorte';
   } else {
     activeKey.textContent = `Llave activa: ${selectedKey}`;
   }
@@ -246,8 +250,17 @@ function renderTools() {
     scissors.classList.remove('is-active');
   }
   scissors.setAttribute('aria-pressed', String(cutMode));
+  const spring = document.querySelector('#spring-tool');
+  if (spring !== null) {
+    if (springMode) {
+      spring.classList.add('is-active');
+    } else {
+      spring.classList.remove('is-active');
+    }
+    spring.setAttribute('aria-pressed', String(springMode));
+  }
   for (const button of document.querySelectorAll('.key')) {
-    const active = cutMode === false && button.dataset.key === selectedKey;
+    const active = cutMode === false && springMode === false && button.dataset.key === selectedKey;
     if (active) {
       button.classList.add('is-active');
     } else {
@@ -258,12 +271,15 @@ function renderTools() {
   const hint = document.querySelector('#tool-hint');
   if (cutMode) {
     hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
+  } else if (springMode) {
+    hint.textContent = 'Tocá origen y destino para tender un resorte.';
   } else {
     hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
   }
 }
 function selectKey(key) {
   cutMode = false;
+  springMode = false;
   selectedKey = key;
   if (workshop !== null) {
     workshop.setSelectedKey(key);
@@ -272,11 +288,25 @@ function selectKey(key) {
 }
 function toggleScissors() {
   cutMode = cutMode === false;
+  springMode = false;
   if (workshop === null) {
     return;
   }
   if (cutMode) {
     workshop.setCutting();
+  } else {
+    workshop.setSelectedKey(selectedKey);
+  }
+  renderTools();
+}
+function toggleSpring() {
+  springMode = springMode === false;
+  cutMode = false;
+  if (workshop === null) {
+    return;
+  }
+  if (springMode) {
+    workshop.setSpring();
   } else {
     workshop.setSelectedKey(selectedKey);
   }
@@ -298,23 +328,34 @@ function previousTarget(from, key) {
   }
   return found.to;
 }
-function handleConnect(from, to, key) {
-  const before = previousTarget(from, key);
-  const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'connect-wire', from, to, tool: { kind: 'key', key } });
+function handleConnect(from, to, tool) {
+  const key = tool.kind === 'spring' ? null : tool.key;
+  const before = tool.kind === 'spring' ? null : previousTarget(from, tool.key);
+  const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'connect-wire', from, to, tool });
   if (result.effect === 'blocked') {
     if (result.reason === 'needs-gear') {
       appendLog('Ese cable necesita un engranaje para cerrar sobre la misma celda.', 'bad');
+    } else if (result.reason === 'spring-loop') {
+      appendLog('Ese resorte no se puede tender sobre la misma celda.', 'bad');
     } else {
       appendLog('Ese cable no se puede conectar sobre la misma celda.', 'bad');
     }
     return;
   }
   if (result.effect === 'kept') {
-    appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
+    if (tool.kind === 'spring') {
+      appendLog(`Ese resorte ya está puesto: ${from} → ${to}.`);
+    } else {
+      appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
+    }
     return;
   }
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
+  if (tool.kind === 'spring') {
+    appendLog(`Tendiste un resorte: ${from} → ${to}.`);
+    return;
+  }
   if (result.effect === 'moved') {
     appendLog(`Moviste la llave ${key}: ${before} → ${to}.`);
     return;
@@ -330,6 +371,10 @@ function handleCut(from, to) {
   }
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
+  if (keys === '') {
+    appendLog(`Cortaste el resorte: ${from} → ${to}.`);
+    return;
+  }
   appendLog(`Cortaste el cable ${keys}: ${from} → ${to}.`);
 }
 function startLevel(id) {
@@ -339,6 +384,7 @@ function startLevel(id) {
   state.blueprint = structuredClone(state.puzzle.blueprint);
   selectedKey = state.level.keys[0].symbol;
   cutMode = false;
+  springMode = false;
   renderWorkshop();
 }
 function startBuild() {
@@ -347,6 +393,7 @@ function startBuild() {
   state.blueprint = structuredClone(state.puzzle.blueprint);
   selectedKey = state.level.keys[0].symbol;
   cutMode = false;
+  springMode = false;
   renderWorkshop();
 }
 function renderWorkshop() {
@@ -427,6 +474,20 @@ function renderWorkshop() {
   scissors.append(scissorsLabel);
   tools.append(palette);
   tools.append(scissors);
+  if (state.level.parts.includes('spring')) {
+    const spring = document.createElement('button');
+    spring.id = 'spring-tool';
+    spring.type = 'button';
+    spring.className = 'tool';
+    spring.setAttribute('aria-pressed', 'false');
+    spring.setAttribute('aria-label', 'Tender resortes');
+    spring.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-6 3 12 3-12 3 12 3-12 3 6"></path></svg>';
+    const springLabel = document.createElement('span');
+    springLabel.textContent = 'Resorte';
+    spring.append(springLabel);
+    spring.addEventListener('click', toggleSpring);
+    tools.append(spring);
+  }
   const hint = document.createElement('p');
   hint.id = 'tool-hint';
   hint.className = 'hint';
@@ -505,16 +566,28 @@ function renderWorkshop() {
     appendLog('Probá la llave y después lanzá el asalto.');
   }
 }
+function runMachine(machine, word, options) {
+  if (machine.type === 'nfa') {
+    return runNFA(machine, word, options);
+  }
+  return runDFA(machine, word, options);
+}
+function frameStates(frames) {
+  if (Array.isArray(frames[0]?.active)) {
+    return frames.flatMap((frame) => frame.active);
+  }
+  return frames.map((frame) => frame.state);
+}
 function handleProbe() {
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
   const word = state.puzzle.examples.open[0];
-  const result = runDFA(machine, word, { record: true });
+  const result = runMachine(machine, word, { record: true });
   if (result.accepted) {
     appendLog(`La llave ${word} abrió la caja.`, 'good');
   } else {
     appendLog(`La llave ${word} no abrió la caja.`, 'bad');
   }
-  workshop.highlight(result.frames.map((frame) => frame.state));
+  workshop.highlight(frameStates(result.frames));
 }
 function handleAssault() {
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
@@ -531,8 +604,8 @@ function handleAssault() {
     return;
   }
   if (verdict.counterexample !== null) {
-    const replay = runDFA(machine, verdict.counterexample, { record: true });
-    workshop.highlight(replay.frames.map((frame) => frame.state));
+    const replay = runMachine(machine, verdict.counterexample, { record: true });
+    workshop.highlight(frameStates(replay.frames));
   }
 }
 function openModal(eyebrow, title, body, actionLabel, onAction) {

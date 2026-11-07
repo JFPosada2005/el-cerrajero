@@ -72,14 +72,14 @@ test('clicking two cells connects them with the active key', () => {
   const { svg, calls } = setup();
   byLabel(collect(svg.children, 'state'), 'Entrada').fire('click');
   byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
-  assert.deepEqual(calls.connect, [['q0', 'q1', '1']]);
+  assert.deepEqual(calls.connect, [['q0', 'q1', { kind: 'key', key: '1' }]]);
 });
 test('the active key reaches the editor', () => {
   const { svg, editor, calls } = setup();
   editor.setSelectedKey('2');
   byLabel(collect(svg.children, 'state'), 'Entrada').fire('click');
   byLabel(collect(svg.children, 'state'), 'Celda 2').fire('click');
-  assert.deepEqual(calls.connect, [['q0', 'q2', '2']]);
+  assert.deepEqual(calls.connect, [['q0', 'q2', { kind: 'key', key: '2' }]]);
 });
 test('wires are inert until the scissors tool is active', () => {
   const { svg, calls } = setup();
@@ -132,7 +132,7 @@ test('Escape cancels a pending cell', () => {
   svg.fire('keydown', { key: 'Escape' });
   byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
   byLabel(collect(svg.children, 'state'), 'Celda 2').fire('click');
-  assert.deepEqual(calls.connect, [['q1', 'q2', '1']]);
+  assert.deepEqual(calls.connect, [['q1', 'q2', { kind: 'key', key: '1' }]]);
 });
 test('a cable with several keys is drawn once with all its labels', () => {
   const { svg } = setup(multiKeyWires());
@@ -154,4 +154,29 @@ test('setBlueprint replaces the cables and re-renders', () => {
   assert.equal(collect(svg.children, 'wire').length, 0);
   editor.setBlueprint({ wires: multiKeyWires() });
   assert.equal(collect(svg.children, 'wire').length, 2);
+});
+test('a spring is drawn dashed with no label', () => {
+  const springCells = [{ id: 'e', label: 'Entrada', x: 100, y: 260 }, { id: 'w', label: 'Espera', x: 280, y: 260 }];
+  const svg = element('svg');
+  createGraphEditor({ svg, cells: springCells, alphabet, blueprint: { wires: [{ from: 'e', to: 'w', spring: true }] }, onConnect: () => {}, onCut: () => {} });
+  const edges = collect(svg.children, 'edge');
+  assert.equal(edges.length, 1);
+  assert.ok(edges[0].attributes.class.split(' ').includes('edge'));
+  assert.ok(edges[0].attributes.class.split(' ').includes('is-spring'));
+  assert.equal(collect(svg.children, 'edge-label').length, 0);
+});
+test('the spring tool connects with a spring payload', () => {
+  const { svg, editor, calls } = setup();
+  editor.setSpring();
+  byLabel(collect(svg.children, 'state'), 'Entrada').fire('click');
+  byLabel(collect(svg.children, 'state'), 'Celda 1').fire('click');
+  assert.deepEqual(calls.connect, [['q0', 'q1', { kind: 'spring' }]]);
+});
+test('the cut label names a spring as a resorte', () => {
+  const svg = element('svg');
+  const editor = createGraphEditor({ svg, cells, alphabet, blueprint: { wires: [{ from: 'q0', to: 'q1', spring: true }] }, onConnect: () => {}, onCut: () => {} });
+  editor.setCutting();
+  const wires = collect(svg.children, 'wire');
+  assert.equal(wires.length, 1);
+  assert.equal(wires[0].attributes['aria-label'], 'Cortar resorte: Entrada a Celda 1');
 });

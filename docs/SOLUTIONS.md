@@ -59,10 +59,37 @@ Abierta —2→ Abierta
 - `Cerrojo —1→ Espera`
 - `Cerrojo —2→ Atenta`
 
-## Niveles 3-5
+## Nivel 3 — El museo (AFND con épsilon)
+
+### Reparación: abre si la secuencia contiene `1-2-2`
+
+- Conectar `Espera —1→ Espera` (auto-lazo; con el `Espera —1→ Día 1` que ya está puesto crea el bifurcador).
+
+Resultado:
+
+```text
+Entrada —resorte→ Espera
+Espera —1→ Espera
+Espera —1→ Día 1
+Espera —2→ Espera
+Día 1 —2→ Día 2
+Día 2 —2→ Cerrojo
+```
+
+### Construcción: abre si la secuencia contiene `1-2-2` o `2-1-1`
+
+Sin romper la rama de día, agregar:
+
+- `Entrada —resorte→ Noche`
+- `Noche —1→ Noche`
+- `Noche —2→ Noche`
+- `Noche —2→ Noche 1`
+- `Noche 1 —1→ Noche 2`
+- `Noche 2 —1→ Cerrojo`
+
+## Niveles 4-5
 
 Pendientes de implementación. Este documento se completa cuando cada nivel esté jugable.
 
-- **Nivel 3:** AFND con épsilon (bifurcador + resorte).
 - **Nivel 4:** AP con pila (giros balanceados / `A^n B^n`).
 - **Nivel 5:** MT (incremento y suma binaria).

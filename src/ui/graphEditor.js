@@ -43,11 +43,12 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
   function wireGroups() {
     const groups = new Map();
     for (const wire of current.wires) {
-      const key = `${wire.from}\u0000${wire.to}`;
+      const spring = wire.spring === true;
+      const key = `${wire.from}\u0000${wire.to}\u0000${spring}`;
       if (groups.has(key) === false) {
-        groups.set(key, { source: wire.from, target: wire.to, symbols: [] });
+        groups.set(key, { source: wire.from, target: wire.to, spring, symbols: [] });
       }
-      if (wire.spring !== true) {
+      if (spring === false) {
         groups.get(key).symbols.push(wire.key);
       }
     }
@@ -105,14 +106,25 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
       if (cutting) {
         attributes.role = 'button';
         attributes.tabindex = '0';
+      }
+      if (cutting && group.spring) {
+        attributes['aria-label'] = `Cortar resorte: ${from.label} a ${to.label}`;
+      }
+      if (cutting && group.spring === false) {
         attributes['aria-label'] = `Cortar cable ${group.symbols.join(',')}: ${from.label} a ${to.label}`;
       }
       const wire = svgElement('g', attributes);
       wire.append(svgElement('path', { d: geometry.path, class: 'edge-hit' }));
-      wire.append(svgElement('path', { d: geometry.path, class: `edge${isLit ? ' is-lit' : ''}`, 'marker-end': isLit ? 'url(#arrow-lit)' : 'url(#arrow)' }));
-      const label = svgElement('text', { x: geometry.labelX, y: geometry.labelY, class: 'edge-label' });
-      label.textContent = group.symbols.join(',');
-      wire.append(label);
+      let edgeClass = `edge${isLit ? ' is-lit' : ''}`;
+      if (group.spring) {
+        edgeClass = `edge is-spring${isLit ? ' is-lit' : ''}`;
+      }
+      wire.append(svgElement('path', { d: geometry.path, class: edgeClass, 'marker-end': isLit ? 'url(#arrow-lit)' : 'url(#arrow)' }));
+      if (group.spring === false) {
+        const label = svgElement('text', { x: geometry.labelX, y: geometry.labelY, class: 'edge-label' });
+        label.textContent = group.symbols.join(',');
+        wire.append(label);
+      }
       if (cutting) {
         wire.addEventListener('click', () => handleWireClick(group.source, group.target));
         wire.addEventListener('keydown', (event) => {
@@ -163,7 +175,11 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
     }
     const source = pendingSource;
     pendingSource = null;
-    onConnect(source, cellId, tool.key);
+    if (tool.kind === 'spring') {
+      onConnect(source, cellId, { kind: 'spring' });
+    } else {
+      onConnect(source, cellId, { kind: 'key', key: tool.key });
+    }
     render();
   }
   function handleWireClick(source, target) {
@@ -187,6 +203,11 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
     pendingSource = null;
     render();
   }
+  function setSpring() {
+    tool = { kind: 'spring' };
+    pendingSource = null;
+    render();
+  }
   function setBlueprint(next) {
     current = next;
     pendingSource = null;
@@ -207,5 +228,5 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, onConnect, 
     }
   });
   render();
-  return { setSelectedKey, setCutting, setBlueprint, highlight, clearHighlight, render };
+  return { setSelectedKey, setSpring, setCutting, setBlueprint, highlight, clearHighlight, render };
 }

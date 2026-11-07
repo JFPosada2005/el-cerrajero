@@ -528,6 +528,10 @@ button:active {
   filter: url(#glow);
 }
 
+.edge.is-spring {
+  stroke-dasharray: 7 5;
+}
+
 .wire .edge-hit {
   fill: none;
   stroke: transparent;
