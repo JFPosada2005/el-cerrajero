@@ -68,7 +68,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | --- | --- | --- | --- | --- | --- |
 | T1 | Scaffold + DFA core (simulate, complete, minimize, equivalence, shortest counterexample) + tests | S3, S9, S12 | inline | done | `9d71345` |
 | T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | done | `04be402` |
-| T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | pending | - |
+| T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | done | `7e60eea` |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | pending | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
 | T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
@@ -261,3 +261,15 @@ User: "listo, empecemos"
 - Three suites imported the old shape; approved an import-only rewiring to the adapter.
 - 104 tests passing. Commit follows.
 - Next: migrate `main.js` and `graphEditor.js` to the schema, add the two-phase flow, and make level 2 playable.
+
+### L24 — UI migration and level 2 playable (2026-11-06)
+
+User: "listo inicia la migracion y pruebo el nivel a ver que tal funciona"
+
+- `graphEditor.js` now takes `{ svg, cells, alphabet, blueprint, onConnect, onCut }` with `setBlueprint`; wires come from the blueprint, not a transitions map.
+- `main.js` is data-driven: `startLevel(id)`, phases `repair`/`build`, `applyEdit` for edits, `toMachine` + `runDFA` for **Probar**, `judge` + `thiefReport(Verdict)` for **Ensayo/Asalto**, repair modal, win modal.
+- `thief.js` takes a `Verdict`; `catalog.js` marks level 2 playable.
+- `rules.js` and `legacy-level.js` deleted; no imports remain.
+- Level 1 now plays both phases (`1-2-3` repair, `3-1-4` build). Level 2 plays the elevator (odd `1`s, ends with `2-1`).
+- 109 tests passing (graphEditor 12, level1 5, level2 4, levels 16).
+- Next: browser smoke test of levels 1 and 2, then levels 3-5.

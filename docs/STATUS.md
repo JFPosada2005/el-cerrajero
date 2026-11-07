@@ -17,20 +17,21 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - equivalencia por BFS del producto;
   - contraejemplo más corto.
 - **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
-- Nivel 1:
-  - taller SVG con 4 celdas y **un cable por par de celdas**, con todos sus valores en una etiqueta;
-  - mecanismo inicial **incompleto**: falta un cable y sobran dos;
+- **Niveles 1 y 2 jugables** con el flujo reparar → construir → asalto:
+  - taller SVG con celdas por fase y **un cable por par de celdas**, con todos sus valores en una etiqueta;
   - conectar con clic en origen → destino; **cortar con la tijera**; Escape cancela una selección pendiente;
   - **ficha del contrato persistente** con cliente y regla en palabras llanas;
-  - prueba de la llave legítima `123`;
-  - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
-  - modal de victoria y persistencia en `localStorage`.
-- Tests: **104 pasando** con `node --test`, incluido un test de DOM del editor, el blueprint de cables, el juez exacto y el esquema de niveles.
+  - **Probar** corre la llave de ejemplo y resalta el camino;
+  - **Ensayo / Asalto** con juez exacto, contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
+  - modal de “Mecanismo reparado” y de victoria; persistencia en `localStorage`.
+- **Nivel 1:** reparar `1-2-3` y construir `3-1-4`.
+- **Nivel 2 (ascensor):** engranaje, paridad de `1` en la reparación y “termina en `2-1`” en la construcción.
+- Tests: **109 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto, esquema de niveles y nivel 2.
 
 ## Qué está en revisión
 
-- T2 (nivel 1): falta el smoke test de navegador y la alineación con `docs/DESIGN.md`.
-- La UI del taller no tiene todavía un modo de construcción libre; el nivel 1 es de reparación.
+- Los niveles 1 y 2 están migrados al esquema; falta el smoke test de navegador de esta versión.
+- Los niveles 3-5 siguen bloqueados y sin datos.
 
 ## Diseño técnico
 
@@ -57,15 +58,16 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 tests/dfa.test.js       23 passing
 tests/order.test.js      5 passing
 tests/limits.test.js     4 passing
-tests/level1.test.js     8 passing
+tests/level1.test.js     5 passing
+tests/level2.test.js     4 passing
 tests/thief.test.js      5 passing
-tests/graphEditor.test.js   8 passing
+tests/graphEditor.test.js  12 passing
 tests/catalog.test.js   12 passing
 tests/blueprint.test.js 14 passing
 tests/machines.test.js   5 passing
 tests/judge.test.js      4 passing
 tests/levels.test.js    16 passing
-total                  104 passing
+total                  109 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).

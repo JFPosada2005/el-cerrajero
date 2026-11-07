@@ -29,7 +29,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | --- | --- | --- | --- | --- | --- | --- |
 | T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — | — |
 | T2 | Shell del juego + Nivel 1 vertical slice | done | Juan | S1-S4, S7-S9 | T1 | `04be402` |
-| T3 | Nivel 2 (AFD con bucle / paridad) | todo | MateoTorres1543 | S3-S5, S9 | T2, diseño congelado | [#1](https://github.com/JFPosada2005/el-cerrajero/issues/1) |
+| T3 | Nivel 2 (AFD con bucle / paridad) | done | Juan | S3-S5, S9 | T2, diseño congelado | `7e60eea` |
 | T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
 | T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
 | T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
@@ -100,7 +100,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T3 — Nivel 2: AFD con bucle / paridad
 
-**Estado:** todo. **Asignada a:** MateoTorres1543.
+**Estado:** done. Implementado en el freeze F3.
 
 **Objetivo:** introducir el bucle y los lenguajes regulares infinitos sin nombrarlos.
 
@@ -108,16 +108,16 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Pieza nueva:** engranaje de bucle.
 
-**Archivos:** `src/game/level2.js`, `src/game/rules.js` (generalizar si hace falta), `src/ui/graphEditor.js` (modo construir si el diseño lo pide), `tests/level2.test.js`, `src/main.js`.
+**Archivos:** `src/game/level2.js`, `src/game/levels.js`, `src/ui/graphEditor.js`, `tests/level2.test.js`, `src/main.js`.
 
 **Criterios de aceptación:**
 
-- [ ] El nivel tiene un objetivo AFD para paridad.
-- [ ] La máquina inicial falla con un contraejemplo concreto.
-- [ ] La máquina correcta es equivalente al objetivo.
-- [ ] El ladrón escala respecto al nivel 1 (prueba longitudes mayores).
-- [ ] La UI habla de “bucle” o “engranaje”, nunca de autómata.
-- [ ] Tests de nivel pasando.
+- [x] El nivel tiene un objetivo AFD para paridad.
+- [x] La máquina inicial falla con un contraejemplo concreto (`12`, `lockout`).
+- [x] La máquina correcta es equivalente al objetivo.
+- [x] El juez exacto cubre todas las longitudes; el nivel 2 cambia la historia y el vocabulario del ladrón.
+- [x] La UI habla de “bucle” o “engranaje”, nunca de autómata.
+- [x] Tests de nivel pasando (`tests/level2.test.js`).
 
 **Depende de:** T2 y del esquema de niveles congelado en `docs/DESIGN.md`.
 
