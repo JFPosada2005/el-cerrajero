@@ -303,3 +303,13 @@ User: "has push con los cambios hechos hasta el nivel 2 si aun no lo has hecho y
 - Level 3 is playable on the map. 150 tests passing.
 - `docs/SOLUTIONS.md` has the level 3 repair and build solutions.
 - Next: browser smoke test of contract 03, then level 4 (PDA).
+
+### L28 — PDA core (2026-11-06)
+
+User: "por el momento esta funcionando bastante bien"
+
+- `src/core/pda.js`: `validatePDA`, `createPDA`, `runPDA` (BFS over `(state, consumed, stack)` with a visited set, `maxConfigs`, `maxStack`, `truncated`), `acceptsPDA`.
+- Acceptance by final state only, ε-moves allowed after the input ends; frames rebuilt from parent pointers along the accepting path or the best non-accepting path.
+- 20 tests; 170 total.
+- Fixed two literal NUL bytes the worker left as key separators (replaced with `\0` escapes; same runtime string, clean source).
+- Next: level 4 data (theater), oracles plus bounded judge, PDA adapter and the stack panel UI.

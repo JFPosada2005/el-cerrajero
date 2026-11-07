@@ -31,7 +31,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | T2 | Shell del juego + Nivel 1 vertical slice | done | Juan | S1-S4, S7-S9 | T1 | `04be402` |
 | T3 | Nivel 2 (AFD con bucle / paridad) | done | Juan | S3-S5, S9 | T2, diseño congelado | `7e60eea` |
 | T4 | Motor AFND + Nivel 3 (AFND-λ) | in progress | Juan | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
-| T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
+| T5 | Motor AP + Nivel 4 (pila) | in progress | Juan | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
 | T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
 | T7 | Pulido: mapa, persistencia, feedback, demo | todo | colaborador | S4, S8, S9 | T3-T6 | [#3](https://github.com/JFPosada2005/el-cerrajero/issues/3) |
 | T8 | Informe + sustentación | todo | Juan + redactor | S11 | T3-T7, playtest | [#4](https://github.com/JFPosada2005/el-cerrajero/issues/4) |
@@ -143,7 +143,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T5 — Motor AP + Nivel 4
 
-**Estado:** todo. **Dueño sugerido:** colaborador.
+**Estado:** in progress. Motor PDA implementado (`src/core/pda.js`, 20 tests); faltan datos, juez acotado y panel de pila.
 
 **Objetivo:** introducir la pila y el lenguaje `A^n B^n` como salto conceptual.
 
@@ -151,12 +151,12 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Criterios de aceptación:**
 
-- [ ] Simulación de AP con pila, configuración y límite de pasos.
-- [ ] Aceptación por estado final o pila vacía, según el diseño.
+- [x] Simulación de AP con pila, configuración y límites de configuraciones y pila.
+- [x] Aceptación por estado final (el diseño no usa pila vacía como criterio).
 - [ ] Juez por pruebas acotadas y búsqueda de contraejemplo; documentar que la equivalencia general de AP es indecidible.
 - [ ] El nivel 4 acepta `A^n B^n` para n razonable.
 - [ ] Panel de pila visible y animado.
-- [ ] Tests pasando.
+- [ ] Tests de nivel pasando.
 
 **Depende de:** T2 y diseño congelado.
 
