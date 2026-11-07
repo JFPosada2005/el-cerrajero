@@ -4,6 +4,8 @@ from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
 class NoCacheHandler(SimpleHTTPRequestHandler):
     def end_headers(self):
         self.send_header('Cache-Control', 'no-store')
+        if self.path in ('/', '/index.html'):
+            self.send_header('Clear-Site-Data', '"cache"')
         super().end_headers()
 
 

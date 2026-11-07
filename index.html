@@ -8,6 +8,20 @@
   </head>
   <body>
     <div id="app"></div>
+    <script>
+      function showBootError(message) {
+        var box = document.createElement('pre');
+        box.style.cssText = 'position:fixed;inset:0;margin:0;padding:2rem;background:#0b0f14;color:#f06a4a;font:14px/1.5 monospace;white-space:pre-wrap;z-index:9999';
+        box.textContent = message;
+        document.body.append(box);
+      }
+      window.addEventListener('error', function (event) {
+        showBootError('Error: ' + event.message + '\n' + event.filename + ':' + event.lineno + ':' + event.colno);
+      });
+      window.addEventListener('unhandledrejection', function (event) {
+        showBootError('Promesa rechazada: ' + String(event.reason));
+      });
+    </script>
     <script type="module" src="src/main.js"></script>
   </body>
 </html>
