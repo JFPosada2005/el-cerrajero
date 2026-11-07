@@ -50,7 +50,8 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 4. Implementar T3 (nivel 2) y T4 (AFND) sobre contratos congelados.
 5. Implementar T5 (AP) y T6 (MT).
 6. Remaster visual (animaciones, texturas, sonido) recién cuando los 5 niveles funcionen.
-7. Pulido T7 e informe T8.
+7. T9: completar [`docs/SOLUTIONS.md`](SOLUTIONS.md) con los niveles 3-5 antes de la presentación.
+8. Pulido T7 e informe T8.
 
 ## Tests
 

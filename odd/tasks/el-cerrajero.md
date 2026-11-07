@@ -51,7 +51,7 @@ Acceptance: local commits only; no remote until approval.
 
 S11 — Final report and presentation.
 Rubric: Título, Autores, Resumen ejecutivo, Introducción, Marco teórico/referencial, Metodología, Resultados, Discusión, Conclusiones, Referencias. Single author: Juan Posada, código 160004831. Use the `redactor` agent for the formal document.
-Acceptance: report follows the rubric; one chapter per level; results from the playtest.
+Acceptance: report follows the rubric; one chapter per level; results from the playtest; a solutions sheet in `docs/SOLUTIONS.md` with the repair and build solution of every level, delivered before the presentation.
 
 S12 — Stack assumption (marked as assumption).
 Web, vanilla JavaScript ES modules, SVG, CSS; no framework; Node's built-in test runner; local server via `python serve.py` (no-store headers). Rationale: zero-install demo, easy to inspect, matches the user's Node 24 environment.
@@ -74,6 +74,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
+| T9 | Solutions sheet for every level (repair + build) | S11 | inline | in progress (L1-L2) | - |
 
 ## Log
 
@@ -273,3 +274,11 @@ User: "listo inicia la migracion y pruebo el nivel a ver que tal funciona"
 - Level 1 now plays both phases (`1-2-3` repair, `3-1-4` build). Level 2 plays the elevator (odd `1`s, ends with `2-1`).
 - 109 tests passing (graphEditor 12, level1 5, level2 4, levels 16).
 - Next: browser smoke test of levels 1 and 2, then levels 3-5.
+
+### L25 — Solutions sheet requested (2026-11-06)
+
+User: "ooo ya veo, si tienes razon, al momento del asalto evalua todos los posibles, esta excelente. Recuerda dejarme al final de todo las soluciones de cada uno de los niveles para poder yo probar todo antes de llegar a la presentacion"
+
+- Confirmed the exact judge semantics: the heist compares languages, not examples. A machine that accepts only `21` is rejected with counterexample `121` (`lockout`); the correct three-cell machine passes.
+- Created `docs/SOLUTIONS.md` with the repair and build solutions for levels 1 and 2; levels 3-5 are marked pending.
+- Added T9 and extended S11 so the sheet is delivered complete before the presentation.
