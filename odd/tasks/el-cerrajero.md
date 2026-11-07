@@ -67,7 +67,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | ID | Task | Specs | Route | Status | Commit |
 | --- | --- | --- | --- | --- | --- |
 | T1 | Scaffold + DFA core (simulate, complete, minimize, equivalence, shortest counterexample) + tests | S3, S9, S12 | inline | done | `9d71345` |
-| T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | review | `9b8911c` |
+| T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | done | `04be402` |
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | pending | - |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | pending | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
@@ -211,3 +211,11 @@ User: "encargate tu de tomar las decisiones conmigo y siempre que sea a programa
 - **Marcador de build:** la pantalla de inicio muestra `build 4` para identificar de un vistazo qué versión está corriendo.
 - **Delegación:** la implementación la hizo `gentle-ai-worker`; el padre corrigió dos frases que el reemplazo literal dejó incoherentes en `DESIGN.md` y verificó las URLs servidas.
 - **Evidencia del worker:** `node --test` 33/33; `node --check` limpio.
+
+### L19 — T2 verified in the browser (2026-11-06)
+
+User: "me parece bien, ya funciona todas estas opciones bien, cual es el siguiente paso?"
+
+- T2 closes: the owner verified connect, cut with scissors, keyboard and the contract card in the browser.
+- 33 tests passing. Commit `04be402`.
+- Next: freeze F1 (`symbols`, `limits`, `order`, `runDFA`, stricter `validateDFA`), delegated to the worker.

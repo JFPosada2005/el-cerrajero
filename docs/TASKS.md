@@ -20,7 +20,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 **M1 — Nivel 1 jugable y documentación de handoff.**
 
 - T1 completado.
-- T2 en revisión (falta smoke test de navegador y alineación con el diseño).
+- T2 cerrada: nivel 1 jugable, editor verificado en navegador por el owner y **33 tests** pasando.
 - T3+ esperan el congelamiento de interfaces de `docs/DESIGN.md`.
 
 ## Tabla
@@ -28,7 +28,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | ID | Tarea | Estado | Dueño | Specs | Depende de | Issue |
 | --- | --- | --- | --- | --- | --- | --- |
 | T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — | — |
-| T2 | Shell del juego + Nivel 1 vertical slice | review | Juan | S1-S4, S7-S9 | T1 | — |
+| T2 | Shell del juego + Nivel 1 vertical slice | done | Juan | S1-S4, S7-S9 | T1 | `04be402` |
 | T3 | Nivel 2 (AFD con bucle / paridad) | todo | MateoTorres1543 | S3-S5, S9 | T2, diseño congelado | [#1](https://github.com/JFPosada2005/el-cerrajero/issues/1) |
 | T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
 | T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
@@ -65,7 +65,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T2 — Shell del juego + Nivel 1
 
-**Estado:** review.
+**Estado:** done. **Verificado en navegador por el owner el 2026-11-06.**
 
 **Archivos:** `index.html`, `styles.css`, `serve.py`, `src/main.js`, `src/game/level1.js`, `src/game/rules.js`, `src/game/thief.js`, `src/ui/graphEditor.js`, `tests/level1.test.js`, `tests/thief.test.js`, `tests/graphEditor.test.js`.
 
@@ -93,7 +93,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 - [x] La tijera corta el cable completo; conectar de nuevo no corta.
 - [x] Escape cancela una selección pendiente.
 - [x] **33 tests** totales pasando, incluido un test de DOM del editor (conectar, cortar, teclado).
-- [ ] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
+- [x] Smoke test en navegador: inicio → nivel → reparar → asalto → victoria.
 - [x] La UI del nivel no muestra vocabulario académico (guard en `tests/level1.test.js`).
 
 **Tests:** `node --test tests/level1.test.js tests/thief.test.js tests/graphEditor.test.js`.
