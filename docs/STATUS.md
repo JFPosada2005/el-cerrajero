@@ -39,7 +39,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **Nivel 2 (ascensor):** engranaje, paridad de `1` en la reparación y “termina en `2-1`” en la construcción.
 - **Nivel 3 (museo):** AFND con épsilon, bifurcador y resorte; dos ramales (`1-2-2` y `2-1-1`).
 - **Nivel 4 (teatro):** AP con pila, giros balanceados y `A^n B^n`; juez acotado (evidencia, no prueba) y panel de pila.
-- Tests: **190 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto y acotado, esquema de niveles, niveles 1-4 y los motores AFD/AFND/AP.
+- Tests: **191 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto y acotado, esquema de niveles, niveles 1-4 y los motores AFD/AFND/AP.
 
 ## Qué está en revisión
 
@@ -79,7 +79,7 @@ tests/level2.test.js     4 passing
 tests/level3.test.js     4 passing
 tests/level4.test.js     5 passing
 tests/thief.test.js      5 passing
-tests/graphEditor.test.js  18 passing
+tests/graphEditor.test.js  19 passing
 tests/catalog.test.js   12 passing
 tests/blueprint.test.js 14 passing
 tests/machines.test.js   9 passing
@@ -87,7 +87,7 @@ tests/judge.test.js      8 passing
 tests/levels.test.js    23 passing
 tests/oracles.test.js    5 passing
 tests/pda.test.js       20 passing
-total                  190 passing
+total                  191 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).

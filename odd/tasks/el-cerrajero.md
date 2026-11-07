@@ -326,3 +326,13 @@ User: "perfecto, continua y termina el nivel 4 para revisar que tal se comporta"
 - Level 4 playable on the map; 190 tests passing.
 - `docs/SOLUTIONS.md` has the level 4 repair and build.
 - Next: browser smoke test of contract 04, then level 5 (TM).
+
+### L30 — Level 4 fits one screen (2026-11-06)
+
+User: "hay una cosita y es que en el punto 4 como el ejercicio ocupa un poco mas de espacio entonces no se visualiza completamente el ejercicio, puedes acomodar esto? pero no quiero que queden barras desplazables, debe visualizarse bien todo"
+
+- Causes: `.log-panel` had a fixed `max-height: 720px`; the SVG was `height: auto`; the level 4 stack pickers lived in the brief and pushed the action buttons below the fold; `q0` sat at `x < 140`, clipping the start arrow.
+- Fix: desktop `100vh` flex shell, SVG and log flex with `min-height: 0`, compact stack block, `q0` at `x = 140`, stack pickers moved into the workshop, inline legend, shorter “Herramientas” heading, hidden scrollbars on the brief/log.
+- Self-loop labels: paths spread 26 px and labels 140 px apart, so the two loops at “Trabajo” no longer overlap.
+- Verified in headless Edge at 1366×768: `scrollWidth === innerWidth`, `scrollHeight === innerHeight`, workshop and stack panel present; screenshot shows every control and both loop labels.
+- 191 tests passing. Commit `13d90f8`.
