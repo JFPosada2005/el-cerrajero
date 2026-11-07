@@ -336,3 +336,12 @@ User: "hay una cosita y es que en el punto 4 como el ejercicio ocupa un poco mas
 - Self-loop labels: paths spread 26 px and labels 140 px apart, so the two loops at “Trabajo” no longer overlap.
 - Verified in headless Edge at 1366×768: `scrollWidth === innerWidth`, `scrollHeight === innerHeight`, workshop and stack panel present; screenshot shows every control and both loop labels.
 - 191 tests passing. Commit `13d90f8`.
+
+### L31 — Level 4 probe/assault crash fixed (2026-11-06)
+
+User screenshot: `TypeError: Cannot read properties of undefined (reading 'length')` at `pda.js:127` when pressing Probar or Ensayo.
+
+- Cause: `main.js` called `toMachine` without the machine type. Level 4's target is a language, so it defaulted to DFA; the bounded judge then called `runPDA` on a DFA without `stackStart`.
+- Fix: pass `state.level.machine` at both call sites (`handleProbe`, `handleAssault`); `judgeLanguage` now throws a clear `judge: language targets need a PDA machine` on a non-PDA.
+- Verified in headless Edge at 1366×768: Probar logs “La llave AB abrió la caja.”, Ensayo logs “Marcas de ganzúa en A.” (intruder expected from the buggy spring), no error overlay, and the stack panel goes base → ficha/base.
+- 192 tests passing. Commit `55f9889`.
