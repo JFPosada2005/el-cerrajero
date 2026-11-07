@@ -291,3 +291,15 @@ User: "listo, ya los probe, vamos por buen camino"
 - 26 tests covering ε-closure cycles, active-set frames, invalid/missing outcomes, subset naming, equivalence and normalization.
 - 135 tests passing.
 - Next: level 3 data (museum), `toMachine` for NFA (springs and forks), `judge` for NFA targets, and the editor UI for springs and the spring tool.
+
+### L27 — Level 3 UI and playable museum (2026-11-06)
+
+User: "has push con los cambios hechos hasta el nivel 2 si aun no lo has hecho y empieza con el 3"
+
+- Push `993440b..85e29f4` (levels 1-2 playable plus the NFA engine).
+- `level3.js` data: museum, repair `contains 1-2-2` (missing `w —1→ w`), build `contains 1-2-2 or 2-1-1` (night branch missing).
+- `machines.js` builds an NFA from springs and forks; `judge.js` normalizes both sides with `nfaToDFA` and keeps the exact verdict.
+- `graphEditor.js` separates key and spring groups, renders springs dashed without a label, and emits `{ kind: 'key' | 'spring' }` payloads; `main.js` adds the **Resorte** tool, `runMachine` dispatch (`runNFA`/`runDFA`) and `frameStates` for NFA active sets.
+- Level 3 is playable on the map. 150 tests passing.
+- `docs/SOLUTIONS.md` has the level 3 repair and build solutions.
+- Next: browser smoke test of contract 03, then level 4 (PDA).

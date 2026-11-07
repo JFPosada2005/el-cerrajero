@@ -123,7 +123,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T4 — Motor AFND + Nivel 3
 
-**Estado:** in progress. Motor AFND-λ implementado (`src/core/nfa.js`, 26 tests); faltan datos, adaptador, juez y UI.
+**Estado:** in progress. Motor, datos y UI listos; falta el smoke test de navegador.
 
 **Objetivo:** implementar no determinismo y clausura épsilon, y usarlos como mecánica.
 
@@ -132,11 +132,12 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 **Criterios de aceptación:**
 
 - [x] `epsilonClosure`, `moveNFA`, `runNFA`, `nfaToDFA` (construcción de subconjuntos) y `areEquivalentNFA` implementados.
-- [ ] El nivel 3 acepta “contiene 1-2-2 o 2-1-1” (D6 aprobado).
-- [ ] El jugador puede usar bifurcador y resorte épsilon.
-- [ ] El juez es equivalencia exacta vía determinización.
-- [ ] El contraejemplo más corto se muestra en la UI.
-- [ ] Tests unitarios y de nivel pasando.
+- [x] El nivel 3 acepta “contiene 1-2-2 o 2-1-1” (D6 aprobado).
+- [x] El jugador puede usar bifurcador y resorte épsilon.
+- [x] El juez es equivalencia exacta vía determinización.
+- [x] El contraejemplo más corto se muestra en la UI.
+- [x] Tests unitarios y de nivel pasando.
+- [ ] Smoke test en navegador del contrato 03.
 
 **Depende de:** T2, T3 (para reutilizar el editor) y diseño congelado.
 

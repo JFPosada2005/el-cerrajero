@@ -23,7 +23,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - construcción de subconjuntos a AFD;
   - equivalencia de AFND vía AFD.
 - **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
-- **Niveles 1 y 2 jugables** con el flujo reparar → construir → asalto:
+- **Niveles 1, 2 y 3 jugables** con el flujo reparar → construir → asalto:
   - taller SVG con celdas por fase y **un cable por par de celdas**, con todos sus valores en una etiqueta;
   - conectar con clic en origen → destino; **cortar con la tijera**; Escape cancela una selección pendiente;
   - **ficha del contrato persistente** con cliente y regla en palabras llanas;
@@ -32,7 +32,8 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - modal de “Mecanismo reparado” y de victoria; persistencia en `localStorage`.
 - **Nivel 1:** reparar `1-2-3` y construir `3-1-4`.
 - **Nivel 2 (ascensor):** engranaje, paridad de `1` en la reparación y “termina en `2-1`” en la construcción.
-- Tests: **135 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto, esquema de niveles, nivel 2 y el motor AFND-λ.
+- **Nivel 3 (museo):** AFND con épsilon, bifurcador y resorte; dos ramales (`1-2-2` y `2-1-1`).
+- Tests: **150 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto, esquema de niveles, niveles 1-3 y los motores AFD/AFND.
 
 ## Qué está en revisión
 
@@ -53,7 +54,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 1. **F1-F3 hechos.** Sigue F4 (flow/progress) y F5 (editor con resortes y `main` data-driven completo).
 2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
-4. **T4 (nivel 3, AFND-λ) en curso:** motor listo; faltan los datos del museo, el adaptador AFND y el juez, y la UI de resortes/bifurcador.
+4. **T4 (nivel 3, AFND-λ) listo:** motor, datos y UI de resortes; pendiente el smoke test de navegador.
 5. Implementar T5 (AP) y T6 (MT).
 6. Remaster visual (animaciones, texturas, sonido) recién cuando los 5 niveles funcionen.
 7. T9: completar [`docs/SOLUTIONS.md`](SOLUTIONS.md) con los niveles 3-5 antes de la presentación.
@@ -68,14 +69,15 @@ tests/order.test.js      5 passing
 tests/limits.test.js     4 passing
 tests/level1.test.js     5 passing
 tests/level2.test.js     4 passing
+tests/level3.test.js     4 passing
 tests/thief.test.js      5 passing
-tests/graphEditor.test.js  12 passing
+tests/graphEditor.test.js  15 passing
 tests/catalog.test.js   12 passing
 tests/blueprint.test.js 14 passing
-tests/machines.test.js   5 passing
-tests/judge.test.js      4 passing
-tests/levels.test.js    16 passing
-total                  135 passing
+tests/machines.test.js   7 passing
+tests/judge.test.js      6 passing
+tests/levels.test.js    20 passing
+total                  150 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).
