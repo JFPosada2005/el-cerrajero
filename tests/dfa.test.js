@@ -5,12 +5,14 @@ import {
   validateDFA,
   simulateDFA,
   acceptsDFA,
+  runDFA,
   completeDFA,
   reachableDFA,
   minimizeDFA,
   areEquivalentDFA,
   shortestCounterexample,
 } from '../src/core/dfa.js';
+import { EPSILON } from '../src/core/symbols.js';
 
 const exact123 = createDFA({
   states: ['q0', 'q1', 'q2', 'q3', 'qr'],
@@ -199,4 +201,78 @@ test('shortestCounterexample finds the shortest difference', () => {
   const counterexample = shortestCounterexample(contains01, contains10);
   assert.equal(counterexample.length, 2);
   assert.ok(['01', '10'].includes(counterexample));
+});
+
+const accepts123 = createDFA({
+  states: ['s0', 's1', 's2', 's3'],
+  alphabet: ['1', '2', '3'],
+  start: 's0',
+  accept: ['s3'],
+  transitions: {
+    s0: { 1: 's1' },
+    s1: { 2: 's2' },
+    s2: { 3: 's3' },
+    s3: {},
+  },
+});
+
+test('runDFA reports accept with steps for 123', () => {
+  assert.deepEqual(runDFA(accepts123, '123'), { accepted: true, outcome: 'accept', steps: 3, frames: [] });
+});
+
+test('runDFA reports reject for a word with no accepting path', () => {
+  assert.deepEqual(runDFA(accepts123, '12'), { accepted: false, outcome: 'reject', steps: 2, frames: [] });
+});
+
+test('runDFA reports missing for a symbol with no transition', () => {
+  const result = runDFA(accepts123, '13');
+  assert.equal(result.accepted, false);
+  assert.equal(result.outcome, 'missing');
+});
+
+test('runDFA reports invalid-symbol for a symbol outside the alphabet', () => {
+  const result = runDFA(accepts123, '1x');
+  assert.equal(result.accepted, false);
+  assert.equal(result.outcome, 'invalid-symbol');
+});
+
+test('runDFA records frames when record is true', () => {
+  const result = runDFA(accepts123, '123', { record: true });
+  assert.deepEqual(result.frames[0], { consumed: 0, state: 's0', symbol: null });
+  assert.deepEqual(result.frames[1], { consumed: 1, state: 's1', symbol: '1' });
+  assert.deepEqual(result.frames, [
+    { consumed: 0, state: 's0', symbol: null },
+    { consumed: 1, state: 's1', symbol: '1' },
+    { consumed: 2, state: 's2', symbol: '2' },
+    { consumed: 3, state: 's3', symbol: '3' },
+  ]);
+});
+
+test('runDFA returns no frames without record', () => {
+  assert.deepEqual(runDFA(accepts123, '123').frames, []);
+});
+
+test('validateDFA rejects duplicate states', () => {
+  const dfa = { states: ['q0', 'q0'], alphabet: ['1'], start: 'q0', accept: [], transitions: {} };
+  assert.throws(() => validateDFA(dfa), /duplicate state/);
+});
+
+test('validateDFA rejects duplicate alphabet symbols', () => {
+  const dfa = { states: ['q0'], alphabet: ['1', '1'], start: 'q0', accept: [], transitions: {} };
+  assert.throws(() => validateDFA(dfa), /duplicate symbol/);
+});
+
+test('validateDFA rejects a multi-character symbol', () => {
+  const dfa = { states: ['q0'], alphabet: ['ab'], start: 'q0', accept: [], transitions: {} };
+  assert.throws(() => validateDFA(dfa), /single character/);
+});
+
+test('validateDFA rejects EPSILON in the alphabet', () => {
+  const dfa = { states: ['q0'], alphabet: [EPSILON], start: 'q0', accept: [], transitions: {} };
+  assert.throws(() => validateDFA(dfa), /ε/);
+});
+
+test('validateDFA rejects a transition row for an unknown state', () => {
+  const dfa = { states: ['q0'], alphabet: ['1'], start: 'q0', accept: [], transitions: { q9: { 1: 'q0' } } };
+  assert.throws(() => validateDFA(dfa), /not in states/);
 });

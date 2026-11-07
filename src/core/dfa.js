@@ -1,3 +1,5 @@
+import { EPSILON } from './symbols.js';
+
 const SINK_BASE = '__sink';
 
 export function validateDFA(dfa) {
@@ -9,6 +11,20 @@ export function validateDFA(dfa) {
   }
   if (!Array.isArray(dfa.alphabet) || dfa.alphabet.length === 0) {
     throw new Error('DFA must have a non-empty alphabet');
+  }
+  if (new Set(dfa.states).size !== dfa.states.length) {
+    throw new Error('DFA has duplicate states');
+  }
+  if (new Set(dfa.alphabet).size !== dfa.alphabet.length) {
+    throw new Error('DFA has duplicate symbols in the alphabet');
+  }
+  for (const symbol of dfa.alphabet) {
+    if (symbol.length !== 1) {
+      throw new Error(`symbol "${symbol}" must be a single character`);
+    }
+    if (symbol === EPSILON) {
+      throw new Error(`alphabet must not contain epsilon "${EPSILON}"`);
+    }
   }
   if (!dfa.states.includes(dfa.start)) {
     throw new Error(`start state "${dfa.start}" is not in states`);
@@ -22,6 +38,11 @@ export function validateDFA(dfa) {
     }
   }
   const transitions = dfa.transitions || {};
+  for (const source of Object.keys(transitions)) {
+    if (!dfa.states.includes(source)) {
+      throw new Error(`transition row "${source}" is not in states`);
+    }
+  }
   for (const state of dfa.states) {
     const row = transitions[state];
     if (row === undefined) {
@@ -143,6 +164,24 @@ export function simulateDFA(dfa, input) {
 
 export function acceptsDFA(dfa, input) {
   return simulateDFA(dfa, input).accepted;
+}
+
+export function runDFA(dfa, word, options = {}) {
+  const result = simulateDFA(dfa, word);
+  let outcome = 'reject';
+  if (result.error !== undefined) {
+    outcome = 'invalid-symbol';
+  } else if (result.missing !== undefined) {
+    outcome = 'missing';
+  } else if (result.accepted) {
+    outcome = 'accept';
+  }
+  const steps = result.trace.length - 1;
+  let frames = [];
+  if (options.record === true) {
+    frames = result.trace.map((state, index) => ({ consumed: index, state, symbol: index === 0 ? null : word[index - 1] }));
+  }
+  return { accepted: result.accepted, outcome, steps, frames };
 }
 
 export function minimizeDFA(dfa) {
