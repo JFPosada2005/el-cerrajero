@@ -30,7 +30,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | T1 | Scaffold + motor AFD + tests | done | Juan | S3, S9, S12 | — | — |
 | T2 | Shell del juego + Nivel 1 vertical slice | done | Juan | S1-S4, S7-S9 | T1 | `04be402` |
 | T3 | Nivel 2 (AFD con bucle / paridad) | done | Juan | S3-S5, S9 | T2, diseño congelado | `7e60eea` |
-| T4 | Motor AFND + Nivel 3 (AFND-λ) | todo | colaborador | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
+| T4 | Motor AFND + Nivel 3 (AFND-λ) | in progress | Juan | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
 | T5 | Motor AP + Nivel 4 (pila) | todo | colaborador | S5, S9 | T2, diseño congelado | [#6](https://github.com/JFPosada2005/el-cerrajero/issues/6) |
 | T6 | Motor MT + Nivel 5 (jefe final) | todo | colaborador | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
 | T7 | Pulido: mapa, persistencia, feedback, demo | todo | colaborador | S4, S8, S9 | T3-T6 | [#3](https://github.com/JFPosada2005/el-cerrajero/issues/3) |
@@ -123,7 +123,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T4 — Motor AFND + Nivel 3
 
-**Estado:** todo. **Dueño sugerido:** colaborador.
+**Estado:** in progress. Motor AFND-λ implementado (`src/core/nfa.js`, 26 tests); faltan datos, adaptador, juez y UI.
 
 **Objetivo:** implementar no determinismo y clausura épsilon, y usarlos como mecánica.
 
@@ -131,8 +131,8 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 **Criterios de aceptación:**
 
-- [ ] `epsilonClosure`, `simulateNFA`, `nfaToDFA` (construcción de subconjuntos) y `areEquivalentNFA` implementados.
-- [ ] El nivel 3 acepta “contiene 1-2-2 o 2-1-1” (D6 propuesto; pendiente de aprobación).
+- [x] `epsilonClosure`, `moveNFA`, `runNFA`, `nfaToDFA` (construcción de subconjuntos) y `areEquivalentNFA` implementados.
+- [ ] El nivel 3 acepta “contiene 1-2-2 o 2-1-1” (D6 aprobado).
 - [ ] El jugador puede usar bifurcador y resorte épsilon.
 - [ ] El juez es equivalencia exacta vía determinización.
 - [ ] El contraejemplo más corto se muestra en la UI.

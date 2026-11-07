@@ -69,7 +69,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T1 | Scaffold + DFA core (simulate, complete, minimize, equivalence, shortest counterexample) + tests | S3, S9, S12 | inline | done | `9d71345` |
 | T2 | Game shell + Level 1 vertical slice (repair, test, heist, win) | S1-S4, S7-S9 | inline | done | `04be402` |
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | done | `7e60eea` |
-| T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | pending | - |
+| T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | in progress (NFA core done) | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | pending | - |
 | T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
@@ -282,3 +282,12 @@ User: "ooo ya veo, si tienes razon, al momento del asalto evalua todos los posib
 - Confirmed the exact judge semantics: the heist compares languages, not examples. A machine that accepts only `21` is rejected with counterexample `121` (`lockout`); the correct three-cell machine passes.
 - Created `docs/SOLUTIONS.md` with the repair and build solutions for levels 1 and 2; levels 3-5 are marked pending.
 - Added T9 and extended S11 so the sheet is delivered complete before the presentation.
+
+### L26 — NFA core (2026-11-06)
+
+User: "listo, ya los probe, vamos por buen camino"
+
+- `src/core/nfa.js`: `validateNFA`, `createNFA`, `epsilonClosure`, `moveNFA`, `runNFA`, `acceptsNFA`, `nfaToDFA` (subset construction, reachable only, no empty subset) and `areEquivalentNFA`.
+- 26 tests covering ε-closure cycles, active-set frames, invalid/missing outcomes, subset naming, equivalence and normalization.
+- 135 tests passing.
+- Next: level 3 data (museum), `toMachine` for NFA (springs and forks), `judge` for NFA targets, and the editor UI for springs and the spring tool.
