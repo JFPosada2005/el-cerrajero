@@ -237,5 +237,6 @@ User: "hazlo mas bien como menu luego de darle a play, tirar los niveles asi de 
 - The landing screen is now a **title screen** with a `Jugar` button; the contract map appears only after pressing it.
 - The five cards are a **horizontal strip, left to right**, in `LEVELS` order; below 980 px the strip scrolls horizontally.
 - The level back button and the win modal return to the map, not the title.
+- Map layout fixed: full width up to 1500 px, five shrinkable columns, no horizontal scrollbar; wraps to 3/2/1 columns below 1100/760/520 px.
 - F2 started: `src/game/blueprint.js` with pure `applyEdit` for graph blueprints (cut, identical kept, gear gate, fork move/add, spring loop) and 14 tests.
 - 79 tests passing. No push this time: the owner did not authorize it for this slice.
