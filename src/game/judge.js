@@ -19,6 +19,9 @@ function languageCoverage(puzzle, tested, maxSteps) {
   return { exhaustiveLength: puzzle.judge.exhaustiveLength, tested, families: ['A^nB^n', 'A^(n-1)B^n', 'A^nB^(n-1)'], maxSteps };
 }
 function judgeLanguage(puzzle, machine) {
+  if (machine.type !== 'pda') {
+    throw new Error('judge: language targets need a PDA machine');
+  }
   const alphabet = [...machine.alphabet];
   const oracle = ORACLES[puzzle.target.id];
   const up = alphabet[0];

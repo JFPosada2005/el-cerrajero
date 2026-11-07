@@ -725,7 +725,7 @@ function frameStates(frames) {
   return frames.map((frame) => frame.state);
 }
 function handleProbe() {
-  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
+  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const word = state.puzzle.examples.open[0];
   const result = runMachine(machine, word, { record: true });
   if (result.accepted) {
@@ -739,7 +739,7 @@ function handleProbe() {
   }
 }
 function handleAssault() {
-  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint);
+  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const verdict = judge(state.puzzle, machine);
   const report = thiefReport(verdict, state.level);
   appendLog(report.text, report.tone);

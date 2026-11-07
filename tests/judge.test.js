@@ -51,6 +51,12 @@ test('an unsupported target kind throws', () => {
   const other = { cells, target: { kind: 'mystery', id: 'nope' } };
   assert.throws(() => judge(other, machineFor([])), /judge: unsupported target kind: mystery/);
 });
+test('a language target with a DFA throws a clear error', () => {
+  const puzzle = level4.phases.repair;
+  const keys = level4.keys.map((entry) => entry.symbol);
+  const player = toMachine(keys, puzzle, structuredClone(puzzle.blueprint));
+  assert.throws(() => judge(puzzle, player), /judge: language targets need a PDA machine/);
+});
 test('a wrong NFA against an NFA target fails with a concrete counterexample', () => {
   const puzzle = level3.phases.repair;
   const keys = level3.keys.map((entry) => entry.symbol);
