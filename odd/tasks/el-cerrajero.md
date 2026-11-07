@@ -229,3 +229,13 @@ User: "dejemos un selector de niveles antes de ir a alguno en especifico, que lo
 - Map screen: 5 cards, padlock on locked, key on available, check on completed, crown + "Jefe final" on level 5. Locked cards are disabled buttons; unlocked-but-unimplemented levels show a polite note.
 - Only level 1 is playable; the other cards unlock visually as the previous contract is completed.
 - The owner explicitly authorized the push of this first demo with one completed level.
+
+### L21 — Title menu, linear strip, blueprint F2 slice (2026-11-06)
+
+User: "hazlo mas bien como menu luego de darle a play, tirar los niveles asi de primerazo no se mira bien, muestralos en linea, de izquierda a derecha. el resto se mira bien, de ahi ya empezamos con el siguiente nivel"
+
+- The landing screen is now a **title screen** with a `Jugar` button; the contract map appears only after pressing it.
+- The five cards are a **horizontal strip, left to right**, in `LEVELS` order; below 980 px the strip scrolls horizontally.
+- The level back button and the win modal return to the map, not the title.
+- F2 started: `src/game/blueprint.js` with pure `applyEdit` for graph blueprints (cut, identical kept, gear gate, fork move/add, spring loop) and 14 tests.
+- 79 tests passing. No push this time: the owner did not authorize it for this slice.

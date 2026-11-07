@@ -25,7 +25,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - prueba de la llave legítima `123`;
   - asalto con contraejemplo concreto y **diagnóstico forense** (`intruder` / `lockout`);
   - modal de victoria y persistencia en `localStorage`.
-- Tests: **64 pasando** con `node --test`, incluido un test de DOM del editor.
+- Tests: **79 pasando** con `node --test`, incluido un test de DOM del editor y el blueprint de cables.
 
 ## Qué está en revisión
 
@@ -39,7 +39,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **D6 aprobado:** el nivel 3 usa “contiene 1-2-2 o 2-1-1”, para que el bifurcador sea necesario.
 - **Addendum visual:** [`docs/VISUAL-DESIGN.md`](VISUAL-DESIGN.md) con la dirección “precisión noir”, tokens, tipografía Fraunces + Inter, motion, accesibilidad y checklist “no retro”.
 - **Investigación visual adicional integrada:** reflow 320 px, foco no obscurecido por sticky, alternativa a drag, View Transitions progresiva, textura estática y tamaños de librerías corregidos.
-- **F1 congelado:** `symbols`, `limits`, `order`, `runDFA` con frames y `validateDFA` estricto. F2-F5 en curso.
+- **F1 congelado:** `symbols`, `limits`, `order`, `runDFA` con frames y `validateDFA` estricto. **F2 iniciado:** `game/blueprint.js` con `applyEdit` (cables, compuertas de engranaje/bifurcador/resorte).
 
 ## Qué sigue
 
@@ -60,8 +60,9 @@ tests/limits.test.js     4 passing
 tests/level1.test.js     8 passing
 tests/thief.test.js      5 passing
 tests/graphEditor.test.js   8 passing
-tests/catalog.test.js   11 passing
-total                   64 passing
+tests/catalog.test.js   12 passing
+tests/blueprint.test.js 14 passing
+total                   79 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).
