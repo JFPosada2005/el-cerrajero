@@ -30,7 +30,7 @@ export const level4 = {
       goal: 'Abre solo si sube y baja la misma cantidad de veces, sin bajar de más.',
       intro: 'El resorte del cerrojo quedó con la condición “da igual”. Ajustalo para que solo abra sobre la base.',
       cells: [
-        { id: 'q0', label: 'Entrada', x: 120, y: 260, start: true },
+        { id: 'q0', label: 'Entrada', x: 140, y: 260, start: true },
         { id: 'q1', label: 'Trabajo', x: 420, y: 260 },
         { id: 'q2', label: 'Cerrojo', x: 700, y: 260, accept: true }
       ],
@@ -58,7 +58,7 @@ export const level4 = {
       goal: 'Abre solo con A^n B^n: sube n veces y baja exactamente n.',
       intro: 'El teatro cambió el montacargas. Construí el mecanismo desde cero.',
       cells: [
-        { id: 'q0', label: 'Entrada', x: 90, y: 260, start: true },
+        { id: 'q0', label: 'Entrada', x: 140, y: 260, start: true },
         { id: 'q1', label: 'Cargando', x: 310, y: 150 },
         { id: 'q2', label: 'Soltando', x: 550, y: 150 },
         { id: 'q3', label: 'Cerrojo', x: 720, y: 340, accept: true }

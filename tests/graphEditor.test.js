@@ -202,3 +202,12 @@ test('wires with different stack conditions render separate labels', () => {
   const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
   assert.deepEqual(labels, ['A · da igual · +ficha', 'A · ficha · -ficha']);
 });
+test('two self-loops with different stack conditions draw separate wires', () => {
+  const svg = setupStack([{ from: 'q0', to: 'q0', key: 'A', stack: { top: 'any', action: 'push' } }, { from: 'q0', to: 'q0', key: 'B', stack: { top: 'chip', action: 'pop' } }]);
+  const wires = collect(svg.children, 'wire');
+  assert.equal(wires.length, 2);
+  const labels = collect(svg.children, 'edge-label').map((node) => node.textContent);
+  assert.deepEqual(labels, ['A · da igual · +ficha', 'B · ficha · -ficha']);
+  const positions = collect(svg.children, 'edge-label').map((node) => Number(node.attributes.x));
+  assert.ok(Math.abs(positions[0] - positions[1]) >= 100);
+});

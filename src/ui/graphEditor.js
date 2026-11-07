@@ -11,19 +11,21 @@ function svgElement(tag, attributes = {}) {
 function nodeMap(cells) {
   return new Map(cells.map((cell) => [cell.id, cell]));
 }
-function edgeGeometry(from, to) {
+function edgeGeometry(from, to, offset = 0, labelOffset = offset) {
   if (from.id === to.id) {
-    return { path: `M ${from.x - 26} ${from.y - 38} C ${from.x - 86} ${from.y - 130}, ${from.x + 86} ${from.y - 130}, ${from.x + 26} ${from.y - 38}`, labelX: from.x, labelY: from.y - LOOP_LABEL_OFFSET };
+    return { path: `M ${from.x - 26 + offset} ${from.y - 38} C ${from.x - 86 + offset} ${from.y - 130}, ${from.x + 86 + offset} ${from.y - 130}, ${from.x + 26 + offset} ${from.y - 38}`, labelX: from.x + labelOffset, labelY: from.y - LOOP_LABEL_OFFSET };
   }
   const dx = to.x - from.x;
   const dy = to.y - from.y;
   const length = Math.hypot(dx, dy) || 1;
   const ux = dx / length;
   const uy = dy / length;
-  const startX = from.x + ux * NODE_RADIUS;
-  const startY = from.y + uy * NODE_RADIUS;
-  const endX = to.x - ux * NODE_RADIUS;
-  const endY = to.y - uy * NODE_RADIUS;
+  const shiftX = -uy * offset;
+  const shiftY = ux * offset;
+  const startX = from.x + ux * NODE_RADIUS + shiftX;
+  const startY = from.y + uy * NODE_RADIUS + shiftY;
+  const endX = to.x - ux * NODE_RADIUS + shiftX;
+  const endY = to.y - uy * NODE_RADIUS + shiftY;
   const midX = (startX + endX) / 2;
   const midY = (startY + endY) / 2;
   const curve = 30;
@@ -123,13 +125,27 @@ export function createGraphEditor({ svg, cells, alphabet, blueprint, stack = nul
   function renderEdges() {
     const lit = litEdges();
     const cutting = isCutting();
-    for (const group of wireGroups()) {
+    const groups = wireGroups();
+    const pairCounts = new Map();
+    for (const group of groups) {
+      const pairKey = `${group.source}\u0000${group.target}`;
+      pairCounts.set(pairKey, (pairCounts.get(pairKey) ?? 0) + 1);
+    }
+    const pairSeen = new Map();
+    for (const group of groups) {
       const from = states.get(group.source);
       const to = states.get(group.target);
       if (from === undefined || to === undefined) {
         continue;
       }
-      const geometry = edgeGeometry(from, to);
+      const pairName = `${group.source}\u0000${group.target}`;
+      const pairTotal = pairCounts.get(pairName);
+      const pairIndex = pairSeen.get(pairName) ?? 0;
+      pairSeen.set(pairName, pairIndex + 1);
+      const spread = pairIndex - (pairTotal - 1) / 2;
+      const parallel = from.id === to.id ? spread * 26 : spread * 18;
+      const captionShift = from.id === to.id ? spread * 140 : parallel;
+      const geometry = edgeGeometry(from, to, parallel, captionShift);
       const isLit = lit.has(`${group.source}\u0000${group.target}`);
       const classes = ['wire', cutting ? 'is-cutting' : '', isLit ? 'is-lit' : ''].filter(Boolean).join(' ');
       const attributes = { class: classes };

@@ -331,7 +331,6 @@ function renderTools() {
     hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
   }
   if (state.level.machine === 'pda') {
-    hint.textContent = `${hint.textContent} Si arriba hay: ${stackTopWord()} · Acción: ${stackActionWord()}.`;
     for (const [id, value] of [['#stack-top-any', 'any'], ['#stack-top-base', 'base'], ['#stack-top-chip', 'chip']]) {
       const button = document.querySelector(id);
       if (button === null) {
@@ -547,7 +546,7 @@ function renderWorkshop() {
     legend.append(entry);
   }
   const toolsTitle = document.createElement('h2');
-  toolsTitle.textContent = 'Llaves y herramientas';
+  toolsTitle.textContent = 'Herramientas';
   const tools = document.createElement('div');
   tools.className = 'tools';
   const palette = document.createElement('div');
@@ -579,15 +578,14 @@ function renderWorkshop() {
     spring.addEventListener('click', toggleSpring);
     tools.append(spring);
   }
-  let stackTopRow = null;
-  let stackActionRow = null;
+  let stackTools = null;
   if (state.level.machine === 'pda') {
-    stackTopRow = document.createElement('div');
-    stackTopRow.className = 'stack-tools';
+    stackTools = document.createElement('div');
+    stackTools.className = 'stack-tools';
     const topText = document.createElement('span');
     topText.className = 'stack-tools-label';
     topText.textContent = 'Si arriba hay';
-    stackTopRow.append(topText);
+    stackTools.append(topText);
     for (const [id, value, word] of [['stack-top-any', 'any', 'Da igual'], ['stack-top-base', 'base', 'Base'], ['stack-top-chip', 'chip', 'Ficha']]) {
       const option = document.createElement('button');
       option.id = id;
@@ -596,14 +594,12 @@ function renderWorkshop() {
       option.textContent = word;
       option.setAttribute('aria-pressed', String(stackTop === value));
       option.addEventListener('click', () => selectStackTop(value));
-      stackTopRow.append(option);
+      stackTools.append(option);
     }
-    stackActionRow = document.createElement('div');
-    stackActionRow.className = 'stack-tools';
     const actionText = document.createElement('span');
     actionText.className = 'stack-tools-label';
     actionText.textContent = 'Acción';
-    stackActionRow.append(actionText);
+    stackTools.append(actionText);
     for (const [id, value, word] of [['stack-action-keep', 'keep', 'No tocar'], ['stack-action-push', 'push', 'Cargar'], ['stack-action-pop', 'pop', 'Soltar']]) {
       const option = document.createElement('button');
       option.id = id;
@@ -612,7 +608,7 @@ function renderWorkshop() {
       option.textContent = word;
       option.setAttribute('aria-pressed', String(stackAction === value));
       option.addEventListener('click', () => selectStackAction(value));
-      stackActionRow.append(option);
+      stackTools.append(option);
     }
   }
   const hint = document.createElement('p');
@@ -642,10 +638,6 @@ function renderWorkshop() {
   brief.append(legend);
   brief.append(toolsTitle);
   brief.append(tools);
-  if (stackTopRow !== null && stackActionRow !== null) {
-    brief.append(stackTopRow);
-    brief.append(stackActionRow);
-  }
   brief.append(hint);
   brief.append(actions);
   const shop = document.createElement('section');
@@ -666,6 +658,9 @@ function renderWorkshop() {
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
   shop.append(shopHead);
+  if (stackTools !== null) {
+    shop.append(stackTools);
+  }
   shop.append(canvas);
   if (state.level.machine === 'pda') {
     const block = document.createElement('div');
