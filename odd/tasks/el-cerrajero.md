@@ -393,9 +393,19 @@ User: "Lanza al verificador para que realice su inspeccion correspondiente de ca
 - `gentle-ai-verify` audited `537fb61..a7aeae6` in a temp scratch copy: 239/239 tests; L1-L3 returned the shortlex-first counterexample in 1,701 brute-force mechanisms; L4 84 candidates with coverage; L5 261 inputs and 1,694 mutants against an independent simulator; the reference adder needs 230 steps; the level 1-4 verdict hash is identical to the baseline.
 - B1 (blocker): the L5 build pin editor opens below the viewport at 1366x768 because `.game` has `overflow:hidden`. Owner decision: not fixed; the remaster replaces the layout completely. Known and accepted.
 - B2 (blocker): `docs/LOGIC.md` overstated `checkThief`. Fixed: it requires `jam`/`alarm`/`wrong-output` for function phases and `intruder`/`lockout` for language phases; L4 can return `jam` and falls back to the intruder line.
-- A1: the `LOGIC.md` test map claims `judge.test.js` covers `jam`/`alarm`; no test pins `jam`. Pending owner decision.
+- A1: the `LOGIC.md` test map claims `judge.test.js` covers `jam`/`alarm`; no test pins `jam`. Resolved in L37.
 - A4: owner accepts the one-pin repair; it shows how the mechanism works before the real build challenge.
 - A5: focus and Escape behavior deferred to the remaster.
-- A6: frames cap at 2000, so a 5000-step jam replays the tape at step 1999 with no note. Fixing it touches `tm.js` (frozen) or adds a UI note.
+- A6: frames cap at 2000, so a 5000-step jam replays the tape at step 1999 with no note. Resolved in L37 with a one-time authorized exception to the freeze.
 - A9: freeze contract amended. The `drumEditor.js` accept-section guard is frozen logic (it protects `createTM`), `tests/*` is the safety net and is not edited for a remaster, and `serve.py` is out of remaster scope.
 - A8 fixed: L35 now records both pushes.
+
+### L37 — A1 and A6 fixes (2026-11-12)
+
+User: "hay que solucionar lo que se dice con lo que esta hecho realmente, nada se puede estar alucinando, asi que corrige estos puntos, haz robusto el test que dices que es flojo, tienes autorizado corregir el problema de los frames aunque modifiques algo del contrato congelado (solo por esta vez) aun asi sigo sin entender del todo bien en que afecta este aspecto, de todas manneras cualquier cosa que se modifique tambien en los documentos donde se nombre esto se debe corregir, recuerda, todo debe tener sentido de lo que se dice a lo que esta hecho."
+
+- A1: `tests/dfa.test.js` now pins the shortlex-first word exactly (`'0'` for the equivalent-DFA pair, `'01'` for `contains01` vs `contains10`) instead of accepting either word. `tests/judge.test.js` now pins `jam` for L4 and L5 and `alarm` for the initial L5 build, so the reasons the test map claims are actually covered.
+- A6: `src/core/tm.js` keeps the terminal frame (`accept`/`alarm`/`limit`) when `maxFrames` is full by replacing the last slot. `showTapeFrame` now ends at the real final configuration instead of step 1999. Verified with the default cap: a runaway machine reports `limit`, 5000 steps, 2000 frames, last frame step 5000.
+- One-time authorized exception to the frozen `src/core/tm.js`; the freeze remains in force for everything else.
+- Docs aligned with the code: `DESIGN.md` §3.5 and §8 (terminal frame, 16-pin adder, D8 and test notes), `LOGIC.md` §4/§9/Discrepancias, `STATUS.md` engine notes and test counts.
+- 244 tests passing (was 239): +2 in `tm.test.js`, +3 in `judge.test.js`; the two `dfa.test.js` tests were strengthened without changing their count.

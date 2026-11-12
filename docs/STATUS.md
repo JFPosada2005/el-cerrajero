@@ -31,7 +31,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - cinta dispersa y cabezal;
   - lectura/escritura y movimiento L/R;
   - resultados accept/alarm/limit/invalid-symbol y `output`;
-  - frames con ventana de 7 celdas.
+  - frames con ventana de 7 celdas; el frame terminal se conserva con el tope lleno.
 - **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
 - **Niveles 1-5 jugables** con el flujo reparar → construir → asalto:
   - taller SVG con celdas por fase y **un cable por par de celdas**, con todos sus valores en una etiqueta;
@@ -45,7 +45,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **Nivel 3 (museo):** AFND con épsilon, bifurcador y resorte; dos ramales (`1-2-2` y `2-1-1`).
 - **Nivel 4 (teatro):** AP con pila, giros balanceados y `A^n B^n`; juez acotado (evidencia, no prueba) y panel de pila.
 - **Nivel 5 (banco central):** MT con cinta y tambor; incremento y suma binaria; juez por función (evidencia, no prueba).
-- Tests: **239 pasando** con `node --test`, incluidos DOM de los editores, blueprint de cables, jueces exacto y acotado, esquema de niveles, niveles 1-5 y los motores AFD/AFND/AP/MT.
+- Tests: **244 pasando** con `node --test`, incluidos DOM de los editores, blueprint de cables, jueces exacto y acotado, esquema de niveles, niveles 1-5 y los motores AFD/AFND/AP/MT.
 
 ## Qué está en revisión
 
@@ -79,7 +79,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 tests/dfa.test.js       23 passing
 tests/nfa.test.js       26 passing
 tests/pda.test.js       20 passing
-tests/tm.test.js        16 passing
+tests/tm.test.js        18 passing
 tests/order.test.js      5 passing
 tests/limits.test.js     4 passing
 tests/level1.test.js     5 passing
@@ -93,11 +93,11 @@ tests/drumEditor.test.js  9 passing
 tests/catalog.test.js   12 passing
 tests/blueprint.test.js 14 passing
 tests/machines.test.js  12 passing
-tests/judge.test.js     12 passing
+tests/judge.test.js     15 passing
 tests/levels.test.js    26 passing
 tests/oracles.test.js    5 passing
 tests/functions.test.js  8 passing
-total                  239 passing
+total                  244 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).

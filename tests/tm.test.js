@@ -103,6 +103,30 @@ test('the halted accept frame carries rule null', () => {
   assert.equal(last.step, result.steps);
 });
 
+test('the limit frame is kept when the frame cap is reached', () => {
+  const machine = createTM(incrementSpec());
+  const result = runTM(machine, '1111', { record: true, maxSteps: 5, maxFrames: 3 });
+  assert.equal(result.outcome, 'limit');
+  assert.equal(result.steps, 5);
+  assert.equal(result.frames.length, 3);
+  const last = result.frames[result.frames.length - 1];
+  assert.equal(last.step, 5);
+  assert.equal(last.state, 'carry');
+  assert.equal(last.read, '1');
+  assert.deepEqual(last.rule, { write: '0', move: 'L', to: 'carry' });
+});
+
+test('the accept frame is kept when the frame cap is reached', () => {
+  const machine = createTM(incrementSpec());
+  const result = runTM(machine, '0', { record: true, maxFrames: 2 });
+  assert.equal(result.outcome, 'accept');
+  assert.equal(result.frames.length, 2);
+  const last = result.frames[result.frames.length - 1];
+  assert.equal(last.step, result.steps);
+  assert.equal(last.state, 'done');
+  assert.equal(last.rule, null);
+});
+
 test('frames stay empty without record', () => {
   const machine = createTM(incrementSpec());
   const result = runTM(machine, '11');

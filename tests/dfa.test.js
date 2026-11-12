@@ -190,17 +190,15 @@ test('areEquivalentDFA recognizes the same language with redundant states', () =
   assert.equal(result.counterexample, null);
 });
 
-test('areEquivalentDFA returns a shortest counterexample', () => {
+test('areEquivalentDFA returns the shortlex-first counterexample', () => {
   const result = areEquivalentDFA(simpleEndsWith1, simpleEndsWith0);
   assert.equal(result.equivalent, false);
-  assert.equal(result.counterexample.length, 1);
-  assert.ok(['0', '1'].includes(result.counterexample));
+  assert.equal(result.counterexample, '0');
 });
 
-test('shortestCounterexample finds the shortest difference', () => {
+test('shortestCounterexample finds the shortlex-first difference', () => {
   const counterexample = shortestCounterexample(contains01, contains10);
-  assert.equal(counterexample.length, 2);
-  assert.ok(['01', '10'].includes(counterexample));
+  assert.equal(counterexample, '01');
 });
 
 const accepts123 = createDFA({

@@ -136,3 +136,48 @@ test('a function target with a DFA throws a clear error', () => {
   const player = toMachine(alphabet, { cells }, { wires: [] });
   assert.throws(() => judge(puzzle, player), /judge: function targets need a TM machine/);
 });
+test('the initial TM build drum fails with alarm', () => {
+  const puzzle = level5.phases.build;
+  const verdict = judge(puzzle, toMachine([], puzzle, structuredClone(puzzle.blueprint), 'tm'));
+  assert.equal(verdict.correct, false);
+  assert.equal(verdict.reason, 'alarm');
+  assert.equal(verdict.counterexample, '0+0');
+  assert.equal(verdict.expected, '0');
+  assert.equal(verdict.actual, null);
+  assert.equal(verdict.method, 'bounded');
+});
+test('a runaway TM counter fails with jam', () => {
+  const puzzle = level5.phases.repair;
+  const blueprint = {
+    rules: {
+      seek: {
+        0: { write: '0', move: 'R', to: 'seek' },
+        1: { write: '1', move: 'R', to: 'seek' },
+        _: { write: '_', move: 'R', to: 'seek' }
+      },
+      carry: {},
+      done: {}
+    }
+  };
+  const verdict = judge(puzzle, toMachine([], puzzle, blueprint, 'tm'));
+  assert.equal(verdict.correct, false);
+  assert.equal(verdict.reason, 'jam');
+  assert.equal(verdict.counterexample, '0');
+  assert.equal(verdict.expected, '1');
+  assert.equal(verdict.actual, null);
+  assert.equal(verdict.method, 'bounded');
+});
+test('a runaway PDA fails with jam', () => {
+  const puzzle = level4.phases.build;
+  const keys = level4.keys.map((entry) => entry.symbol);
+  const blueprint = {
+    wires: [
+      { from: 'q0', to: 'q1', spring: true, stack: { top: 'any', action: 'push' } },
+      { from: 'q1', to: 'q0', spring: true, stack: { top: 'any', action: 'push' } }
+    ]
+  };
+  const verdict = judge(puzzle, toMachine(keys, puzzle, blueprint, 'pda'));
+  assert.equal(verdict.correct, false);
+  assert.equal(verdict.reason, 'jam');
+  assert.equal(verdict.counterexample, 'AB');
+});

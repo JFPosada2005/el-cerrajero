@@ -147,7 +147,7 @@ Qué puede y qué no puede saber cada capa (verificado en el código):
 - **API:** `validateTM` (`tm.js:50-122`), `createTM` (`tm.js:124-143`), `runTM` (`tm.js:145-194`), `acceptsTM` (`tm.js:196-198`).
 - **Invariantes:** determinista por forma (a lo sumo una regla por par estado/símbolo); el blanco está en el alfabeto de cinta pero no en el de entrada; el alfabeto de entrada ⊆ alfabeto de cinta; `move` es `L` o `R`; los estados de aceptación no tienen reglas (`tm.js:50-122`).
 - **Semántica:** cinta infinita en ambas direcciones como `Map` disperso; cabezal inicia en 0 (`tm.js:154-160`). Cada paso: si el estado acepta → `accept`; si no hay regla → `alarm`; si `steps === maxSteps` → `limit`; si no, escribir/mover/transitar (`tm.js:162-193`). `output` = cinta del primer al último símbolo no blanco (`tapeOutput`, `tm.js:28-48`).
-- **Frames:** `{ step, state, head, read, rule, window: { start, symbols } }` con ventana de 7 casillas (`head ± 3`, `windowSymbols` en `tm.js:8-14`), tope `maxFrames` (`tm.js:16-26`).
+- **Frames:** `{ step, state, head, read, rule, window: { start, symbols } }` con ventana de 7 casillas (`head ± 3`, `windowSymbols` en `tm.js:8-14`), tope `maxFrames`; el frame terminal (`accept`/`alarm`/`limit`) siempre se conserva: si el tope está lleno, reemplaza el último slot, así el replay termina en la configuración real (`pushFrame` y `runTM` en `tm.js`).
 - **El porqué:** por Rice, cualquier propiedad no trivial de lo que computa una MT es indecidible, y la detención también lo es; por eso cada corrida lleva tope de pasos y el juez trata el tope como `jam` (§5).
 
 ---
@@ -270,10 +270,10 @@ Secciones exactas por archivo: contrato/título/cliente/brief/llaves/partes/ladr
 
 | Archivo | Qué fija |
 |---|---|
-| `dfa.test.js` | `simulateDFA`/`runDFA`, validación estricta, `areEquivalentDFA` y mínimo shortlex (`'01'`/`'10'` de largo 2) |
+| `dfa.test.js` | `simulateDFA`/`runDFA`, validación estricta, `areEquivalentDFA` y mínimo shortlex fijado en `'0'` y `'01'` |
 | `nfa.test.js` | Clausura-ε con ciclos, frames de activos, `nfaToDFA`, equivalencia; `'211'` fijado |
 | `pda.test.js` | push/pop y orden cima-primero, ε tras fin de entrada, pila vacía, `limit` en lazo ε, frames del camino aceptador |
-| `tm.test.js` | Mover a la izquierda del inicio, `alarm`, `limit`, salida recortada, blanco, aceptador sin reglas |
+| `tm.test.js` | Mover a la izquierda del inicio, `alarm`, `limit`, salida recortada, blanco, aceptador sin reglas, frame terminal conservado con el tope lleno |
 | `order.test.js` | Orden shortlex, conteo `enumerateWords` (2047 con ≤ 10 sobre 2 llaves), RNG determinista |
 | `limits.test.js` | `DEFAULT_LIMITS` y `withLimits` |
 | `blueprint.test.js` | Cada efecto de `applyEdit`: `removed`/`kept`/`added`/`moved`/`blocked` (+`needs-gear`, `spring-loop`) |
@@ -333,7 +333,7 @@ En la UI visible están prohibidas las palabras académicas (`checkCopy`/`BANNED
 3. **Tope "segundo número ≤ 31" (L5).** El diseño (§4.3) lo enuncia como regla; el código no lo impone: lo que acota es `sumInputs` (`functions.js:23-41`, `maxBits: 4` + acarreos hasta k = 8/5). Efecto equivalente en la práctica.
 4. **Línea de victoria.** El diseño (§4.2) cita "probó {tested} combinaciones y se rindió"; los `giveUp` reales dicen "El ladrón probó todas las combinaciones…" (p. ej. `level4.js:21`). Misma idea, otro texto.
 5. **Suites de test del diseño (§9) sin archivo propio:** `flow`, `progress`, `vocabulary`, `architecture`, `hygiene` no existen como `tests/*.test.js` (la lista real está en §9); parte de esas reglas sí están cubiertas indirectamente (`levels.test.js` valida vocabulario vía `validateLevel`→`checkCopy`; `catalog.test.js` cubre desbloqueo).
-6. **Conteo de púas del sumador L5.** El diseño (§8) dice 15; la tabla implementada y verificada en `tests/level5.test.js` tiene **16** (4 en `seek`, 3 en `dec`, 3 en `toPlus`, 3 en `carry`, 3 en `clean`). Manda la tabla verificada; el número del diseño quedó desactualizado.
+6. **Conteo de púas del sumador L5 (resuelto).** El diseño decía 15; la tabla implementada y verificada en `tests/level5.test.js` tiene **16** (4 en `seek`, 3 en `dec`, 3 en `toPlus`, 3 en `carry`, 3 en `clean`). `DESIGN.md` §8 y D8 ya dicen 16.
 
 ## Key Learnings
 
