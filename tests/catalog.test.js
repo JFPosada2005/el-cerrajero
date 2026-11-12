@@ -17,9 +17,9 @@ test('only the fifth contract is the final boss', () => {
   assert.equal(bosses[0].id, 5);
 });
 
-test('the first four contracts are playable', () => {
+test('all five contracts are playable', () => {
   const playable = LEVELS.filter((level) => level.playable);
-  assert.deepEqual(playable.map((level) => level.id), [1, 2, 3, 4]);
+  assert.deepEqual(playable.map((level) => level.id), [1, 2, 3, 4, 5]);
 });
 
 test('the first contract is available on a fresh map', () => {

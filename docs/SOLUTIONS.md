@@ -118,8 +118,39 @@ Trabajo —resorte→ Cerrojo (base, no tocar)
 - `Soltando —B→ Soltando` (ficha, soltar)
 - `Soltando —resorte→ Cerrojo` (base, no tocar)
 
-## Nivel 5
+## Nivel 5 — El banco central (tambor y cinta)
 
-Pendiente de implementación. Este documento se completa cuando el nivel esté jugable.
+En este nivel cada púa se escribe como `sección · símbolo · escribe · mueve · siguiente`: lo que hay que escribir en la cinta, hacia dónde mover el cabezal (`←` izquierda, `→` derecha) y a qué sección ir. Una púa vacía deja la alarma encendida. El símbolo vacío se muestra como `vacío`.
 
-- **Nivel 5:** MT (incremento y suma binaria).
+### Reparación: el contador suma 1 al número de la cinta
+
+En `Llevar`, la púa para `1` escribe `1`: con la cinta `1` el contador marca `11` en vez de `10`.
+
+Cambiar:
+
+- `Llevar · 1 · 1 · ← · Llevar` por `Llevar · 1 · 0 · ← · Llevar` (se escribe `0`, se sigue moviendo a la izquierda, se sigue en `Llevar`).
+
+### Construcción: el contador suma los dos números separados por `+`
+
+Tabla de referencia completa (`Listo` no lleva púas: es el cerrojo):
+
+```text
+Buscar el final · 0 · 0 · → · Buscar el final
+Buscar el final · 1 · 1 · → · Buscar el final
+Buscar el final · + · + · → · Buscar el final
+Buscar el final · vacío · vacío · ← · Restar
+Restar · 0 · 1 · ← · Restar
+Restar · 1 · 0 · ← · Volver al signo
+Restar · + · vacío · → · Limpiar
+Volver al signo · 0 · 0 · ← · Volver al signo
+Volver al signo · 1 · 1 · ← · Volver al signo
+Volver al signo · + · + · ← · Llevar
+Llevar · 1 · 0 · ← · Llevar
+Llevar · 0 · 1 · → · Buscar el final
+Llevar · vacío · 1 · → · Buscar el final
+Limpiar · 0 · vacío · → · Limpiar
+Limpiar · 1 · vacío · → · Limpiar
+Limpiar · vacío · vacío · → · Listo
+```
+
+Con la cinta `101+11` el contador deja `1000`; con `1+1` deja `10`.

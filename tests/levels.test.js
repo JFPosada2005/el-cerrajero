@@ -18,6 +18,7 @@ test('getLevel returns each frozen level', () => {
   assert.equal(getLevel(2).id, 2);
   assert.equal(getLevel(3).id, 3);
   assert.equal(getLevel(4).id, 4);
+  assert.equal(getLevel(5).id, 5);
 });
 test('getLevel throws on an unknown id', () => {
   assert.throws(() => getLevel(99), /unknown level 99/);
@@ -27,13 +28,15 @@ test('validateLevel accepts the frozen levels', () => {
   assert.equal(validateLevel(level2), true);
   assert.equal(validateLevel(level3), true);
   assert.equal(validateLevel(level4), true);
+  assert.equal(validateLevel(level5), true);
 });
 test('LEVELS holds the frozen levels in order', () => {
-  assert.equal(LEVELS.length, 4);
+  assert.equal(LEVELS.length, 5);
   assert.equal(LEVELS[0].id, 1);
   assert.equal(LEVELS[1].id, 2);
   assert.equal(LEVELS[2].id, 3);
   assert.equal(LEVELS[3].id, 4);
+  assert.equal(LEVELS[4].id, 5);
 });
 test('validation rejects a duplicate cell id', () => {
   const bad = mutated(level1, (copy) => {

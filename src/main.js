@@ -5,13 +5,19 @@ import { toMachine } from './game/machines.js';
 import { runDFA } from './core/dfa.js';
 import { runNFA } from './core/nfa.js';
 import { runPDA } from './core/pda.js';
+import { runTM } from './core/tm.js';
+import { functionFor } from './game/functions.js';
 import { judge } from './game/judge.js';
 import { thiefReport } from './game/thief.js';
 import { createGraphEditor } from './ui/graphEditor.js';
+import { createDrumEditor } from './ui/drumEditor.js';
+import { createTapePanel } from './ui/tapePanel.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
 const app = document.querySelector('#app');
 const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
+let drumEditor = null;
+let tapePanel = null;
 let selectedKey = null;
 let cutMode = false;
 let springMode = false;
@@ -468,7 +474,7 @@ function startLevel(id) {
   state.phase = 'repair';
   state.puzzle = state.level.phases.repair;
   state.blueprint = structuredClone(state.puzzle.blueprint);
-  selectedKey = state.level.keys[0].symbol;
+  selectedKey = firstKey();
   cutMode = false;
   springMode = false;
   stackTop = 'any';
@@ -479,14 +485,24 @@ function startBuild() {
   state.phase = 'build';
   state.puzzle = state.level.phases.build;
   state.blueprint = structuredClone(state.puzzle.blueprint);
-  selectedKey = state.level.keys[0].symbol;
+  selectedKey = firstKey();
   cutMode = false;
   springMode = false;
   stackTop = 'any';
   stackAction = 'keep';
   renderWorkshop();
 }
+function firstKey() {
+  if (state.level.keys.length === 0) {
+    return null;
+  }
+  return state.level.keys[0].symbol;
+}
 function renderWorkshop() {
+  if (state.level.workspace === 'drum') {
+    renderDrumWorkshop();
+    return;
+  }
   app.replaceChildren();
   const shell = document.createElement('div');
   shell.className = 'game';
@@ -716,6 +732,210 @@ function renderWorkshop() {
     appendLog('Probá la llave y después lanzá el asalto.');
   }
 }
+function sectionLabel(id) {
+  const found = state.puzzle.sections.find((section) => section.id === id);
+  if (found === undefined) {
+    return id;
+  }
+  return found.label;
+}
+function moveArrow(move) {
+  if (move === 'L') {
+    return '←';
+  }
+  return '→';
+}
+function readLabel(symbol) {
+  if (symbol === state.puzzle.tape.blank) {
+    return 'vacío';
+  }
+  return symbol;
+}
+function renderDrumWorkshop() {
+  app.replaceChildren();
+  const shell = document.createElement('div');
+  shell.className = 'game';
+  const header = document.createElement('header');
+  header.className = 'game-header';
+  const headerText = document.createElement('div');
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'eyebrow';
+  eyebrow.textContent = 'El Cerrajero';
+  const title = document.createElement('h1');
+  title.textContent = `Contrato ${state.level.contract} · ${phaseWord()}`;
+  headerText.append(eyebrow);
+  headerText.append(title);
+  const back = document.createElement('button');
+  back.id = 'back-button';
+  back.type = 'button';
+  back.className = 'ghost';
+  back.textContent = 'Volver';
+  back.addEventListener('click', renderMap);
+  header.append(headerText);
+  header.append(back);
+  const layout = document.createElement('main');
+  layout.className = 'layout';
+  const brief = document.createElement('aside');
+  brief.className = 'panel brief';
+  const contract = document.createElement('section');
+  contract.className = 'contract';
+  contract.setAttribute('aria-label', 'Contrato del cliente');
+  const number = document.createElement('p');
+  number.className = 'contract-number';
+  number.textContent = `Contrato ${state.level.contract}`;
+  const client = document.createElement('h2');
+  client.className = 'contract-client';
+  client.textContent = state.level.client;
+  const rule = document.createElement('p');
+  rule.className = 'contract-rule';
+  rule.textContent = state.puzzle.goal;
+  const note = document.createElement('p');
+  note.className = 'contract-note';
+  note.textContent = 'Cualquier otra combinación deja la alarma encendida.';
+  contract.append(number);
+  contract.append(client);
+  contract.append(rule);
+  contract.append(note);
+  const briefTitle = document.createElement('h2');
+  briefTitle.textContent = 'El encargo';
+  const intro = document.createElement('p');
+  intro.textContent = state.puzzle.intro;
+  const legend = document.createElement('div');
+  legend.className = 'legend';
+  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
+    const entry = document.createElement('span');
+    const icon = document.createElement('i');
+    icon.className = `legend-dot ${dot}`;
+    entry.append(icon);
+    entry.append(word);
+    legend.append(entry);
+  }
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const probe = document.createElement('button');
+  probe.id = 'test-key';
+  probe.type = 'button';
+  probe.className = 'secondary';
+  probe.textContent = 'Probar la cinta';
+  const assault = document.createElement('button');
+  assault.id = 'heist';
+  assault.type = 'button';
+  assault.className = 'primary';
+  if (state.phase === 'repair') {
+    assault.textContent = 'Ensayo';
+  } else {
+    assault.textContent = 'Asalto';
+  }
+  actions.append(probe);
+  actions.append(assault);
+  brief.append(contract);
+  brief.append(briefTitle);
+  brief.append(intro);
+  brief.append(legend);
+  brief.append(actions);
+  const shop = document.createElement('section');
+  shop.className = 'panel workshop';
+  const shopHead = document.createElement('div');
+  shopHead.className = 'workshop-head';
+  const shopTitle = document.createElement('h2');
+  shopTitle.textContent = 'Tambor';
+  shopHead.append(shopTitle);
+  const tapeRoot = document.createElement('div');
+  tapeRoot.id = 'tape-panel';
+  const drumRoot = document.createElement('div');
+  drumRoot.id = 'drum';
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.textContent = 'Tocá una púa para escribir, mover y elegir la sección siguiente.';
+  shop.append(shopHead);
+  shop.append(tapeRoot);
+  shop.append(drumRoot);
+  shop.append(hint);
+  const logPanel = document.createElement('aside');
+  logPanel.className = 'panel log-panel';
+  const logTitle = document.createElement('h2');
+  logTitle.textContent = 'Bitácora';
+  const log = document.createElement('ul');
+  log.id = 'log';
+  log.className = 'log';
+  log.setAttribute('aria-live', 'polite');
+  log.setAttribute('aria-label', 'Bitácora del taller');
+  logPanel.append(logTitle);
+  logPanel.append(log);
+  layout.append(brief);
+  layout.append(shop);
+  layout.append(logPanel);
+  shell.append(header);
+  shell.append(layout);
+  app.append(shell);
+  workshop = null;
+  drumEditor = createDrumEditor({ root: document.querySelector('#drum'), sections: state.puzzle.sections, symbols: state.puzzle.tape.symbols, labels: state.puzzle.tape.labels, rules: state.blueprint.rules, onEdit: handlePinEdit });
+  tapePanel = createTapePanel({ root: document.querySelector('#tape-panel'), blankLabel: state.puzzle.tape.labels[state.puzzle.tape.blank] ?? '' });
+  document.querySelector('#test-key').addEventListener('click', handleProbe);
+  document.querySelector('#heist').addEventListener('click', handleAssault);
+  appendLog(state.puzzle.intro);
+  if (state.phase === 'repair') {
+    appendLog('Probá la cinta y después pedí el ensayo.');
+  } else {
+    appendLog('Probá la cinta y después lanzá el asalto.');
+  }
+}
+function showTapeFrame(run) {
+  if (run.frames.length === 0) {
+    return;
+  }
+  const frame = run.frames[run.frames.length - 1];
+  tapePanel.show({ window: frame.window, head: frame.head, sectionLabel: sectionLabel(frame.state) });
+  drumEditor.light(frame.state, frame.read);
+}
+function probeTape() {
+  const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
+  const input = state.puzzle.examples.runs[0].input;
+  const run = runTM(machine, input, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
+  showTapeFrame(run);
+  const fn = functionFor(state.puzzle.target.id);
+  const expected = fn.compute(input);
+  if (fn.matches(run.output, expected)) {
+    appendLog(`La cinta ${input} dejó ${run.output}.`, 'good');
+  } else {
+    appendLog(`La cinta ${input} dejó ${run.output}.`, 'bad');
+  }
+  appendLog(`El cliente esperaba ${expected}.`);
+}
+function assaultTape(machine, verdict) {
+  if (verdict.correct) {
+    drumEditor.clearLight();
+    if (state.phase === 'repair' && state.level.phases.build !== undefined) {
+      showRepairModal();
+    } else {
+      showWin();
+    }
+    return;
+  }
+  if (verdict.counterexample === null) {
+    return;
+  }
+  const run = runTM(machine, verdict.counterexample, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
+  showTapeFrame(run);
+}
+function handlePinEdit(edit) {
+  const rules = structuredClone(state.blueprint.rules);
+  if (rules[edit.section] === undefined) {
+    rules[edit.section] = {};
+  }
+  if (edit.pin === null) {
+    delete rules[edit.section][edit.read];
+  } else {
+    rules[edit.section][edit.read] = { write: edit.pin.write, move: edit.pin.move, to: edit.pin.to };
+  }
+  state.blueprint.rules = rules;
+  drumEditor.setRules(state.blueprint.rules);
+  if (edit.pin === null) {
+    appendLog(`Púa vacía (alarma): ${sectionLabel(edit.section)} · ${readLabel(edit.read)}.`);
+    return;
+  }
+  appendLog(`Púa de ${sectionLabel(edit.section)} · ${readLabel(edit.read)}: ${readLabel(edit.pin.write)} ${moveArrow(edit.pin.move)} ${sectionLabel(edit.pin.to)}.`);
+}
 function runMachine(machine, word, options) {
   if (machine.type === 'nfa') {
     return runNFA(machine, word, options);
@@ -732,6 +952,10 @@ function frameStates(frames) {
   return frames.map((frame) => frame.state);
 }
 function handleProbe() {
+  if (state.level.machine === 'tm') {
+    probeTape();
+    return;
+  }
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const word = state.puzzle.examples.open[0];
   const result = runMachine(machine, word, { record: true });
@@ -750,6 +974,10 @@ function handleAssault() {
   const verdict = judge(state.puzzle, machine);
   const report = thiefReport(verdict, state.level);
   appendLog(report.text, report.tone);
+  if (state.level.machine === 'tm') {
+    assaultTape(machine, verdict);
+    return;
+  }
   if (verdict.correct) {
     workshop.clearHighlight();
     if (state.phase === 'repair' && state.level.phases.build !== undefined) {
