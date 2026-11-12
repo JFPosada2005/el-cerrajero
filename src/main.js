@@ -579,12 +579,13 @@ function renderWorkshop() {
     tools.append(spring);
   }
   let stackTools = null;
+  let stackHelp = null;
   if (state.level.machine === 'pda') {
     stackTools = document.createElement('div');
     stackTools.className = 'stack-tools';
     const topText = document.createElement('span');
     topText.className = 'stack-tools-label';
-    topText.textContent = 'Si arriba hay';
+    topText.textContent = 'Si la pila tiene arriba';
     stackTools.append(topText);
     for (const [id, value, word] of [['stack-top-any', 'any', 'Da igual'], ['stack-top-base', 'base', 'Base'], ['stack-top-chip', 'chip', 'Ficha']]) {
       const option = document.createElement('button');
@@ -610,6 +611,9 @@ function renderWorkshop() {
       option.addEventListener('click', () => selectStackAction(value));
       stackTools.append(option);
     }
+    stackHelp = document.createElement('p');
+    stackHelp.className = 'stack-help';
+    stackHelp.textContent = 'La pila es la memoria del mecanismo. El cable mira la ficha de arriba: cargar apila una ficha, soltar la saca y no tocar la deja igual. Se lee: llave · qué hay arriba · qué hace.';
   }
   const hint = document.createElement('p');
   hint.id = 'tool-hint';
@@ -661,12 +665,15 @@ function renderWorkshop() {
   if (stackTools !== null) {
     shop.append(stackTools);
   }
+  if (stackHelp !== null) {
+    shop.append(stackHelp);
+  }
   shop.append(canvas);
   if (state.level.machine === 'pda') {
     const block = document.createElement('div');
     block.className = 'stack-block';
     const stackTitle = document.createElement('h2');
-    stackTitle.textContent = 'Pila';
+    stackTitle.textContent = 'Pila · arriba primero';
     const stackPanel = document.createElement('div');
     stackPanel.id = 'stack-panel';
     stackPanel.className = 'stack-panel';

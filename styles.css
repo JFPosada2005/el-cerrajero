@@ -948,6 +948,12 @@ button:active {
   font-size: 0.68rem;
 }
 
+.stack-help {
+  color: var(--muted);
+  font-size: 0.78rem;
+  margin: 0 0 0.5rem;
+}
+
 @media (min-width: 1101px) {
   .game {
     height: 100vh;

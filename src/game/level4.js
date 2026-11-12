@@ -55,7 +55,7 @@ export const level4 = {
       ]
     },
     build: {
-      goal: 'Abre solo con A^n B^n: sube n veces y baja exactamente n.',
+      goal: 'Abre solo si primero subís varias veces y después bajás exactamente la misma cantidad.',
       intro: 'El teatro cambió el montacargas. Construí el mecanismo desde cero.',
       cells: [
         { id: 'q0', label: 'Entrada', x: 140, y: 260, start: true },
