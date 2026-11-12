@@ -71,7 +71,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | done | `7e60eea` |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | in progress (NFA core done) | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | review | `cf07e65` |
-| T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | pending | - |
+| T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | in progress (TM core done) | - |
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
 | T9 | Solutions sheet for every level (repair + build) | S11 | inline | in progress (L1-L2) | - |
@@ -345,3 +345,13 @@ User screenshot: `TypeError: Cannot read properties of undefined (reading 'lengt
 - Fix: pass `state.level.machine` at both call sites (`handleProbe`, `handleAssault`); `judgeLanguage` now throws a clear `judge: language targets need a PDA machine` on a non-PDA.
 - Verified in headless Edge at 1366×768: Probar logs “La llave AB abrió la caja.”, Ensayo logs “Marcas de ganzúa en A.” (intruder expected from the buggy spring), no error overlay, and the stack panel goes base → ficha/base.
 - 192 tests passing. Commit `55f9889`.
+
+### L32 — TM core (2026-11-12)
+
+User: "perfecto, podemos proseguir con el nivel 5"
+
+- `src/core/tm.js`: `validateTM`, `createTM`, `runTM` (sparse tape, head at 0, accept/alarm/limit/invalid-symbol, `output` from the leftmost to the rightmost non-blank, 7-cell frames capped at 2000), `acceptsTM`.
+- 16 tests over the +1 machine: `0→1`, `1→10`, `10→11`, `11→100`, `1111→10000`, plus frames and validation.
+- 208 tests passing.
+- `.gitignore` now covers `__pycache__/` and `.atl/`.
+- Next: `functions.js` (binary-increment, binary-sum), the bounded TM judge, level 5 data and the drum/tape UI.

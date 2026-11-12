@@ -27,6 +27,11 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
   - búsqueda BFS con configuraciones visitadas;
   - límites de configuraciones y de pila (`truncated`);
   - frames con estado, pila y regla.
+- Motor MT (`src/core/tm.js`):
+  - cinta dispersa y cabezal;
+  - lectura/escritura y movimiento L/R;
+  - resultados accept/alarm/limit/invalid-symbol y `output`;
+  - frames con ventana de 7 celdas.
 - **Mapa de contratos:** 5 cartas, candado en las bloqueadas, desbloqueo al completar la anterior y corona en el jefe final.
 - **Niveles 1, 2, 3 y 4 jugables** con el flujo reparar → construir → asalto:
   - taller SVG con celdas por fase y **un cable por par de celdas**, con todos sus valores en una etiqueta;
@@ -39,7 +44,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 - **Nivel 2 (ascensor):** engranaje, paridad de `1` en la reparación y “termina en `2-1`” en la construcción.
 - **Nivel 3 (museo):** AFND con épsilon, bifurcador y resorte; dos ramales (`1-2-2` y `2-1-1`).
 - **Nivel 4 (teatro):** AP con pila, giros balanceados y `A^n B^n`; juez acotado (evidencia, no prueba) y panel de pila.
-- Tests: **192 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto y acotado, esquema de niveles, niveles 1-4 y los motores AFD/AFND/AP.
+- Tests: **208 pasando** con `node --test`, incluidos DOM del editor, blueprint de cables, juez exacto y acotado, esquema de niveles, niveles 1-4 y los motores AFD/AFND/AP/MT.
 
 ## Qué está en revisión
 
@@ -62,7 +67,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
 4. **T4 (nivel 3, AFND-λ) listo:** motor, datos y UI de resortes; pendiente el smoke test de navegador.
 5. **T5 (nivel 4, AP) listo:** motor, datos, oráculos, juez acotado y UI de pila; pendiente el smoke test de navegador.
-6. Implementar T6 (MT).
+6. **T6 (nivel 5, MT) en curso:** motor de cinta listo; faltan las funciones, el juez acotado y la UI de tambor/cinta.
 7. Remaster visual (animaciones, texturas, sonido) recién cuando los 5 niveles funcionen.
 8. T9: completar [`docs/SOLUTIONS.md`](SOLUTIONS.md) con los niveles 4-5 antes de la presentación.
 9. Pulido T7 e informe T8.
@@ -87,7 +92,8 @@ tests/judge.test.js      9 passing
 tests/levels.test.js    23 passing
 tests/oracles.test.js    5 passing
 tests/pda.test.js       20 passing
-total                  192 passing
+tests/tm.test.js        16 passing
+total                  208 passing
 ```
 
 Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: no-store`).
