@@ -131,4 +131,5 @@ Comando: `npm test`. Servidor: `npm run serve` (`serve.py`, con `Cache-Control: 
 - [`README.md`](../README.md)
 - [`CONTRIBUTING.md`](../CONTRIBUTING.md)
 - [`docs/TASKS.md`](TASKS.md)
+- [`docs/LOGIC.md`](LOGIC.md) — lógica, teoría y jueces de los cinco niveles; referencia del congelamiento.
 - [`odd/tasks/el-cerrajero.md`](../odd/tasks/el-cerrajero.md)

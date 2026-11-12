@@ -190,6 +190,8 @@ Este documento es un addendum a [`docs/DESIGN.md`](DESIGN.md): no cambia mecáni
 
 Archivos: `styles.css`, `index.html` (preload), `src/ui/*`, `assets/fonts/`, `docs/SMOKE.md`.
 
+**La lógica no se toca.** El remaster trabaja sobre `styles.css`, `index.html`, la presentación de `src/ui/*`, assets y movimiento. Los motores, jueces, datos y flujo funcional están congelados; ver [`docs/LOGIC.md`](LOGIC.md) y `AGENTS.md`. Si un cambio de lógica parece necesario, se pregunta al owner antes; si se hace por error, se informa y el owner decide.
+
 ## 14. Playtest
 
 Preguntas (sin ayudar):

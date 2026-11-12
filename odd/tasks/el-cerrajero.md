@@ -75,6 +75,7 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
 | T9 | Solutions sheet for every level (repair + build) | S11 | inline | done | `1c86aeb` |
+| T10 | Logic reference and remaster freeze | S11 | delegated (worker) | done | `docs/LOGIC.md` |
 
 ## Log
 
@@ -373,3 +374,14 @@ User: "perfecto, podemos proseguir con el nivel 5"
 - Verified in headless Edge at 1366×768: 3 sections / 9 pins / 7 tape cells, no page scroll (`768=768`, `1366=1366`), Probar logs “La cinta 1 dejó 11. El cliente esperaba 10.”, Ensayo logs the wrong-output thief line.
 - 239 tests.
 - Next: browser smoke test of contract 05 (repair and build), then the visual remaster.
+
+### L35 — Logic reference and remaster freeze (2026-11-12)
+
+User: "en este momento has push, necesito que se realice un documento (manda un subagente a hacerlo) de como funciona toda la logica de todos los niveles, que hagan referencia a partes exactas de codigo, como funcionan los jueces, basicamente como funciona toda la teoria detras de los niveles. Asi tengo claro como mi codigo maneja todo. Cuando iniciemos la fase de remasterizacion se supone en teoria toda esta logica no se debe tocar para absolutamente nada. Si en algun momento es necesario hacerlo necesito que me lo preguntes y me digas el porque es necesario. O si se llega a hacer por error de igual forma con mas razon aun es deber informarme, decirme el porque y yo determinar si dejamos el cambio o no."
+
+- Pushed `36605c6..2f87a94` (all level 5 work).
+- `docs/LOGIC.md`: layers, theory per level, engines, judges (exact/bounded), game layer, flow, level data, test map, remaster contract, glossary, and an honest “Discrepancias” section. References use `path:symbol` plus line numbers as of 2026-11-12 (symbols are the stable reference).
+- `AGENTS.md`: freeze policy — logic frozen during the remaster; presentation files free; ask before any logic change and explain why; report accidental changes and the owner decides; PRs declare whether they touched frozen files.
+- `docs/VISUAL-DESIGN.md` §13: the remaster does not touch the logic; links to `docs/LOGIC.md`.
+- Corrected the document's L5 pin count: the design says 15, the verified table has 16; the doc states 16 and records the discrepancy.
+- Next: visual remaster, then the report. The logic remains frozen.
