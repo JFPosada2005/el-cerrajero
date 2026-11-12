@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { level1 } from '../src/game/level1.js';
 import { level3 } from '../src/game/level3.js';
+import { level5 } from '../src/game/level5.js';
 import { applyEdit } from '../src/game/blueprint.js';
 import { toMachine } from '../src/game/machines.js';
 import { areEquivalentDFA } from '../src/core/dfa.js';
@@ -70,4 +71,28 @@ test('a PDA puzzle expands any and maps push pop keep with a spring epsilon rule
 test('a PDA puzzle without a stack throws', () => {
   const puzzle = { cells: [{ id: 'q0', start: true }, { id: 'q1', accept: true }], target: { kind: 'language', id: 'a-n-b-n' } };
   assert.throws(() => toMachine(['A', 'B'], puzzle, { wires: [] }, 'pda'), /stack/);
+});
+test('a TM puzzle builds sections tape and rules for the level-5 repair drum', () => {
+  const puzzle = level5.phases.repair;
+  const machine = toMachine([], puzzle, structuredClone(puzzle.blueprint), 'tm');
+  assert.equal(machine.type, 'tm');
+  assert.equal(machine.start, 'seek');
+  assert.deepEqual(machine.accept, ['done']);
+  assert.deepEqual(machine.tapeAlphabet, ['0', '1', '_']);
+  assert.equal(machine.blank, '_');
+  assert.deepEqual(machine.inputAlphabet, ['0', '1']);
+  assert.deepEqual(machine.transitions.seek['0'], { write: '0', move: 'R', to: 'seek' });
+});
+test('a TM puzzle builds the level-5 build drum with the plus symbol', () => {
+  const puzzle = level5.phases.build;
+  const machine = toMachine([], puzzle, structuredClone(puzzle.blueprint), 'tm');
+  assert.equal(machine.type, 'tm');
+  assert.equal(machine.start, 'seek');
+  assert.deepEqual(machine.accept, ['done']);
+  assert.deepEqual(machine.inputAlphabet, ['0', '1', '+']);
+  assert.equal(machine.transitions.seek._.to, 'carry');
+});
+test('a TM puzzle without a tape throws', () => {
+  const puzzle = { sections: [{ id: 'seek', start: true }, { id: 'done', accept: true }], target: { kind: 'function', id: 'binary-increment' } };
+  assert.throws(() => toMachine([], puzzle, { rules: {} }, 'tm'), /tape/);
 });

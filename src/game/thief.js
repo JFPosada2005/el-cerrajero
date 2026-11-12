@@ -11,6 +11,6 @@ export function thiefReport(verdict, level) {
     return { text: level.thief.giveUp, tone: 'good' };
   }
   const line = level.thief.lines[verdict.reason] ?? level.thief.lines.intruder;
-  const text = formatLine(line, { key: verdict.counterexample });
+  const text = formatLine(line, { key: verdict.counterexample, expected: verdict.expected, actual: verdict.actual });
   return { text, tone: 'bad' };
 }

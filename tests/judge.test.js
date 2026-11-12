@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { level1 } from '../src/game/level1.js';
 import { level3 } from '../src/game/level3.js';
 import { level4 } from '../src/game/level4.js';
+import { level5 } from '../src/game/level5.js';
 import { applyEdit } from '../src/game/blueprint.js';
 import { toMachine } from '../src/game/machines.js';
 import { judge } from '../src/game/judge.js';
@@ -108,4 +109,30 @@ test('the repaired PDA passes the bounded language judge', () => {
   assert.equal(verdict.reason, null);
   assert.equal(verdict.method, 'bounded');
   assert.equal(verdict.coverage.tested >= 2000, true);
+});
+test('a broken TM counter fails the function branch with wrong-output', () => {
+  const puzzle = level5.phases.repair;
+  const machine = toMachine([], puzzle, structuredClone(puzzle.blueprint), 'tm');
+  const verdict = judge(puzzle, machine);
+  assert.equal(verdict.correct, false);
+  assert.equal(verdict.counterexample, '1');
+  assert.equal(verdict.reason, 'wrong-output');
+  assert.equal(verdict.expected, '10');
+  assert.equal(verdict.actual, '11');
+  assert.equal(verdict.method, 'bounded');
+});
+test('a fixed TM counter passes the function branch', () => {
+  const puzzle = level5.phases.repair;
+  const blueprint = structuredClone(puzzle.blueprint);
+  blueprint.rules.carry['1'].write = '0';
+  const verdict = judge(puzzle, toMachine([], puzzle, blueprint, 'tm'));
+  assert.equal(verdict.correct, true);
+  assert.equal(verdict.counterexample, null);
+  assert.equal(verdict.reason, null);
+  assert.equal(verdict.method, 'bounded');
+});
+test('a function target with a DFA throws a clear error', () => {
+  const puzzle = level5.phases.repair;
+  const player = toMachine(alphabet, { cells }, { wires: [] });
+  assert.throws(() => judge(puzzle, player), /judge: function targets need a TM machine/);
 });

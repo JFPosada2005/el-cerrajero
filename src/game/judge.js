@@ -1,6 +1,8 @@
 import { areEquivalentDFA, createDFA, simulateDFA } from '../core/dfa.js';
 import { nfaToDFA } from '../core/nfa.js';
 import { runPDA } from '../core/pda.js';
+import { runTM } from '../core/tm.js';
+import { functionFor } from './functions.js';
 import { enumerateWords, randomWords, shortlexCompare } from '../core/order.js';
 import { ORACLES } from './oracles.js';
 
@@ -69,8 +71,55 @@ function judgeLanguage(puzzle, machine) {
   }
   return { correct: true, counterexample: null, reason: null, expected: null, actual: null, method: 'bounded', coverage: languageCoverage(puzzle, words.length, maxSteps) };
 }
+function functionFamilies(id) {
+  if (id === 'binary-sum') {
+    return ['pairs', 'carry-chains'];
+  }
+  return ['ones'];
+}
+function functionCoverage(puzzle, tested, maxSteps) {
+  return { exhaustiveLength: 0, tested, families: functionFamilies(puzzle.target.id), maxSteps };
+}
+function judgeFunction(puzzle, machine) {
+  if (machine.type !== 'tm') {
+    throw new Error('judge: function targets need a TM machine');
+  }
+  const fn = functionFor(puzzle.target.id);
+  const seen = new Set();
+  const inputs = [];
+  for (const word of fn.inputs(puzzle.judge.inputs)) {
+    if (seen.has(word) === true) {
+      continue;
+    }
+    seen.add(word);
+    inputs.push(word);
+  }
+  inputs.sort(shortlexCompare(['0', '1', '+']));
+  const maxSteps = puzzle.judge.limits.maxSteps;
+  let observed = 0;
+  for (const input of inputs) {
+    const expected = fn.compute(input);
+    const run = runTM(machine, input, { maxSteps });
+    if (run.steps > observed) {
+      observed = run.steps;
+    }
+    if (run.outcome === 'limit') {
+      return { correct: false, counterexample: input, reason: 'jam', expected, actual: null, method: 'bounded', coverage: functionCoverage(puzzle, inputs.length, observed) };
+    }
+    if (run.outcome === 'alarm' || run.outcome === 'invalid-symbol') {
+      return { correct: false, counterexample: input, reason: 'alarm', expected, actual: null, method: 'bounded', coverage: functionCoverage(puzzle, inputs.length, observed) };
+    }
+    if (fn.matches(run.output, expected) === false) {
+      return { correct: false, counterexample: input, reason: 'wrong-output', expected, actual: run.output, method: 'bounded', coverage: functionCoverage(puzzle, inputs.length, observed) };
+    }
+  }
+  return { correct: true, counterexample: null, reason: null, expected: null, actual: null, method: 'bounded', coverage: functionCoverage(puzzle, inputs.length, observed) };
+}
 export function judge(puzzle, machine) {
   const kind = puzzle.target.kind;
+  if (kind === 'function') {
+    return judgeFunction(puzzle, machine);
+  }
   if (kind === 'language') {
     return judgeLanguage(puzzle, machine);
   }

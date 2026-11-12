@@ -1,6 +1,7 @@
 import { createDFA } from '../core/dfa.js';
 import { createNFA } from '../core/nfa.js';
 import { createPDA } from '../core/pda.js';
+import { createTM } from '../core/tm.js';
 import { EPSILON } from '../core/symbols.js';
 
 function appendTarget(transitions, from, symbol, to) {
@@ -63,6 +64,9 @@ function toDFA(alphabet, puzzle, blueprint) {
 
 export function toMachine(alphabet, puzzle, blueprint, machine = null) {
   const kind = machine ?? puzzle.target?.machine?.type ?? 'dfa';
+  if (kind === 'tm') {
+    return toTM(puzzle, blueprint);
+  }
   if (kind === 'nfa') {
     return toNFA(alphabet, puzzle, blueprint);
   }
@@ -105,4 +109,39 @@ function toPDA(alphabet, puzzle, blueprint) {
     }
   }
   return createPDA({ states, alphabet: [...alphabet], stackAlphabet: [base, chip], stackStart: base, start: startCell.id, accept, transitions });
+}
+function toTM(puzzle, blueprint) {
+  if (puzzle.tape === undefined) {
+    throw new Error('toMachine: TM puzzle is missing its tape');
+  }
+  if (puzzle.sections === undefined) {
+    throw new Error('toMachine: TM puzzle is missing its sections');
+  }
+  const states = puzzle.sections.map((section) => section.id);
+  const startSection = puzzle.sections.find((section) => section.start === true);
+  if (startSection === undefined) {
+    throw new Error('toMachine: puzzle has no start section');
+  }
+  const accept = puzzle.sections.filter((section) => section.accept === true).map((section) => section.id);
+  const tapeAlphabet = [...puzzle.tape.symbols];
+  const blank = puzzle.tape.blank;
+  const inputAlphabet = tapeAlphabet.filter((symbol) => symbol !== blank);
+  const transitions = {};
+  for (const state of states) {
+    transitions[state] = {};
+  }
+  const rules = blueprint.rules ?? {};
+  for (const [section, row] of Object.entries(rules)) {
+    if (states.includes(section) === false) {
+      throw new Error(`toMachine: rule for unknown section "${section}"`);
+    }
+    const safeRow = row ?? {};
+    for (const [read, rule] of Object.entries(safeRow)) {
+      if (rule === null || rule === undefined) {
+        continue;
+      }
+      transitions[section][read] = { write: rule.write, move: rule.move, to: rule.to };
+    }
+  }
+  return createTM({ states, inputAlphabet, tapeAlphabet, blank, start: startSection.id, accept, transitions });
 }

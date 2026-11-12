@@ -6,6 +6,7 @@ import { level1 } from '../src/game/level1.js';
 import { level2 } from '../src/game/level2.js';
 import { level3 } from '../src/game/level3.js';
 import { level4 } from '../src/game/level4.js';
+import { level5 } from '../src/game/level5.js';
 import { LEVELS, getLevel, validateLevel } from '../src/game/levels.js';
 function mutated(base, visit) {
   const copy = structuredClone(base);
@@ -155,4 +156,19 @@ test('validation rejects an invalid stack action', () => {
     copy.phases.repair.blueprint.wires[0].stack.action = 'bogus';
   });
   assert.throws(() => validateLevel(bad), /stack/);
+});
+test('validateLevel accepts level 5 with its drum puzzles', () => {
+  assert.equal(validateLevel(level5), true);
+});
+test('validation rejects a drum tape missing its blank', () => {
+  const bad = mutated(level5, (copy) => {
+    copy.phases.repair.tape.symbols = ['0', '1'];
+  });
+  assert.throws(() => validateLevel(bad), /blank/);
+});
+test('validation rejects a function target with an unknown id', () => {
+  const bad = mutated(level5, (copy) => {
+    copy.phases.repair.target.id = 'binary-triple';
+  });
+  assert.throws(() => validateLevel(bad), /unknown function/);
 });

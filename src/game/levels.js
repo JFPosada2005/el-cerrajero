@@ -1,6 +1,7 @@
 import { acceptsDFA } from '../core/dfa.js';
 import { acceptsNFA } from '../core/nfa.js';
 import { ORACLES, oracleAccepts } from './oracles.js';
+import { functionFor } from './functions.js';
 import { level1 } from './level1.js';
 import { level2 } from './level2.js';
 import { level3 } from './level3.js';
@@ -14,11 +15,11 @@ function checkTopLevel(level) {
       throw new Error(`level is missing field "${field}"`);
     }
   }
-  if (level.machine !== 'dfa' && level.machine !== 'nfa' && level.machine !== 'pda') {
-    throw new Error(`level machine must be "dfa", "nfa" or "pda"`);
+  if (level.machine !== 'dfa' && level.machine !== 'nfa' && level.machine !== 'pda' && level.machine !== 'tm') {
+    throw new Error(`level machine must be "dfa", "nfa", "pda" or "tm"`);
   }
-  if (level.workspace !== 'graph') {
-    throw new Error(`level workspace must be "graph"`);
+  if (level.workspace !== 'graph' && level.workspace !== 'drum') {
+    throw new Error(`level workspace must be "graph" or "drum"`);
   }
 }
 function checkKeys(level) {
@@ -57,6 +58,69 @@ function checkPuzzleCells(puzzle, name) {
   const accepts = puzzle.cells.filter((cell) => cell.accept === true);
   if (accepts.length < 1) {
     throw new Error(`${name} puzzle must have at least one accept cell`);
+  }
+}
+function checkDrumPuzzle(puzzle, name) {
+  if (Array.isArray(puzzle.sections) === false) {
+    throw new Error(`${name} puzzle sections must be an array`);
+  }
+  const seen = new Set();
+  for (const section of puzzle.sections) {
+    if (seen.has(section.id) === true) {
+      throw new Error(`${name} puzzle has duplicate section id "${section.id}"`);
+    }
+    seen.add(section.id);
+  }
+  const starts = puzzle.sections.filter((section) => section.start === true);
+  if (starts.length !== 1) {
+    throw new Error(`${name} puzzle must have exactly one start section`);
+  }
+  const accepts = puzzle.sections.filter((section) => section.accept === true);
+  if (accepts.length < 1) {
+    throw new Error(`${name} puzzle must have at least one accept section`);
+  }
+  if (puzzle.tape === undefined || Array.isArray(puzzle.tape.symbols) === false) {
+    throw new Error(`${name} puzzle is missing its tape symbols`);
+  }
+  const symbols = new Set();
+  for (const symbol of puzzle.tape.symbols) {
+    if (symbols.has(symbol) === true) {
+      throw new Error(`${name} puzzle has duplicate tape symbol "${symbol}"`);
+    }
+    symbols.add(symbol);
+  }
+  if (symbols.has(puzzle.tape.blank) === false) {
+    throw new Error(`${name} puzzle tape must include its blank`);
+  }
+}
+function checkDrumBlueprint(puzzle, name) {
+  const ids = new Set(puzzle.sections.map((section) => section.id));
+  const tape = new Set(puzzle.tape.symbols);
+  const rules = puzzle.blueprint?.rules ?? {};
+  for (const [section, row] of Object.entries(rules)) {
+    if (ids.has(section) === false) {
+      throw new Error(`${name} puzzle rule references unknown section "${section}"`);
+    }
+    if (row === null || row === undefined) {
+      continue;
+    }
+    for (const [read, rule] of Object.entries(row)) {
+      if (rule === null || rule === undefined) {
+        continue;
+      }
+      if (tape.has(read) === false) {
+        throw new Error(`${name} puzzle rule reads symbol "${read}" outside the tape alphabet`);
+      }
+      if (tape.has(rule.write) === false) {
+        throw new Error(`${name} puzzle rule writes symbol "${rule.write}" outside the tape alphabet`);
+      }
+      if (rule.move !== 'L' && rule.move !== 'R') {
+        throw new Error(`${name} puzzle rule move "${rule.move}" must be L or R`);
+      }
+      if (ids.has(rule.to) === false) {
+        throw new Error(`${name} puzzle rule goes to unknown section "${rule.to}"`);
+      }
+    }
   }
 }
 function checkWires(puzzle, level, name) {
@@ -101,6 +165,10 @@ function checkWires(puzzle, level, name) {
   }
 }
 function checkTarget(puzzle, level, name) {
+  if (puzzle.target?.kind === 'function') {
+    functionFor(puzzle.target.id);
+    return;
+  }
   if (puzzle.target?.kind === 'language') {
     if (ORACLES[puzzle.target.id] === undefined) {
       throw new Error(`${name} puzzle has unknown language "${puzzle.target.id}"`);
@@ -119,6 +187,15 @@ function checkTarget(puzzle, level, name) {
   }
 }
 function checkExamples(puzzle, name) {
+  if (puzzle.target?.kind === 'function') {
+    const fn = functionFor(puzzle.target.id);
+    for (const run of puzzle.examples?.runs ?? []) {
+      if (fn.compute(run.input) !== run.output) {
+        throw new Error(`${name} puzzle run "${run.input}" should output "${fn.compute(run.input)}"`);
+      }
+    }
+    return;
+  }
   if (puzzle.target?.kind === 'language') {
     for (const word of puzzle.examples?.open ?? []) {
       if (oracleAccepts(puzzle.target.id, word) !== true) {
@@ -149,11 +226,27 @@ function checkExamples(puzzle, name) {
   }
 }
 function checkThief(level) {
+  const phases = Object.values(level.phases);
+  const hasFunction = phases.some((puzzle) => puzzle.target?.kind === 'function');
+  const hasOther = phases.some((puzzle) => puzzle.target?.kind !== 'function');
   if (typeof level.thief?.giveUp !== 'string') {
     throw new Error('thief giveUp must be a non-empty string');
   }
   if (level.thief.giveUp.length === 0) {
     throw new Error('thief giveUp must be a non-empty string');
+  }
+  if (hasFunction === true) {
+    for (const reason of ['jam', 'alarm', 'wrong-output']) {
+      if (typeof level.thief?.lines?.[reason] !== 'string') {
+        throw new Error(`thief lines ${reason} must be a non-empty string`);
+      }
+      if (level.thief.lines[reason].length === 0) {
+        throw new Error(`thief lines ${reason} must be a non-empty string`);
+      }
+    }
+  }
+  if (hasOther === false) {
+    return;
   }
   if (typeof level.thief?.lines?.intruder !== 'string') {
     throw new Error('thief lines intruder must be a non-empty string');
@@ -176,6 +269,12 @@ function checkCopy(level) {
   for (const puzzle of Object.values(level.phases)) {
     texts.push(puzzle.goal);
     texts.push(puzzle.intro);
+    for (const section of puzzle.sections ?? []) {
+      texts.push(section.label);
+    }
+    for (const label of Object.values(puzzle.tape?.labels ?? {})) {
+      texts.push(label);
+    }
     for (const hint of puzzle.hints ?? []) {
       texts.push(hint);
     }
@@ -205,6 +304,15 @@ function checkStack(level) {
     throw new Error('pda level stack base and chip must be different');
   }
 }
+function checkPuzzleShape(puzzle, level, name) {
+  if (puzzle.sections !== undefined) {
+    checkDrumPuzzle(puzzle, name);
+    checkDrumBlueprint(puzzle, name);
+    return;
+  }
+  checkPuzzleCells(puzzle, name);
+  checkWires(puzzle, level, name);
+}
 export function validateLevel(level) {
   checkTopLevel(level);
   checkKeys(level);
@@ -215,10 +323,8 @@ export function validateLevel(level) {
   if (level.phases?.build === undefined) {
     throw new Error('level is missing phase "build"');
   }
-  checkPuzzleCells(level.phases.repair, 'repair');
-  checkPuzzleCells(level.phases.build, 'build');
-  checkWires(level.phases.repair, level, 'repair');
-  checkWires(level.phases.build, level, 'build');
+  checkPuzzleShape(level.phases.repair, level, 'repair');
+  checkPuzzleShape(level.phases.build, level, 'build');
   checkTarget(level.phases.repair, level, 'repair');
   checkTarget(level.phases.build, level, 'build');
   checkExamples(level.phases.repair, 'repair');
