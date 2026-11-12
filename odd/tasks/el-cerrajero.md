@@ -71,10 +71,10 @@ Acceptance: `docs/VISUAL-DESIGN.md` applied; "precision noir" direction; self-ho
 | T3 | Level 2 (DFA loop/parity) + thief escalation | S3-S5, S9 | inline | done | `7e60eea` |
 | T4 | NFA core + Level 3 (AFND-lambda fork) | S5, S6, S9 | inline | in progress (NFA core done) | - |
 | T5 | PDA core + Level 4 (stack) | S5, S9 | inline | review | `cf07e65` |
-| T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | in progress (TM core done) | - |
+| T6 | TM core + Level 5 (tape boss) | S5, S9 | inline | review | `1c86aeb` |
 | T7 | Polish: visual system, level select, persistence, feedback, README, demo script | S4, S8, S9, S13 | inline | pending | - |
 | T8 | Final report + presentation | S11 | delegated (redactor) | pending | - |
-| T9 | Solutions sheet for every level (repair + build) | S11 | inline | in progress (L1-L2) | - |
+| T9 | Solutions sheet for every level (repair + build) | S11 | inline | done | `1c86aeb` |
 
 ## Log
 
@@ -355,3 +355,21 @@ User: "perfecto, podemos proseguir con el nivel 5"
 - 208 tests passing.
 - `.gitignore` now covers `__pycache__/` and `.atl/`.
 - Next: `functions.js` (binary-increment, binary-sum), the bounded TM judge, level 5 data and the drum/tape UI.
+
+### L33 — Level 5 data, functions and TM judge (2026-11-12)
+
+- `functions.js`: binary-increment (maxBits 6 + ones stress) and binary-sum (16×16 pairs + carry chains), with `compute`/`matches`.
+- `level5.js`: the central bank, repair +1 with the carry `1`-pin bug, build adder with empty dec/toPlus/clean, thief `jam`/`alarm`/`wrong-output` lines.
+- `machines.js` builds a TM from sections/tape/rules; `judge.js` bounded function branch (limit → jam, alarm → alarm, mismatch → wrong-output); `thief.js` threads expected/actual; `levels.js` validates drum puzzles and function targets.
+- Reference adder verified: 16 pins, 261 inputs, 15+15 in 230 steps (matches the design's worst case).
+- `LEVELS` now includes level5 (integration fix after the delegated unit).
+- 230 tests.
+
+### L34 — Drum and tape UI, level 5 playable (2026-11-12)
+
+- `drumEditor.js`: one pin per tape symbol in fixed order, read-symbol badge, inline Escribe/Mueve/Siguiente editor, Guardar/Vaciar/Cancelar/Esc, accept sections final and non-editable.
+- `tapePanel.js`: 7-cell window, cabezal marker, `Cinta · <sección>`.
+- `main.js`: drum workshop branch, TM probe/assault with tape replay, pin edits, level 5 on the map.
+- Verified in headless Edge at 1366×768: 3 sections / 9 pins / 7 tape cells, no page scroll (`768=768`, `1366=1366`), Probar logs “La cinta 1 dejó 11. El cliente esperaba 10.”, Ensayo logs the wrong-output thief line.
+- 239 tests.
+- Next: browser smoke test of contract 05 (repair and build), then the visual remaster.

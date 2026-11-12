@@ -32,7 +32,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 | T3 | Nivel 2 (AFD con bucle / paridad) | done | Juan | S3-S5, S9 | T2, diseño congelado | `7e60eea` |
 | T4 | Motor AFND + Nivel 3 (AFND-λ) | in progress | Juan | S5, S6, S9 | T2, diseño congelado | [#5](https://github.com/JFPosada2005/el-cerrajero/issues/5) |
 | T5 | Motor AP + Nivel 4 (pila) | review | Juan | S5, S9 | T2, diseño congelado | `cf07e65` |
-| T6 | Motor MT + Nivel 5 (jefe final) | in progress | Juan | S5, S9 | T2, diseño congelado | [#2](https://github.com/JFPosada2005/el-cerrajero/issues/2) |
+| T6 | Motor MT + Nivel 5 (jefe final) | review | Juan | S5, S9 | T2, diseño congelado | `1c86aeb` |
 | T7 | Pulido: mapa, persistencia, feedback, demo | todo | colaborador | S4, S8, S9 | T3-T6 | [#3](https://github.com/JFPosada2005/el-cerrajero/issues/3) |
 | T8 | Informe + sustentación | todo | Juan + redactor | S11 | T3-T7, playtest | [#4](https://github.com/JFPosada2005/el-cerrajero/issues/4) |
 
@@ -163,7 +163,7 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 
 ## T6 — Motor MT + Nivel 5
 
-**Estado:** in progress. Motor TM implementado (`src/core/tm.js`, 16 tests); faltan funciones, juez acotado y la UI de tambor/cinta.
+**Estado:** review. Motor, funciones, juez, tambor y cinta listos; falta el smoke test de navegador.
 
 **Objetivo:** cerrar con el jefe final: una máquina de Turing que computa.
 
@@ -172,10 +172,11 @@ Estados: `done`, `in progress`, `review`, `blocked`, `todo`.
 **Criterios de aceptación:**
 
 - [x] Simulación de cinta con cabezal, lectura/escritura, movimiento y límite de pasos.
-- [ ] Juez por función de referencia (suma binaria o comparación de mitades) sobre un conjunto de entradas.
-- [ ] El nivel 5 tiene UI de tambor de control y cinta.
-- [ ] El ladrón maestro busca el contraejemplo más corto dentro del límite.
-- [ ] Tests de nivel pasando.
+- [x] Juez por función de referencia (suma binaria o comparación de mitades) sobre un conjunto de entradas.
+- [x] El nivel 5 tiene UI de tambor de control y cinta.
+- [x] El ladrón maestro busca el contraejemplo más corto dentro del límite.
+- [x] Tests de nivel pasando.
+- [ ] Smoke test en navegador del contrato 05.
 
 **Depende de:** T2 y diseño congelado.
 
