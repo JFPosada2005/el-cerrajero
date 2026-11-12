@@ -379,9 +379,23 @@ User: "perfecto, podemos proseguir con el nivel 5"
 
 User: "en este momento has push, necesito que se realice un documento (manda un subagente a hacerlo) de como funciona toda la logica de todos los niveles, que hagan referencia a partes exactas de codigo, como funcionan los jueces, basicamente como funciona toda la teoria detras de los niveles. Asi tengo claro como mi codigo maneja todo. Cuando iniciemos la fase de remasterizacion se supone en teoria toda esta logica no se debe tocar para absolutamente nada. Si en algun momento es necesario hacerlo necesito que me lo preguntes y me digas el porque es necesario. O si se llega a hacer por error de igual forma con mas razon aun es deber informarme, decirme el porque y yo determinar si dejamos el cambio o no."
 
-- Pushed `36605c6..2f87a94` (all level 5 work).
+- Pushed `36605c6..2f87a94` (all level 5 work) and `2f87a94..a7aeae6` (logic doc + freeze policy).
 - `docs/LOGIC.md`: layers, theory per level, engines, judges (exact/bounded), game layer, flow, level data, test map, remaster contract, glossary, and an honest “Discrepancias” section. References use `path:symbol` plus line numbers as of 2026-11-12 (symbols are the stable reference).
 - `AGENTS.md`: freeze policy — logic frozen during the remaster; presentation files free; ask before any logic change and explain why; report accidental changes and the owner decides; PRs declare whether they touched frozen files.
 - `docs/VISUAL-DESIGN.md` §13: the remaster does not touch the logic; links to `docs/LOGIC.md`.
 - Corrected the document's L5 pin count: the design says 15, the verified table has 16; the doc states 16 and records the discrepancy.
 - Next: visual remaster, then the report. The logic remains frozen.
+
+### L36 — Independent verification (2026-11-12)
+
+User: "Lanza al verificador para que realice su inspeccion correspondiente de calidad en lo que llevamos hasta ahora"
+
+- `gentle-ai-verify` audited `537fb61..a7aeae6` in a temp scratch copy: 239/239 tests; L1-L3 returned the shortlex-first counterexample in 1,701 brute-force mechanisms; L4 84 candidates with coverage; L5 261 inputs and 1,694 mutants against an independent simulator; the reference adder needs 230 steps; the level 1-4 verdict hash is identical to the baseline.
+- B1 (blocker): the L5 build pin editor opens below the viewport at 1366x768 because `.game` has `overflow:hidden`. Owner decision: not fixed; the remaster replaces the layout completely. Known and accepted.
+- B2 (blocker): `docs/LOGIC.md` overstated `checkThief`. Fixed: it requires `jam`/`alarm`/`wrong-output` for function phases and `intruder`/`lockout` for language phases; L4 can return `jam` and falls back to the intruder line.
+- A1: the `LOGIC.md` test map claims `judge.test.js` covers `jam`/`alarm`; no test pins `jam`. Pending owner decision.
+- A4: owner accepts the one-pin repair; it shows how the mechanism works before the real build challenge.
+- A5: focus and Escape behavior deferred to the remaster.
+- A6: frames cap at 2000, so a 5000-step jam replays the tape at step 1999 with no note. Fixing it touches `tm.js` (frozen) or adds a UI note.
+- A9: freeze contract amended. The `drumEditor.js` accept-section guard is frozen logic (it protects `createTM`), `tests/*` is the safety net and is not edited for a remaster, and `serve.py` is out of remaster scope.
+- A8 fixed: L35 now records both pushes.

@@ -226,7 +226,7 @@ Nota: `moved` conserva la pila existente del cable (`tests/blueprint.test.js:48-
 ### 6.3 `levels.js` — esquema y validación (`src/game/levels.js`)
 
 - `LEVELS = [level1, …, level5]` (`levels.js:10`); `getLevel(id)` (`levels.js:337-343`) lanza `unknown level` si no existe.
-- `validateLevel(level)` (`levels.js:317-336`) verifica: campos top-level (`checkTopLevel`, `levels.js:12-25`); llaves de un carácter sin duplicar (`checkKeys`, `26-43`); exactamente una celda/sección inicial y al menos un cerrojo (`checkPuzzleCells` 44-63, `checkDrumPuzzle` 64-96); cables contra celdas existentes, partes requeridas (`gear` para lazos, `spring` para resortes, `stack` para pilas) y sin resortes en lazo (`checkWires` 127-166, `checkDrumBlueprint` 97-126); alfabeto del objetivo igual a las llaves en orden (`checkTarget` 168-189); ejemplos que el objetivo acepta/rechaza (`checkExamples` 190-228); líneas de ladrón para cada razón posible del objetivo (`checkThief` 229-264); vocabulario sin palabras académicas (`checkCopy` 265-291, lista `BANNED` en `levels.js:11`); pila bien formada (`checkStack` 292-307).
+- `validateLevel(level)` (`levels.js:317-336`) verifica: campos top-level (`checkTopLevel`, `levels.js:12-25`); llaves de un carácter sin duplicar (`checkKeys`, `26-43`); exactamente una celda/sección inicial y al menos un cerrojo (`checkPuzzleCells` 44-63, `checkDrumPuzzle` 64-96); cables contra celdas existentes, partes requeridas (`gear` para lazos, `spring` para resortes, `stack` para pilas) y sin resortes en lazo (`checkWires` 127-166, `checkDrumBlueprint` 97-126); alfabeto del objetivo igual a las llaves en orden (`checkTarget` 168-189); ejemplos que el objetivo acepta/rechaza (`checkExamples` 190-228); líneas de ladrón según el tipo de objetivo (`checkThief` 229-264): `jam`/`alarm`/`wrong-output` si hay una fase de función, `intruder`/`lockout` si hay una fase de lenguaje; el juez acotado de lenguaje puede devolver `jam` y el nivel 4 no define esa línea, así que `thiefReport` cae a `intruder` (`thief.js:13`); vocabulario sin palabras académicas (`checkCopy` 265-291, lista `BANNED` en `levels.js:11`); pila bien formada (`checkStack` 292-307).
 
 ### 6.4 `thief.js`, `catalog.js` y progreso
 
@@ -294,6 +294,10 @@ Cómo correr: `npm test` (Node con runner nativo, sin dependencias). Los tests s
 **Congelado** (`AGENTS.md:15`): `src/core/*`, `src/game/*`, el flujo funcional de `src/main.js` (`startLevel` 472, `startBuild` 484, `renderWorkshop` 501, `renderDrumWorkshop` 754, `handleProbe` 954, `handleAssault` 972, `handlePinEdit` 921, `loadProgress` 118, `saveProgress` 133, `showWin` 1037), datos `level1.js`…`level5.js`, jueces, oráculos, funciones, `blueprint`, `machines`, `levels.js`.
 
 **Presentación libre** (`AGENTS.md:16`): `styles.css`, `index.html`, el render de `src/ui/*` (`graphEditor.js`, `drumEditor.js`, `tapePanel.js`), assets, fuentes, sonido, animaciones y la capa visual de `main.js` — siempre que no cambien reglas, datos a motores ni callbacks (`onConnect`/`onCut`/`onEdit`, formas de `frames`, contrato `{ blueprint, effect, reason }`).
+
+**Invariantes que viven en la UI y sí están congelados.** El guard de `drumEditor.js` que impide abrir el editor de púas en las secciones con `accept: true` no es decoración: protege la invariante de `createTM` de que un estado de aceptación no tenga reglas. Un remaster puede cambiar por completo el aspecto del tambor, pero no puede permitir que una púa llegue a la sección final. Lo mismo vale para cualquier validación de UI que impida construir una máquina inválida.
+
+**Fuera del remaster.** `tests/*` es la red de seguridad del congelamiento: no se edita ni se borra un test para que pase un cambio visual; sí se pueden agregar tests. `serve.py` es infraestructura de desarrollo y no se toca.
 
 **Preguntar antes / informar después / declarar en el PR** (`AGENTS.md:17-19`): ver §1.
 
