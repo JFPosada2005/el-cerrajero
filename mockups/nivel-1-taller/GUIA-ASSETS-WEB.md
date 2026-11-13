@@ -66,6 +66,9 @@ Un SVG limpio o una textura CC0 te da:
 | `tijeras.png` | 1024×512 | tijeras vintage, tijeras de sastre | **Web** |
 | `engranaje-herramienta.png` | 1024×1024 | engranaje con mango, herramienta de engranaje | **Web** |
 | `llave-1.png` … `llave-4.png` | 512×1024 | llave ornamentada, llave art déco, SVG | **Web o IA** |
+| `contrato.png` | 1024×768 | papel viejo + sello de lacre (fallback) | Web/Photopea |
+| `nota-pista.png` | 768×768 | nota doblada + lupa (fallback) | Web |
+| `libreta.png` | 768×768 | libreta de cuero (fallback) | Web |
 | `bocallave-entrada.png` | 512×768 | bocallave art déco, placa de cerradura | Web si falla la IA |
 | `cilindro-cerradura.png` | 768×960 | cilindro de cerradura, bombín, cerradura de latón | Web/3D si falla la IA |
 | `resorte.png` | 512×1024 | resorte de latón, muelle | Web/opcional |
@@ -291,6 +294,34 @@ long key silhouette
 - Legible a 40 px de ancho.
 
 **Post-proceso:** elegir una; duplicar y recolorear la banda de esmalte en Photopea: 1 latón, 2 teal, 3 coral, 4 violeta. Exportar 512×1024 con alfa.
+
+---
+
+### `contrato.png`, `nota-pista.png`, `libreta.png` — fallback web
+
+**Palabras clave:**
+
+```text
+old paper texture parchment
+wax seal png transparent
+folded note icon svg
+magnifying glass icon svg
+leather notebook icon svg
+brass clasp notebook
+```
+
+**Dónde buscar:** SVG Repo, Game-icons.net, Flaticon, Freepik, Poly Haven (textura de papel), Photopea.
+
+**Qué mirar:**
+
+- Papel ivory envejecido, sin texto legible.
+- Sello de lacre rojo oscuro, no plástico.
+- Nota doblada + lupa de latón; se pueden componer como dos iconos separados.
+- Libreta de cuero con broche de latón y páginas color crema.
+- Sin logos, sin texto, sin fondo.
+- Si usás una textura de papel, que sea frontal y sin sombra fuerte.
+
+**Post-proceso:** componer en Photopea: papel + sello + cinta; nota + lupa; libreta + lápiz. Exportar PNG con alfa a las medidas de la tabla.
 
 ---
 
