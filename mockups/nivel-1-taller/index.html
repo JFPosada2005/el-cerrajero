@@ -3,12 +3,12 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>El Cerrajero — Mockup Nivel 1</title>
+  <title>El Cerrajero — Taller del Nivel 1</title>
   <link rel="stylesheet" href="styles.css">
 </head>
-<body>
+<body data-tool="wire" data-key="1">
   <div class="game-shell">
-    <header class="topbar">
+    <header class="hud">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true">
           <svg viewBox="0 0 40 40" focusable="false">
@@ -17,22 +17,16 @@
             <circle cx="20" cy="16" r="2.6" fill="currentColor"></circle>
           </svg>
         </span>
-        <div class="brand-text">
-          <span class="brand-name">El Cerrajero</span>
-          <span class="brand-sub">Taller de precisión</span>
-        </div>
+        <span class="brand-name">El Cerrajero</span>
       </div>
 
-      <div class="level-id">
-        <span class="eyebrow">Contrato 01</span>
-        <h1>La caja de seguridad</h1>
+      <div class="hud-contract">
+        <span class="hud-eyebrow">Contrato 01</span>
+        <span class="hud-title">La caja de seguridad</span>
+        <span class="hud-phase">Reparar</span>
       </div>
 
-      <div class="topbar-tools">
-        <div class="phase-switch" role="group" aria-label="Fase del contrato">
-          <span class="phase is-active">Reparar</span>
-          <span class="phase">Construir</span>
-        </div>
+      <div class="hud-right">
         <div class="progress" aria-label="Progreso: contrato 1 de 5">
           <span class="keyhole is-done" aria-hidden="true"></span>
           <span class="keyhole" aria-hidden="true"></span>
@@ -40,553 +34,288 @@
           <span class="keyhole" aria-hidden="true"></span>
           <span class="keyhole" aria-hidden="true"></span>
         </div>
-        <button class="icon-button" type="button" aria-label="Sonido desactivado" title="Sonido desactivado">
+        <button class="sound-button" id="sound-button" type="button" aria-label="Activar sonido" aria-pressed="false">
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M4 9v6h4l5 4V5L8 9H4z"></path>
-            <path d="M17 9l4 6M21 9l-4 6"></path>
+            <path class="sound-wave" d="M16 9c1.2 1.5 1.2 4.5 0 6M19 6c2.6 3 2.6 9 0 12"></path>
+            <path class="sound-slash" d="M16 9l5 6M21 9l-5 6"></path>
           </svg>
         </button>
         <span class="mockup-pill">Mockup</span>
       </div>
     </header>
 
-    <main class="workspace">
-      <section class="stage" aria-label="Taller del contrato 01">
-        <svg class="stage-art" viewBox="0 0 1000 640" role="group" aria-label="Mecanismo de la cerradura del Banco del Llano">
+    <main class="stage" id="stage" aria-label="Mesa de trabajo del taller">
+      <img class="scene" src="assets/sprites/fondo-banco.svg" alt="" aria-hidden="true" draggable="false" data-sprite="fondo-banco">
+      <div class="stage-light" aria-hidden="true"></div>
+      <img class="bench" src="assets/sprites/mesa-madera.svg" alt="" aria-hidden="true" draggable="false" data-sprite="mesa-madera">
+      <img class="thief" id="thief" src="assets/sprites/ladron.svg" alt="El ladrón observa desde la penumbra" draggable="false" data-sprite="ladron">
+
+      <div class="table-objects" aria-label="Objetos sobre la mesa">
+        <button class="table-object object-contract" type="button" data-overlay="contract" aria-haspopup="dialog" aria-label="Abrir el contrato">
+          <img src="assets/sprites/contrato.svg" alt="" draggable="false" data-sprite="contrato">
+          <span class="object-caption">Contrato</span>
+        </button>
+        <button class="table-object object-hint" type="button" data-overlay="hint" aria-haspopup="dialog" aria-label="Abrir la pista">
+          <img src="assets/sprites/nota-pista.svg" alt="" draggable="false" data-sprite="nota-pista">
+          <span class="object-caption">Pista</span>
+        </button>
+        <button class="table-object object-log" type="button" data-overlay="log" aria-haspopup="dialog" aria-label="Abrir la bitácora">
+          <img src="assets/sprites/libreta.svg" alt="" draggable="false" data-sprite="libreta">
+          <span class="object-caption">Bitácora</span>
+        </button>
+      </div>
+
+      <div class="mechanism-wrap" id="mechanism">
+        <img class="plate" src="assets/sprites/placa-mecanismo.svg" alt="" aria-hidden="true" draggable="false" data-sprite="placa-mecanismo">
+        <span class="plate-label">Banco del Llano · Caja 01</span>
+        <span class="plate-serial">N.º 0147</span>
+
+        <svg class="wires" id="wires" viewBox="0 0 900 560" aria-hidden="true">
           <defs>
-            <linearGradient id="bgNight" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#0a0f15"></stop>
-              <stop offset="0.55" stop-color="#0f171f"></stop>
-              <stop offset="1" stop-color="#151d25"></stop>
+            <linearGradient id="cable-core" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#4a3520"/>
+              <stop offset="0.45" stop-color="#241a12"/>
+              <stop offset="1" stop-color="#100b08"/>
             </linearGradient>
-            <radialGradient id="warmGlow" cx="0.16" cy="0.12" r="0.55">
-              <stop offset="0" stop-color="#d4a72c" stop-opacity="0.2"></stop>
-              <stop offset="0.5" stop-color="#8a5b1a" stop-opacity="0.07"></stop>
-              <stop offset="1" stop-color="#0a0f15" stop-opacity="0"></stop>
+            <linearGradient id="cable-sheen" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0" stop-color="#f0cf6a" stop-opacity="0"/>
+              <stop offset="0.45" stop-color="#f0cf6a" stop-opacity="0.42"/>
+              <stop offset="1" stop-color="#f0cf6a" stop-opacity="0"/>
+            </linearGradient>
+            <linearGradient id="tag-brass" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#f6dc92"/>
+              <stop offset="0.5" stop-color="#c79a32"/>
+              <stop offset="1" stop-color="#5c3f12"/>
+            </linearGradient>
+            <radialGradient id="terminal" cx="38%" cy="32%" r="70%">
+              <stop offset="0" stop-color="#f6dc92"/>
+              <stop offset="0.55" stop-color="#b58a24"/>
+              <stop offset="1" stop-color="#3a2a12"/>
             </radialGradient>
-            <radialGradient id="coolGlow" cx="0.9" cy="0.18" r="0.55">
-              <stop offset="0" stop-color="#38c6b8" stop-opacity="0.12"></stop>
-              <stop offset="0.55" stop-color="#1b6f6a" stop-opacity="0.04"></stop>
-              <stop offset="1" stop-color="#0a0f15" stop-opacity="0"></stop>
-            </radialGradient>
-            <radialGradient id="vignette" cx="0.5" cy="0.45" r="0.72">
-              <stop offset="0.45" stop-color="#05080c" stop-opacity="0"></stop>
-              <stop offset="1" stop-color="#05080c" stop-opacity="0.82"></stop>
-            </radialGradient>
-            <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f0cf6a"></stop>
-              <stop offset="0.42" stop-color="#d4a72c"></stop>
-              <stop offset="1" stop-color="#8a6a1f"></stop>
-            </linearGradient>
-            <linearGradient id="plateBrass" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#4a3a1e"></stop>
-              <stop offset="0.32" stop-color="#332714"></stop>
-              <stop offset="0.62" stop-color="#4f3d1c"></stop>
-              <stop offset="1" stop-color="#241b0d"></stop>
-            </linearGradient>
-            <linearGradient id="brassDark" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#4a3614"></stop>
-              <stop offset="1" stop-color="#24180a"></stop>
-            </linearGradient>
-            <radialGradient id="wheelRim" cx="0.35" cy="0.25" r="0.8">
-              <stop offset="0" stop-color="#f0cf6a"></stop>
-              <stop offset="0.45" stop-color="#b58a24"></stop>
-              <stop offset="1" stop-color="#4f3a10"></stop>
-            </radialGradient>
-            <radialGradient id="wheelFace" cx="0.35" cy="0.25" r="0.85">
-              <stop offset="0" stop-color="#22303d"></stop>
-              <stop offset="0.55" stop-color="#121a22"></stop>
-              <stop offset="1" stop-color="#080c11"></stop>
-            </radialGradient>
-            <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#b9c2cf"></stop>
-              <stop offset="0.5" stop-color="#7e8899"></stop>
-              <stop offset="1" stop-color="#3f4854"></stop>
-            </linearGradient>
-            <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#faf4e6"></stop>
-              <stop offset="0.55" stop-color="#f2ede3"></stop>
-              <stop offset="1" stop-color="#e2d5ba"></stop>
-            </linearGradient>
-            <linearGradient id="plateLight" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f0cf6a" stop-opacity="0.13"></stop>
-              <stop offset="0.42" stop-color="#f0cf6a" stop-opacity="0"></stop>
-              <stop offset="1" stop-color="#000000" stop-opacity="0.22"></stop>
-            </linearGradient>
-            <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#3a261a"></stop>
-              <stop offset="0.5" stop-color="#2a1b13"></stop>
-              <stop offset="1" stop-color="#1a100c"></stop>
-            </linearGradient>
-            <linearGradient id="leather" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#2a1d1a"></stop>
-              <stop offset="1" stop-color="#160e0d"></stop>
-            </linearGradient>
-            <linearGradient id="moonGlass" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0" stop-color="#254b5d"></stop>
-              <stop offset="1" stop-color="#0c151c"></stop>
-            </linearGradient>
-            <radialGradient id="waxSeal" cx="0.35" cy="0.3" r="0.8">
-              <stop offset="0" stop-color="#b34a3c"></stop>
-              <stop offset="0.55" stop-color="#8e2f2a"></stop>
-              <stop offset="1" stop-color="#5a1b17"></stop>
-            </radialGradient>
-            <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
-              <path d="M40 0H0V40" fill="none" stroke="#f0cf6a" stroke-opacity="0.045"></path>
-            </pattern>
-            <pattern id="woodGrain" width="26" height="8" patternUnits="userSpaceOnUse">
-              <path d="M0 2H26M0 6H18" stroke="#7a5639" stroke-opacity="0.12"></path>
-            </pattern>
-            <pattern id="paperFiber" width="18" height="18" patternUnits="userSpaceOnUse">
-              <path d="M2 4H12M7 11H17M0 15H8" stroke="#7a5a12" stroke-opacity="0.05"></path>
-            </pattern>
-            <filter id="plateShadow" x="-12%" y="-12%" width="124%" height="130%">
-              <feDropShadow dx="0" dy="10" stdDeviation="9" flood-color="#000" flood-opacity="0.55"></feDropShadow>
+            <filter id="wire-shadow" x="-20%" y="-40%" width="140%" height="180%">
+              <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity="0.65"/>
             </filter>
-            <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-              <feDropShadow dx="0" dy="4" stdDeviation="3" flood-color="#000" flood-opacity="0.55"></feDropShadow>
-            </filter>
-            <filter id="tagShadow" x="-40%" y="-40%" width="180%" height="180%">
-              <feDropShadow dx="0" dy="2" stdDeviation="1.5" flood-color="#000" flood-opacity="0.6"></feDropShadow>
+            <filter id="tag-shadow" x="-50%" y="-50%" width="200%" height="200%">
+              <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.7"/>
             </filter>
           </defs>
 
-          <g aria-hidden="true">
-            <rect width="1000" height="640" fill="url(#bgNight)"></rect>
-            <rect width="1000" height="640" fill="url(#warmGlow)"></rect>
-            <rect width="1000" height="640" fill="url(#coolGlow)"></rect>
-
-            <g opacity="0.22" stroke="#d4a72c" stroke-width="0.7" fill="none">
-              <path d="M0 92H1000M0 176H1000M0 260H1000M0 344H1000M0 428H1000"></path>
-              <path d="M122 0V560M262 0V560M402 0V560M542 0V560M682 0V560M822 0V560M962 0V560"></path>
-            </g>
-
-            <g opacity="0.62">
-              <path d="M18 322V82a56 56 0 0 1 112 0v240z" fill="url(#moonGlass)" stroke="#2a3646" stroke-width="2"></path>
-              <path d="M74 26v296M18 170h112M18 244h112" stroke="#0a0f15" stroke-width="4" opacity="0.9"></path>
-              <path d="M103 62a20 20 0 1 1-40 0 20 20 0 0 1 40 0z" fill="#d9e9e7" opacity="0.45"></path>
-              <g stroke="#9fd6d0" stroke-width="1" opacity="0.28">
-                <path d="M20 98l12 16M40 70l9 12M56 120l12 16M32 146l8 11M84 84l10 14"></path>
-              </g>
-            </g>
-
-            <g opacity="0.58" transform="translate(904 272)">
-              <circle r="150" fill="#0b1015" stroke="#3a2a1a" stroke-width="3"></circle>
-              <circle r="132" fill="none" stroke="#6e5317" stroke-width="2"></circle>
-              <circle r="112" fill="none" stroke="#2a3646" stroke-width="2"></circle>
-              <circle r="86" fill="none" stroke="#6e5317" stroke-width="1.4"></circle>
-              <g fill="#0b0f14" stroke="#4a3614" stroke-width="2">
-                <circle cx="0" cy="-132" r="6"></circle>
-                <circle cx="94" cy="-94" r="6"></circle>
-                <circle cx="132" cy="0" r="6"></circle>
-                <circle cx="94" cy="94" r="6"></circle>
-                <circle cx="0" cy="132" r="6"></circle>
-                <circle cx="-94" cy="94" r="6"></circle>
-                <circle cx="-132" cy="0" r="6"></circle>
-                <circle cx="-94" cy="-94" r="6"></circle>
-              </g>
-              <circle r="32" fill="url(#brassDark)" stroke="#d4a72c" stroke-width="2"></circle>
-              <path d="M-58 0H58M0-58V58M-40-40L40 40M40-40L-40 40" stroke="#8a6a1f" stroke-width="7" stroke-linecap="round"></path>
-              <circle r="10" fill="url(#brass)"></circle>
-            </g>
-
-            <g opacity="0.3">
-              <rect x="0" y="0" width="42" height="560" fill="url(#brassDark)"></rect>
-              <rect x="958" y="0" width="42" height="560" fill="url(#brassDark)"></rect>
-              <path d="M12 0V560M30 0V560M970 0V560M988 0V560" stroke="#d4a72c" stroke-width="1" opacity="0.35"></path>
-            </g>
-
-            <g opacity="0.9" transform="translate(72 28)">
-              <circle cx="30" cy="64" r="58" fill="#d4a72c" opacity="0.08"></circle>
-              <path d="M30 16v36" stroke="#8a6a1f" stroke-width="4"></path>
-              <path d="M4 52h52l-9 26H13z" fill="#2f5a4a" stroke="#7a9a72" stroke-width="1.5"></path>
-              <path d="M10 78h40" stroke="#d4a72c" stroke-width="3"></path>
-              <circle cx="30" cy="54" r="4" fill="#f0cf6a"></circle>
-            </g>
-
-            <rect width="1000" height="640" fill="url(#vignette)"></rect>
-          </g>
-
-          <g aria-hidden="true">
-            <rect x="0" y="556" width="1000" height="84" fill="url(#wood)"></rect>
-            <rect x="0" y="556" width="1000" height="84" fill="url(#woodGrain)"></rect>
-            <path d="M0 558H1000" stroke="#8a6a4a" stroke-width="1" opacity="0.55"></path>
-            <rect x="0" y="590" width="1000" height="50" fill="url(#leather)"></rect>
-            <path d="M0 592H1000" stroke="#d4a72c" stroke-width="0.8" opacity="0.16"></path>
-            <ellipse cx="470" cy="604" rx="424" ry="19" fill="#000" opacity="0.45"></ellipse>
-          </g>
-
-          <g class="plate" transform="translate(60 80)">
-            <rect x="0" y="0" width="820" height="520" rx="18" fill="url(#plateBrass)" stroke="#24180a" stroke-width="3" filter="url(#plateShadow)"></rect>
-            <rect x="7" y="7" width="806" height="506" rx="13" fill="none" stroke="#f0cf6a" stroke-opacity="0.16"></rect>
-            <rect x="10" y="10" width="800" height="500" rx="12" fill="url(#grid)"></rect>
-            <rect x="10" y="10" width="800" height="500" rx="12" fill="url(#plateLight)"></rect>
-            <rect x="16" y="16" width="788" height="488" rx="10" fill="none" stroke="#24180a" stroke-opacity="0.45"></rect>
-
-            <g transform="translate(410 36)">
-              <rect x="-154" y="-14" width="308" height="28" rx="6" fill="#0b0f14" stroke="#6e5317" stroke-width="1"></rect>
-              <text class="engraved" x="0" y="5" text-anchor="middle">BANCO DEL LLANO · CAJA 01</text>
-            </g>
-
-            <g fill="#2a1c0d" stroke="#d4a72c" stroke-width="1">
-              <g transform="translate(30 30)">
-                <circle r="7" fill="url(#brass)"></circle>
-                <path d="M-5 0H5" stroke="#3a2a1a" stroke-width="1.4"></path>
-              </g>
-              <g transform="translate(790 30) rotate(38)">
-                <circle r="7" fill="url(#brass)"></circle>
-                <path d="M-5 0H5" stroke="#3a2a1a" stroke-width="1.4"></path>
-              </g>
-              <g transform="translate(30 490) rotate(-26)">
-                <circle r="7" fill="url(#brass)"></circle>
-                <path d="M-5 0H5" stroke="#3a2a1a" stroke-width="1.4"></path>
-              </g>
-              <g transform="translate(790 490) rotate(12)">
-                <circle r="7" fill="url(#brass)"></circle>
-                <path d="M-5 0H5" stroke="#3a2a1a" stroke-width="1.4"></path>
-              </g>
-            </g>
-
-            <text class="engraved-small" x="34" y="508">N.º 0147</text>
-
-            <g class="legend-plate" transform="translate(54 424)">
-              <rect x="0" y="0" width="224" height="30" rx="5" fill="#0b0f14" stroke="#4a3614" stroke-width="1"></rect>
-              <text class="engraved-small" x="12" y="19">ENTRADA · RUEDA · CERROJO</text>
-              <circle cx="190" cy="15" r="3" fill="#8e2f2a"></circle>
-              <text class="engraved-small" x="198" y="19">ALARMA</text>
-            </g>
-
-            <g class="alarm-bus" aria-hidden="true">
-              <path d="M56 480C240 494 560 494 748 480" fill="none" stroke="#240c0a" stroke-width="8" stroke-linecap="round"></path>
-              <path d="M56 480C240 494 560 494 748 480" fill="none" stroke="#8e2f2a" stroke-width="3.5" stroke-linecap="round"></path>
-              <circle cx="300" cy="488" r="4" fill="#8e2f2a" stroke="#240c0a" stroke-width="2"></circle>
-              <circle cx="570" cy="488" r="4" fill="#8e2f2a" stroke="#240c0a" stroke-width="2"></circle>
-            </g>
-
-            <g class="groove" aria-hidden="true">
-              <path d="M370 190C410 220 470 240 508 248" fill="none" stroke="#2a1c0d" stroke-width="4" stroke-linecap="round" stroke-dasharray="3 6" opacity="0.5"></path>
-              <path d="M370 190C410 220 470 240 508 248" fill="none" stroke="#f0cf6a" stroke-width="1" stroke-linecap="round" opacity="0.12"></path>
-              <circle cx="370" cy="190" r="4.5" fill="#0b0f14" stroke="#8e2f2a" stroke-width="1.5"></circle>
-              <circle cx="508" cy="248" r="4.5" fill="#0b0f14" stroke="#8e2f2a" stroke-width="1.5"></circle>
-            </g>
-
-            <g class="cable" data-key="1">
-              <title>Cable de la llave 1: Entrada a Celda 1</title>
-              <path class="cable-shadow" d="M184 254C220 210 260 180 296 172" fill="none" stroke="#05080c" stroke-width="12" stroke-linecap="round"></path>
-              <path class="cable-core" d="M184 254C220 210 260 180 296 172" fill="none" stroke="#2b2015" stroke-width="7" stroke-linecap="round"></path>
-              <path class="cable-sheen" d="M184 254C220 210 260 180 296 172" fill="none" stroke="#e0b85a" stroke-width="1.2" stroke-linecap="round" opacity="0.38"></path>
-              <g class="cable-tag" transform="translate(238 207)">
-                <path d="M0-12V-17" stroke="#d4a72c" stroke-width="1.4"></path>
-                <circle cx="0" cy="-18" r="2.6" fill="none" stroke="#d4a72c" stroke-width="1.2"></circle>
-                <rect x="-20" y="-12" width="40" height="24" rx="5" fill="#141b24" stroke="#d4a72c" stroke-width="1" filter="url(#tagShadow)"></rect>
-                <circle cx="-10" cy="0" r="4.2" fill="#f0cf6a"></circle>
+          <g id="wire-group">
+            <g class="cable" data-cable="entry-gear1" data-key="1" data-from="entry" data-to="gear-1">
+              <path class="cable-hit" d="M196 300Q246 214 296 159" fill="none"></path>
+              <path class="cable-shadow" d="M196 300Q246 214 296 159" fill="none"></path>
+              <path class="cable-core" d="M196 300Q246 214 296 159" fill="none"></path>
+              <path class="cable-sheen" d="M196 300Q246 214 296 159" fill="none"></path>
+              <circle class="terminal" cx="196" cy="300" r="7"></circle>
+              <circle class="terminal" cx="296" cy="159" r="7"></circle>
+              <g class="cable-tag" transform="translate(246 222)">
+                <path class="tag-loop" d="M0-14v-7"></path>
+                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
+                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
+                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f0cf6a"></circle>
                 <text class="tag-text" x="7" y="4" text-anchor="middle">1</text>
               </g>
             </g>
 
-            <g class="cable" data-key="2">
-              <title>Cable de la llave 2: Entrada a Cerrojo</title>
-              <path class="cable-shadow" d="M176 292C320 420 560 400 674 180" fill="none" stroke="#05080c" stroke-width="12" stroke-linecap="round"></path>
-              <path class="cable-core" d="M176 292C320 420 560 400 674 180" fill="none" stroke="#2b2015" stroke-width="7" stroke-linecap="round"></path>
-              <path class="cable-sheen" d="M176 292C320 420 560 400 674 180" fill="none" stroke="#e0b85a" stroke-width="1.2" stroke-linecap="round" opacity="0.38"></path>
-              <g class="cable-tag" transform="translate(436 366)">
-                <path d="M0-12V-17" stroke="#d4a72c" stroke-width="1.4"></path>
-                <circle cx="0" cy="-18" r="2.6" fill="none" stroke="#d4a72c" stroke-width="1.2"></circle>
-                <rect x="-20" y="-12" width="40" height="24" rx="5" fill="#141b24" stroke="#d4a72c" stroke-width="1" filter="url(#tagShadow)"></rect>
-                <circle cx="-10" cy="0" r="4.2" fill="#38c6b8"></circle>
+            <g class="cable" data-cable="entry-lock" data-key="2" data-from="entry" data-to="lock">
+              <path class="cable-hit" d="M196 315C330 410 560 396 686 203" fill="none"></path>
+              <path class="cable-shadow" d="M196 315C330 410 560 396 686 203" fill="none"></path>
+              <path class="cable-core" d="M196 315C330 410 560 396 686 203" fill="none"></path>
+              <path class="cable-sheen" d="M196 315C330 410 560 396 686 203" fill="none"></path>
+              <circle class="terminal" cx="196" cy="315" r="7"></circle>
+              <circle class="terminal" cx="686" cy="203" r="7"></circle>
+              <g class="cable-tag" transform="translate(438 372)">
+                <path class="tag-loop" d="M0-14v-7"></path>
+                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
+                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
+                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#38c6b8"></circle>
                 <text class="tag-text" x="7" y="4" text-anchor="middle">2</text>
               </g>
             </g>
 
-            <g class="cable" data-key="1">
-              <title>Cable de la llave 1: Celda 1 a Cerrojo</title>
-              <path class="cable-shadow" d="M388 150C470 118 590 118 672 150" fill="none" stroke="#05080c" stroke-width="12" stroke-linecap="round"></path>
-              <path class="cable-core" d="M388 150C470 118 590 118 672 150" fill="none" stroke="#2b2015" stroke-width="7" stroke-linecap="round"></path>
-              <path class="cable-sheen" d="M388 150C470 118 590 118 672 150" fill="none" stroke="#e0b85a" stroke-width="1.2" stroke-linecap="round" opacity="0.38"></path>
-              <g class="cable-tag" transform="translate(530 124)">
-                <path d="M0-12V-17" stroke="#d4a72c" stroke-width="1.4"></path>
-                <circle cx="0" cy="-18" r="2.6" fill="none" stroke="#d4a72c" stroke-width="1.2"></circle>
-                <rect x="-20" y="-12" width="40" height="24" rx="5" fill="#141b24" stroke="#d4a72c" stroke-width="1" filter="url(#tagShadow)"></rect>
-                <circle cx="-10" cy="0" r="4.2" fill="#f0cf6a"></circle>
+            <g class="cable" data-cable="gear1-lock" data-key="1" data-from="gear-1" data-to="lock">
+              <path class="cable-hit" d="M415 165C500 112 610 118 685 178" fill="none"></path>
+              <path class="cable-shadow" d="M415 165C500 112 610 118 685 178" fill="none"></path>
+              <path class="cable-core" d="M415 165C500 112 610 118 685 178" fill="none"></path>
+              <path class="cable-sheen" d="M415 165C500 112 610 118 685 178" fill="none"></path>
+              <circle class="terminal" cx="415" cy="165" r="7"></circle>
+              <circle class="terminal" cx="685" cy="178" r="7"></circle>
+              <g class="cable-tag" transform="translate(550 124)">
+                <path class="tag-loop" d="M0-14v-7"></path>
+                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
+                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
+                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f0cf6a"></circle>
                 <text class="tag-text" x="7" y="4" text-anchor="middle">1</text>
               </g>
             </g>
 
-            <g class="cable" data-key="3">
-              <title>Cable de la llave 3: Celda 2 a Cerrojo</title>
-              <path class="cable-shadow" d="M570 238C600 216 640 198 684 186" fill="none" stroke="#05080c" stroke-width="12" stroke-linecap="round"></path>
-              <path class="cable-core" d="M570 238C600 216 640 198 684 186" fill="none" stroke="#2b2015" stroke-width="7" stroke-linecap="round"></path>
-              <path class="cable-sheen" d="M570 238C600 216 640 198 684 186" fill="none" stroke="#e0b85a" stroke-width="1.2" stroke-linecap="round" opacity="0.38"></path>
-              <g class="cable-tag" transform="translate(628 205)">
-                <path d="M0-12V-17" stroke="#d4a72c" stroke-width="1.4"></path>
-                <circle cx="0" cy="-18" r="2.6" fill="none" stroke="#d4a72c" stroke-width="1.2"></circle>
-                <rect x="-20" y="-12" width="40" height="24" rx="5" fill="#141b24" stroke="#d4a72c" stroke-width="1" filter="url(#tagShadow)"></rect>
-                <circle cx="-10" cy="0" r="4.2" fill="#f06a4a"></circle>
+            <g class="cable" data-cable="gear2-lock" data-key="3" data-from="gear-2" data-to="lock">
+              <path class="cable-hit" d="M615 270C646 252 672 234 700 220" fill="none"></path>
+              <path class="cable-shadow" d="M615 270C646 252 672 234 700 220" fill="none"></path>
+              <path class="cable-core" d="M615 270C646 252 672 234 700 220" fill="none"></path>
+              <path class="cable-sheen" d="M615 270C646 252 672 234 700 220" fill="none"></path>
+              <circle class="terminal" cx="615" cy="270" r="7"></circle>
+              <circle class="terminal" cx="700" cy="220" r="7"></circle>
+              <g class="cable-tag" transform="translate(660 246)">
+                <path class="tag-loop" d="M0-14v-7"></path>
+                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
+                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
+                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f06a4a"></circle>
                 <text class="tag-text" x="7" y="4" text-anchor="middle">3</text>
               </g>
             </g>
-
-            <g class="wheel wheel-entry" transform="translate(140 270)" tabindex="0" role="button" aria-label="Entrada">
-              <ellipse cx="0" cy="54" rx="50" ry="10" fill="#000" opacity="0.42"></ellipse>
-              <circle r="48" fill="url(#wheelRim)" stroke="#4f3a10" stroke-width="2" filter="url(#softShadow)"></circle>
-              <circle r="44" fill="none" stroke="#f0cf6a" stroke-width="1.1" stroke-dasharray="2 6" opacity="0.55"></circle>
-              <circle class="wheel-body" r="36" fill="url(#wheelFace)" stroke="#d4a72c" stroke-width="1.6"></circle>
-              <circle r="28" fill="none" stroke="#6e5317" stroke-width="1"></circle>
-              <path d="M0-18a8 8 0 0 0-4 14.9V10h8V-3.1A8 8 0 0 0 0-18z" fill="#0b0f14" stroke="#f0cf6a" stroke-width="1.4"></path>
-              <circle cx="0" cy="-10" r="2" fill="#f0cf6a"></circle>
-              <circle r="3" fill="#f0cf6a" opacity="0.9"></circle>
-              <path d="M-6-40l6 8 6-8" fill="none" stroke="#f0cf6a" stroke-width="1.4"></path>
-              <g transform="translate(0 66)">
-                <rect x="-42" y="-10" width="84" height="20" rx="4" fill="#0b0f14" stroke="#4a3614" stroke-width="1"></rect>
-                <text class="wheel-label" x="0" y="4" text-anchor="middle">ENTRADA</text>
-              </g>
-            </g>
-
-            <g class="wheel" transform="translate(340 150)" tabindex="0" role="button" aria-label="Celda 1">
-              <ellipse cx="0" cy="54" rx="50" ry="10" fill="#000" opacity="0.42"></ellipse>
-              <circle r="48" fill="url(#wheelRim)" stroke="#4f3a10" stroke-width="2" filter="url(#softShadow)"></circle>
-              <circle r="44" fill="none" stroke="#f0cf6a" stroke-width="1.1" stroke-dasharray="2 6" opacity="0.55"></circle>
-              <circle class="wheel-body" r="36" fill="url(#wheelFace)" stroke="#d4a72c" stroke-width="1.6"></circle>
-              <circle r="28" fill="none" stroke="#6e5317" stroke-width="1"></circle>
-              <text class="wheel-roman" x="0" y="5" text-anchor="middle">I</text>
-              <circle r="3" fill="#f0cf6a" opacity="0.9"></circle>
-              <path d="M-6-40l6 8 6-8" fill="none" stroke="#f0cf6a" stroke-width="1.4"></path>
-              <g transform="translate(0 66)">
-                <rect x="-42" y="-10" width="84" height="20" rx="4" fill="#0b0f14" stroke="#4a3614" stroke-width="1"></rect>
-                <text class="wheel-label" x="0" y="4" text-anchor="middle">CELDA 1</text>
-              </g>
-            </g>
-
-            <g class="wheel" transform="translate(540 270)" tabindex="0" role="button" aria-label="Celda 2">
-              <ellipse cx="0" cy="54" rx="50" ry="10" fill="#000" opacity="0.42"></ellipse>
-              <circle r="48" fill="url(#wheelRim)" stroke="#4f3a10" stroke-width="2" filter="url(#softShadow)"></circle>
-              <circle r="44" fill="none" stroke="#f0cf6a" stroke-width="1.1" stroke-dasharray="2 6" opacity="0.55"></circle>
-              <circle class="wheel-body" r="36" fill="url(#wheelFace)" stroke="#d4a72c" stroke-width="1.6"></circle>
-              <circle r="28" fill="none" stroke="#6e5317" stroke-width="1"></circle>
-              <text class="wheel-roman" x="0" y="5" text-anchor="middle">II</text>
-              <circle r="3" fill="#f0cf6a" opacity="0.9"></circle>
-              <path d="M-6-40l6 8 6-8" fill="none" stroke="#f0cf6a" stroke-width="1.4"></path>
-              <g transform="translate(0 66)">
-                <rect x="-42" y="-10" width="84" height="20" rx="4" fill="#0b0f14" stroke="#4a3614" stroke-width="1"></rect>
-                <text class="wheel-label" x="0" y="4" text-anchor="middle">CELDA 2</text>
-              </g>
-            </g>
-
-            <g class="wheel wheel-lock" transform="translate(720 150)" tabindex="0" role="button" aria-label="Cerrojo">
-              <ellipse cx="0" cy="54" rx="50" ry="10" fill="#000" opacity="0.42"></ellipse>
-              <circle r="48" fill="url(#wheelRim)" stroke="#4f3a10" stroke-width="2" filter="url(#softShadow)"></circle>
-              <circle r="44" fill="none" stroke="#f0cf6a" stroke-width="1.1" stroke-dasharray="2 6" opacity="0.55"></circle>
-              <circle class="wheel-body" r="36" fill="url(#wheelFace)" stroke="#d4a72c" stroke-width="1.6"></circle>
-              <circle r="28" fill="none" stroke="#f0cf6a" stroke-width="1.4"></circle>
-              <path d="M0-18a8 8 0 0 0-4 14.9V8h8V-3.1A8 8 0 0 0 0-18z" fill="#0b0f14" stroke="#f0cf6a" stroke-width="1.4"></path>
-              <path d="M38-8h34a6 6 0 0 1 6 6v4a6 6 0 0 1-6 6H38z" fill="url(#steel)" stroke="#2a3646" stroke-width="1.4"></path>
-              <rect x="-18" y="42" width="36" height="12" rx="3" fill="#0b0f14" stroke="#8e2f2a" stroke-width="1"></rect>
-              <text class="lock-state" x="0" y="51" text-anchor="middle">CERRADO</text>
-              <g transform="translate(0 66)">
-                <rect x="-42" y="-10" width="84" height="20" rx="4" fill="#0b0f14" stroke="#4a3614" stroke-width="1"></rect>
-                <text class="wheel-label" x="0" y="4" text-anchor="middle">CERROJO</text>
-              </g>
-            </g>
-
-            <g class="alarm-bell" transform="translate(760 466) scale(1.15)" aria-hidden="true">
-              <path d="M-14 0h28l-4-16h-20z" fill="url(#brass)" stroke="#4a3614" stroke-width="1.2"></path>
-              <path d="M-10-16a10 10 0 0 1 20 0" fill="none" stroke="#d4a72c" stroke-width="5"></path>
-              <circle cx="0" cy="-16" r="3" fill="#8e2f2a"></circle>
-              <path d="M0 0v10" stroke="#4a3614" stroke-width="3"></path>
-              <text class="engraved-small" x="0" y="22" text-anchor="middle">ALARMA</text>
-            </g>
           </g>
 
-          <g class="thief" aria-hidden="true" transform="translate(872 350)">
-            <ellipse cx="42" cy="248" rx="46" ry="8" fill="#000" opacity="0.4"></ellipse>
-            <path d="M18 244L20 136Q20 102 46 94L58 94Q82 102 82 136L80 244Z" fill="#070b10"></path>
-            <path d="M78 136q30 12 38 40" fill="none" stroke="#070b10" stroke-width="13" stroke-linecap="round"></path>
-            <path d="M116 176l22-12M116 176l20 8" fill="none" stroke="#b9a06a" stroke-width="2.2" stroke-linecap="round"></path>
-            <circle cx="51" cy="64" r="22" fill="#070b10"></circle>
-            <path d="M18 64q33-30 66 0l-4-12q-29-28-58 0z" fill="#070b10"></path>
-            <path d="M32 36q19-18 38 0l-4-6q-15-16-30 0z" fill="#070b10"></path>
-            <path d="M22 138q-10 22-6 52" fill="none" stroke="#38c6b8" stroke-width="2.2" opacity="0.5"></path>
-            <path d="M26 100q-6 18-4 34" fill="none" stroke="#38c6b8" stroke-width="1.5" opacity="0.38"></path>
-            <path d="M76 100q8 18 6 38" fill="none" stroke="#d4a72c" stroke-width="1.6" opacity="0.3"></path>
-            <path d="M80 142q8 20 4 42" fill="none" stroke="#d4a72c" stroke-width="1.4" opacity="0.24"></path>
+          <g id="alarm-layer">
+            <path class="alarm-shadow" d="M80 500C280 520 600 520 800 500" fill="none"></path>
+            <path class="alarm-bus" d="M80 500C280 520 600 520 800 500" fill="none"></path>
+            <circle class="alarm-node" cx="300" cy="512" r="4"></circle>
+            <circle class="alarm-node" cx="620" cy="512" r="4"></circle>
+            <path class="missing-groove" d="M407 242Q455 266 503 248" fill="none"></path>
+            <circle class="open-socket" cx="407" cy="242" r="4.5"></circle>
+            <circle class="open-socket" cx="503" cy="248" r="4.5"></circle>
           </g>
 
-          <g aria-hidden="true">
-            <rect x="0" y="0" width="1000" height="34" fill="#05080c" opacity="0.35"></rect>
-            <rect x="0" y="610" width="1000" height="30" fill="#05080c" opacity="0.28"></rect>
-          </g>
+          <g id="pulse-layer"></g>
         </svg>
 
-        <div class="stage-caption">
-          <span class="stage-kicker">Mecanismo</span>
-          <span class="stage-note">Reparación · falta un cable y hay dos de más</span>
+        <span class="plate-alarm-label">Alarma</span>
+
+        <div class="part part-entry" data-part="entry" role="button" tabindex="0" aria-label="Entrada del mecanismo">
+          <span class="part-aura" aria-hidden="true"></span>
+          <img src="assets/sprites/bocallave-entrada.svg" alt="" draggable="false" data-sprite="bocallave-entrada">
         </div>
-        <p class="stage-scroll-hint">Deslizá para recorrer el mecanismo →</p>
-      </section>
 
-      <aside class="casefile" aria-label="Expediente del contrato">
-        <article class="contract-card">
-          <span class="paperclip" aria-hidden="true">
-            <svg viewBox="0 0 26 64" focusable="false">
-              <path d="M18 16v34a10 10 0 0 1-20 0V14a7 7 0 0 1 14 0v32a4 4 0 0 1-8 0V20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"></path>
-            </svg>
-          </span>
-          <p class="contract-number">Contrato 01</p>
-          <h2>Banco del Llano</h2>
-          <p class="contract-rule">Abre solo con la secuencia <strong>1 · 2 · 3</strong>.</p>
-          <p class="contract-note">Cualquier otra combinación deja la alarma encendida.</p>
-          <div class="stamp" aria-label="Estado: en reparación">En reparación</div>
-          <div class="wax-seal" aria-hidden="true"><span></span></div>
-          <div class="contract-foot">
-            <span>Caja 01</span>
-            <span>N.º 0147</span>
-          </div>
-        </article>
-
-        <section class="panel brief-panel">
-          <div class="section-head">
-            <h3>El encargo</h3>
-            <span class="section-rule" aria-hidden="true"></span>
-          </div>
-          <p>El mecanismo quedó a medio armar. Falta un cable y hay dos de más.</p>
-          <div class="hint-card">
-            <button class="button ghost hint-button" type="button">
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path d="M5 4h14v16l-7-4-7 4z"></path>
-              </svg>
-              Pista
-              <span class="hint-count">1 / 2</span>
-            </button>
-            <p>Probá la llave 1-2-3 y mirá por dónde pasa.</p>
-          </div>
-        </section>
-
-        <section class="panel notes-panel">
-          <div class="section-head">
-            <h3>Notas del caso</h3>
-            <span class="section-rule" aria-hidden="true"></span>
-          </div>
-          <ol class="notes">
-            <li class="note note-info">
-              <span class="note-time">21:04</span>
-              <p>El mecanismo quedó a medio armar. Falta un cable y hay dos de más.</p>
-            </li>
-            <li class="note note-info">
-              <span class="note-time">21:05</span>
-              <p>Probá la llave y después pedí el ensayo.</p>
-            </li>
-            <li class="note note-bad">
-              <span class="note-time">21:06</span>
-              <p>Marcas de ganzúa en 2. El ladrón entró por ahí.</p>
-            </li>
-          </ol>
-        </section>
-
-        <footer class="casefile-footer" aria-label="Resumen del expediente">
-          <span class="casefile-mark" aria-hidden="true">01</span>
-          <span class="casefile-copy">Expediente del Banco del Llano</span>
-          <span class="casefile-status">En reparación</span>
-        </footer>
-      </aside>
-    </main>
-
-    <footer class="dock">
-      <div class="dock-group dock-keys">
-        <span class="dock-label">Llavero</span>
-        <div class="key-ring">
-          <input class="key-input" type="radio" name="key" id="key-1" checked>
-          <label class="key-tag key-gold" for="key-1" aria-label="Llave 1">
-            <span class="key-hole" aria-hidden="true"></span>
-            <span class="key-symbol">1</span>
-            <span class="key-teeth" aria-hidden="true"></span>
-          </label>
-
-          <input class="key-input" type="radio" name="key" id="key-2">
-          <label class="key-tag key-teal" for="key-2" aria-label="Llave 2">
-            <span class="key-hole" aria-hidden="true"></span>
-            <span class="key-symbol">2</span>
-            <span class="key-teeth" aria-hidden="true"></span>
-          </label>
-
-          <input class="key-input" type="radio" name="key" id="key-3">
-          <label class="key-tag key-coral" for="key-3" aria-label="Llave 3">
-            <span class="key-hole" aria-hidden="true"></span>
-            <span class="key-symbol">3</span>
-            <span class="key-teeth" aria-hidden="true"></span>
-          </label>
-
-          <input class="key-input" type="radio" name="key" id="key-4">
-          <label class="key-tag key-violet" for="key-4" aria-label="Llave 4">
-            <span class="key-hole" aria-hidden="true"></span>
-            <span class="key-symbol">4</span>
-            <span class="key-teeth" aria-hidden="true"></span>
-          </label>
+        <div class="part part-gear part-gear-1" data-part="gear-1" role="button" tabindex="0" aria-label="Rueda de memoria I">
+          <span class="part-aura" aria-hidden="true"></span>
+          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.svg" alt="" draggable="false" data-sprite="rueda-engranaje">
+          <span class="gear-numeral" aria-hidden="true">I</span>
         </div>
+
+        <div class="part part-gear part-gear-2" data-part="gear-2" role="button" tabindex="0" aria-label="Rueda de memoria II">
+          <span class="part-aura" aria-hidden="true"></span>
+          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.svg" alt="" draggable="false" data-sprite="rueda-engranaje">
+          <span class="gear-numeral" aria-hidden="true">II</span>
+        </div>
+
+        <div class="part part-lock" data-part="lock" role="button" tabindex="0" aria-label="Cerrojo de la caja">
+          <span class="part-aura" aria-hidden="true"></span>
+          <img class="lock-bolt" src="assets/sprites/perno.svg" alt="" draggable="false" data-sprite="perno">
+          <img class="lock-body" src="assets/sprites/cilindro-cerradura.svg" alt="" draggable="false" data-sprite="cilindro-cerradura">
+          <span class="lock-led" aria-hidden="true"></span>
+        </div>
+
+        <button class="part part-bell" type="button" data-part="bell" aria-label="Campana de alarma">
+          <img src="assets/sprites/campana-alarma.svg" alt="" draggable="false" data-sprite="campana-alarma">
+        </button>
       </div>
 
-      <div class="dock-group dock-tools">
-        <span class="dock-label">Herramienta</span>
-        <div class="tool-row">
-          <input class="tool-input" type="radio" name="tool" id="tool-wire" checked>
-          <label class="tool-button" for="tool-wire">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M4 16c2-5 5-8 10-8 3 0 5 2 5 5s-2 5-5 5c-4 0-6-3-6-6 0-2 1-4 3-5"></path>
-              <circle cx="4" cy="16" r="2"></circle>
-            </svg>
-            Cable
-          </label>
+      <div class="tool-cursor" id="tool-cursor" hidden aria-hidden="true">
+        <img id="tool-cursor-img" src="assets/sprites/carrete-cobre.svg" alt="" draggable="false">
+        <span class="cursor-dot"></span>
+      </div>
 
-          <input class="tool-input" type="radio" name="tool" id="tool-cut">
-          <label class="tool-button" for="tool-cut">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="6" cy="6" r="3"></circle>
-              <circle cx="6" cy="18" r="3"></circle>
-              <path d="M20 4L8.1 15.9M14.5 14.5L20 20M8.1 8.1L12 12"></path>
-            </svg>
-            Tijera
-          </label>
+      <p class="stage-hint" id="stage-hint">Elegí una herramienta y probala sobre la cerradura.</p>
+    </main>
 
-          <button class="tool-button is-locked" type="button" disabled title="Se desbloquea en el contrato 02">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <circle cx="12" cy="12" r="4"></circle>
-              <path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"></path>
-            </svg>
-            Engranaje
-            <span class="locked-badge">02</span>
+    <p class="mobile-scroll-note">Deslizá el mecanismo para recorrerlo →</p>
+
+    <footer class="inventory" id="inventory" aria-label="Inventario del cerrajero">
+      <div class="inventory-keys">
+        <span class="key-rail" aria-hidden="true"></span>
+        <div class="key-row">
+          <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" aria-label="Llave 1">
+            <img src="assets/sprites/llave-1.svg" alt="" draggable="false" data-sprite="llave-1">
+            <span class="item-name">Llave 1</span>
+          </button>
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" aria-label="Llave 2">
+            <img src="assets/sprites/llave-2.svg" alt="" draggable="false" data-sprite="llave-2">
+            <span class="item-name">Llave 2</span>
+          </button>
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" aria-label="Llave 3">
+            <img src="assets/sprites/llave-3.svg" alt="" draggable="false" data-sprite="llave-3">
+            <span class="item-name">Llave 3</span>
+          </button>
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" aria-label="Llave 4">
+            <img src="assets/sprites/llave-4.svg" alt="" draggable="false" data-sprite="llave-4">
+            <span class="item-name">Llave 4</span>
           </button>
         </div>
       </div>
 
-      <div class="dock-status">
-        <span class="status-dot" aria-hidden="true"></span>
-        <span class="status-text">Cable de la llave <strong class="active-key-label" aria-hidden="true"></strong></span>
-        <span class="tool-hint">
-          <span class="for-wire">Elegí una llave y tocá origen y destino.</span>
-          <span class="for-cut">Tocá un cable para cortarlo.</span>
-        </span>
+      <div class="inventory-tools">
+        <button class="inventory-item inventory-tool is-active" type="button" data-tool="wire" aria-label="Carrete de cobre">
+          <img src="assets/sprites/carrete-cobre.svg" alt="" draggable="false" data-sprite="carrete-cobre">
+          <span class="item-name">Cable</span>
+        </button>
+        <button class="inventory-item inventory-tool" type="button" data-tool="scissors" aria-label="Tijeras">
+          <img src="assets/sprites/tijeras.svg" alt="" draggable="false" data-sprite="tijeras">
+          <span class="item-name">Tijera</span>
+        </button>
+        <button class="inventory-item inventory-tool is-locked" type="button" data-tool="gear" aria-label="Engranaje, se desbloquea en el contrato 02" aria-disabled="true">
+          <img src="assets/sprites/engranaje-herramienta.svg" alt="" draggable="false" data-sprite="engranaje-herramienta">
+          <span class="item-name">Engranaje · contrato 02</span>
+          <span class="lock-badge" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"></rect><path d="M9 11V8a3 3 0 0 1 6 0v3"></path></svg>
+          </span>
+        </button>
       </div>
 
-      <div class="dock-actions">
-        <span class="thief-note">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M5 11a7 7 0 0 1 14 0v6l-3-2-3 2-3-2-3 2z"></path>
-            <path d="M9 11h.01M15 11h.01"></path>
-          </svg>
-          El ladrón está afuera
-        </span>
-        <button class="button secondary" type="button" title="Mockup: sin acción">
-          Probar la llave
-        </button>
-        <button class="button primary" type="button" title="Mockup: sin acción">
-          Ensayo
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M7 4l13 8-13 8z"></path>
-          </svg>
-        </button>
+      <div class="inventory-actions">
+        <button class="action-button" id="probe-button" type="button">Probar</button>
+        <button class="action-button is-primary" id="assault-button" type="button">Ensayo</button>
       </div>
     </footer>
 
-    <p class="mockup-note">Mockup estático · datos de ejemplo · sin lógica de juego</p>
+    <p class="mockup-note">Mockup · datos de ejemplo · sin lógica de juego</p>
   </div>
+
+  <div class="overlay" id="overlay" hidden>
+    <div class="overlay-backdrop" data-close></div>
+    <section class="dossier" id="dossier" role="dialog" aria-modal="true" aria-label="Documento">
+      <button class="overlay-close" id="overlay-close" type="button" aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg>
+      </button>
+      <div id="dossier-content"></div>
+    </section>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <template id="tpl-contract">
+    <article class="paper paper-contract">
+      <p class="paper-kicker">Contrato 01</p>
+      <h2>Banco del Llano</h2>
+      <p class="paper-rule">Abre solo con la secuencia <strong>1 · 2 · 3</strong>.</p>
+      <p class="paper-note">Cualquier otra combinación deja la alarma encendida.</p>
+      <div class="paper-foot"><span>Caja 01</span><span>N.º 0147</span></div>
+      <div class="paper-seal" aria-hidden="true"></div>
+      <div class="paper-stamp" aria-hidden="true">En reparación</div>
+    </article>
+  </template>
+
+  <template id="tpl-hint">
+    <article class="paper paper-hint">
+      <p class="paper-kicker">Pista <span id="hint-index">1</span> de 2</p>
+      <h2>El encargo</h2>
+      <p class="paper-hint-text" id="hint-text">Probá la llave 1-2-3 y mirá por dónde pasa.</p>
+      <button class="paper-button" id="next-hint" type="button">Siguiente pista</button>
+    </article>
+  </template>
+
+  <template id="tpl-log">
+    <article class="paper paper-log">
+      <p class="paper-kicker">Bitácora</p>
+      <h2>Notas del caso</h2>
+      <ol class="log-list">
+        <li class="is-info"><span>21:04</span><p>El mecanismo quedó a medio armar. Falta un cable y hay dos de más.</p></li>
+        <li class="is-info"><span>21:05</span><p>Probá la llave y después pedí el ensayo.</p></li>
+        <li class="is-bad"><span>21:06</span><p>Marcas de ganzúa en 2. El ladrón entró por ahí.</p></li>
+      </ol>
+    </article>
+  </template>
+
+  <script src="app.js"></script>
 </body>
 </html>
