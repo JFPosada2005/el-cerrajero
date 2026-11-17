@@ -31,22 +31,23 @@ Los botones `Probar` y `Ensayo` no ejecutan la lógica del juego: son demostraci
 
 ## Sprites
 
-Los archivos actuales son **SVG provisionales** para que la interfaz ya se pueda evaluar. Los definitivos deben ir en `assets/sprites/` con los nombres y tamaños del índice [`GUIA-ASSETS.md`](GUIA-ASSETS.md).
+La mayoría de los props principales ya usan los **assets de IA** integrados: fondo, ladrón, contrato, pista, libreta, bocallave, cilindro, carrete, llaves 1–4 y la textura de la placa. Quedan en SVG las piezas mecánicas que necesitan geometría exacta: engranajes, perno, campana, tijeras, engranaje-herramienta y mesa.
 
-La guía está dividida en dos rutas:
+La revisión completa de lo recibido está en [`REVISION-ASSETS.md`](REVISION-ASSETS.md): qué se usó, qué se ajustó y por qué los ZIP de la carpeta WEB no encajaron.
 
-- [`GUIA-ASSETS-IA.md`](GUIA-ASSETS-IA.md): prompts completos para generar con IA el fondo, el ladrón, el papel, el cuero y los props orgánicos.
-- [`GUIA-ASSETS-WEB.md`](GUIA-ASSETS-WEB.md): palabras clave, sitios, licencias y características para buscar engranajes, pernos, tijeras, campanas, texturas de madera/latón y piezas de geometría exacta.
+El índice de assets y las dos guías siguen disponibles:
 
-En resumen: **IA para atmósfera y materiales; web/SVG para mecánica y geometría exacta; Photopea para limpiar, recolorear y componer.**
+- [`GUIA-ASSETS.md`](GUIA-ASSETS.md): índice y tabla de decisión.
+- [`GUIA-ASSETS-IA.md`](GUIA-ASSETS-IA.md): prompts para generar con IA.
+- [`GUIA-ASSETS-WEB.md`](GUIA-ASSETS-WEB.md): palabras clave, sitios y licencias para buscar.
 
-Para probar los PNG definitivos sin cambiar el código:
+Para probar PNG/JPEG definitivos sin cambiar el código:
 
 ```text
 index.html?sprites=png
 ```
 
-Ese parámetro reemplaza cada `assets/sprites/nombre.svg` por `assets/sprites/nombre.png`; si un PNG falta, conserva el SVG.
+El mockup usa `fondo-banco.jpg` y `placa-textura.jpg` optimizados; si aparece un `fondo-banco.png` o `placa-textura.png` en la carpeta, `?sprites=png` lo prefiere.
 
 ## Archivos
 
@@ -54,10 +55,11 @@ Ese parámetro reemplaza cada `assets/sprites/nombre.svg` por `assets/sprites/no
 index.html               estructura y objetos de la escena
 styles.css               dirección visual, layout y estados
 app.js                   interacción de demo, modales, cursor y sonido
-assets/sprites/*.svg     sprites provisionales
+assets/sprites/          PNG de IA, JPG optimizados y SVG de mecánica
 GUIA-ASSETS.md           índice y tabla de decisión de assets
 GUIA-ASSETS-IA.md        prompts para generar assets con IA
 GUIA-ASSETS-WEB.md       keywords y características para buscar assets
+REVISION-ASSETS.md       revisión de los assets recibidos y decisiones
 preview-1440.png         captura de referencia
 preview-390.png          captura móvil de referencia
 ```

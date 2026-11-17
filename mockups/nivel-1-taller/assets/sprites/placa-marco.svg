@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 560" width="900" height="560">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d4a72c"></stop>
+      <stop offset="0.35" stop-color="#9a7424"></stop>
+      <stop offset="0.7" stop-color="#5c3f12"></stop>
+      <stop offset="1" stop-color="#2b1c0b"></stop>
+    </linearGradient>
+    <radialGradient id="screw" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#e4be63"></stop>
+      <stop offset="0.55" stop-color="#8a651f"></stop>
+      <stop offset="1" stop-color="#2b1c0b"></stop>
+    </radialGradient>
+    <linearGradient id="plateDark" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#0b0f14"></stop>
+      <stop offset="1" stop-color="#05080c"></stop>
+    </linearGradient>
+    <radialGradient id="plateShade" cx="0.5" cy="0.45" r="0.72">
+      <stop offset="0.35" stop-color="#000000" stop-opacity="0"></stop>
+      <stop offset="1" stop-color="#000000" stop-opacity="0.38"></stop>
+    </radialGradient>
+  </defs>
+
+  <rect x="2" y="2" width="896" height="556" rx="18" fill="none" stroke="#120c06" stroke-width="4"></rect>
+  <rect x="7" y="7" width="886" height="546" rx="14" fill="none" stroke="url(#brass)" stroke-width="7" opacity="0.78"></rect>
+  <rect x="15" y="15" width="870" height="530" rx="10" fill="none" stroke="#2a1c0d" stroke-width="3"></rect>
+  <rect x="21" y="21" width="858" height="518" rx="7" fill="none" stroke="#f0cf6a" stroke-width="1" opacity="0.12"></rect>
+
+  <g fill="url(#screw)" stroke="#2b1c0b" stroke-width="2">
+    <g transform="translate(32 32)">
+      <circle r="9"></circle>
+      <path d="M-6 0H6" stroke="#3a2a12" stroke-width="2"></path>
+    </g>
+    <g transform="translate(868 32) rotate(40)">
+      <circle r="9"></circle>
+      <path d="M-6 0H6" stroke="#3a2a12" stroke-width="2"></path>
+    </g>
+    <g transform="translate(32 528) rotate(-28)">
+      <circle r="9"></circle>
+      <path d="M-6 0H6" stroke="#3a2a12" stroke-width="2"></path>
+    </g>
+    <g transform="translate(868 528) rotate(12)">
+      <circle r="9"></circle>
+      <path d="M-6 0H6" stroke="#3a2a12" stroke-width="2"></path>
+    </g>
+  </g>
+
+  <g fill="none" stroke="#f0cf6a" stroke-width="1.2" opacity="0.14">
+    <path d="M44 44h92v12H56v12H44z"></path>
+    <path d="M856 44h-92v12h80v12h12z"></path>
+    <path d="M44 516h92v-12H56v-12H44z"></path>
+    <path d="M856 516h-92v-12h80v-12h12z"></path>
+  </g>
+
+  <path d="M860 90v380" stroke="#2f6f68" stroke-width="2" opacity="0.12"></path>
+  <path d="M40 470h820" stroke="#2f6f68" stroke-width="1.5" opacity="0.08"></path>
+
+  <rect x="22" y="22" width="856" height="516" rx="7" fill="url(#plateShade)"></rect>
+
+  <g transform="translate(450 34)">
+    <rect x="-154" y="-17" width="308" height="34" rx="6" fill="url(#plateDark)" stroke="#6e5317" stroke-width="1.5"></rect>
+    <rect x="-146" y="-10" width="292" height="20" rx="3" fill="none" stroke="#f0cf6a" stroke-width="1" opacity="0.16"></rect>
+  </g>
+
+  <g transform="translate(38 500)">
+    <rect x="0" y="0" width="196" height="30" rx="5" fill="url(#plateDark)" stroke="#4a3614" stroke-width="1.5"></rect>
+    <rect x="7" y="6" width="182" height="18" rx="2" fill="none" stroke="#f0cf6a" stroke-width="1" opacity="0.14"></rect>
+  </g>
+
+  <g fill="none" stroke="#000" stroke-width="1.5" opacity="0.35">
+    <path d="M30 70v30M70 30h30M870 70v30M830 30h-30M30 490v-30M70 530h30M870 490v-30M830 530h-30"></path>
+  </g>
+</svg>

@@ -1,15 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="512" height="128">
   <defs>
     <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#e1e8ef"/>
-      <stop offset="0.22" stop-color="#aab5c1"/>
-      <stop offset="0.55" stop-color="#697483"/>
-      <stop offset="1" stop-color="#303944"/>
+      <stop offset="0" stop-color="#c4ced9"/>
+      <stop offset="0.22" stop-color="#8b97a5"/>
+      <stop offset="0.55" stop-color="#4f5a68"/>
+      <stop offset="1" stop-color="#1b222b"/>
     </linearGradient>
     <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
-      <stop offset="0" stop-color="#8a651f"/>
-      <stop offset="0.5" stop-color="#f0cf6a"/>
-      <stop offset="1" stop-color="#8a651f"/>
+      <stop offset="0" stop-color="#5c3f12"/>
+      <stop offset="0.5" stop-color="#c79a32"/>
+      <stop offset="1" stop-color="#5c3f12"/>
     </linearGradient>
     <filter id="shadow" x="-10%" y="-50%" width="120%" height="220%">
       <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity="0.6"/>
@@ -24,5 +24,6 @@
     <path d="M40 48v32M56 48v32" stroke="#4a5563" stroke-width="3" opacity="0.5"/>
     <path d="M442 38l22-14v80l-22-14z" fill="#d9e1e9" stroke="#2a333e" stroke-width="4"/>
     <path d="M28 64h330" stroke="#2a333e" stroke-width="2" opacity="0.6"/>
+    <path d="M38 76h320" stroke="#38c6b8" stroke-width="1.5" opacity="0.18"/>
   </g>
 </svg>

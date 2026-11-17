@@ -119,13 +119,15 @@ Opcionales: `resorte.png`, `terminal.png`, `chispa.png`.
 ## Reglas de integración
 
 - Props: PNG-24 con alfa, 2× de la medida final, 4–8 % de margen transparente.
-- Fondo: full-bleed, sin transparencia, 2048×1280.
+- Fondo: full-bleed, sin transparencia, 2048×1152 (16:9) o 2048×1280 (16:10); el mockup usa 2048×1152.
 - Mesa: PNG con transparencia arriba del borde superior; abajo, madera.
 - Placa: PNG con transparencia fuera del rectángulo; placas de texto en blanco para superponer en HTML.
 - Llaves: una sola silueta; las variantes 2–4 se recolorean.
 - Engranaje: simétrico, centrado, sin texto; el numeral I/II va en HTML.
 - Sin sombras horneadas fuertes: el CSS ya aplica sombras.
 - Sin texto, logos, watermarks ni rips de juegos.
+
+**Estado del mockup:** el fondo y la textura de la placa se optimizaron a JPG; los props con transparencia siguen en PNG. La placa se compone de `placa-textura.jpg` + `placa-marco.svg`. Los originales PNG quedan en las carpetas del escritorio.
 
 ## Créditos
 

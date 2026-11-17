@@ -184,9 +184,9 @@ const sounds = {
 /* Cursor y herramienta. */
 function cursorSource(tool, key) {
   if (tool === 'key') {
-    return $(`.inventory-key[data-key="${key}"] img`);
+    return $(`.inventory-key[data-key="${key}"]`);
   }
-  return $(`.inventory-tool[data-tool="${tool}"] img`);
+  return $(`.inventory-tool[data-tool="${tool}"]`);
 }
 
 function setTool(tool, key = state.key) {
@@ -207,7 +207,8 @@ function setTool(tool, key = state.key) {
   });
   const source = cursorSource(tool, state.key);
   if (source !== undefined && source !== null) {
-    toolCursorImg.src = source.src;
+    const sourceImage = $('img', source);
+    toolCursorImg.src = source.dataset.cursor ?? sourceImage.src;
   }
   clearSource();
   hideStageHint();

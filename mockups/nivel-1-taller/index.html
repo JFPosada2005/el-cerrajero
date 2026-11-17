@@ -46,28 +46,29 @@
     </header>
 
     <main class="stage" id="stage" aria-label="Mesa de trabajo del taller">
-      <img class="scene" src="assets/sprites/fondo-banco.svg" alt="" aria-hidden="true" draggable="false" data-sprite="fondo-banco">
+      <img class="scene" src="assets/sprites/fondo-banco.jpg" alt="" aria-hidden="true" draggable="false" data-sprite="fondo-banco">
       <div class="stage-light" aria-hidden="true"></div>
       <img class="bench" src="assets/sprites/mesa-madera.svg" alt="" aria-hidden="true" draggable="false" data-sprite="mesa-madera">
-      <img class="thief" id="thief" src="assets/sprites/ladron.svg" alt="El ladrón observa desde la penumbra" draggable="false" data-sprite="ladron">
+      <img class="thief" id="thief" src="assets/sprites/ladron.png" alt="El ladrón observa desde la penumbra" draggable="false" data-sprite="ladron">
 
       <div class="table-objects" aria-label="Objetos sobre la mesa">
         <button class="table-object object-contract" type="button" data-overlay="contract" aria-haspopup="dialog" aria-label="Abrir el contrato">
-          <img src="assets/sprites/contrato.svg" alt="" draggable="false" data-sprite="contrato">
+          <img src="assets/sprites/contrato.png" alt="" draggable="false" data-sprite="contrato">
           <span class="object-caption">Contrato</span>
         </button>
         <button class="table-object object-hint" type="button" data-overlay="hint" aria-haspopup="dialog" aria-label="Abrir la pista">
-          <img src="assets/sprites/nota-pista.svg" alt="" draggable="false" data-sprite="nota-pista">
+          <img src="assets/sprites/nota-pista.png" alt="" draggable="false" data-sprite="nota-pista">
           <span class="object-caption">Pista</span>
         </button>
         <button class="table-object object-log" type="button" data-overlay="log" aria-haspopup="dialog" aria-label="Abrir la bitácora">
-          <img src="assets/sprites/libreta.svg" alt="" draggable="false" data-sprite="libreta">
+          <img src="assets/sprites/libreta.png" alt="" draggable="false" data-sprite="libreta">
           <span class="object-caption">Bitácora</span>
         </button>
       </div>
 
       <div class="mechanism-wrap" id="mechanism">
-        <img class="plate" src="assets/sprites/placa-mecanismo.svg" alt="" aria-hidden="true" draggable="false" data-sprite="placa-mecanismo">
+        <img class="plate-texture" src="assets/sprites/placa-textura.jpg" alt="" aria-hidden="true" draggable="false" data-sprite="placa-textura">
+        <img class="plate-frame" src="assets/sprites/placa-marco.svg" alt="" aria-hidden="true" draggable="false" data-sprite="placa-marco">
         <span class="plate-label">Banco del Llano · Caja 01</span>
         <span class="plate-serial">N.º 0147</span>
 
@@ -184,7 +185,7 @@
 
         <div class="part part-entry" data-part="entry" role="button" tabindex="0" aria-label="Entrada del mecanismo">
           <span class="part-aura" aria-hidden="true"></span>
-          <img src="assets/sprites/bocallave-entrada.svg" alt="" draggable="false" data-sprite="bocallave-entrada">
+          <img src="assets/sprites/bocallave-entrada.png" alt="" draggable="false" data-sprite="bocallave-entrada">
         </div>
 
         <div class="part part-gear part-gear-1" data-part="gear-1" role="button" tabindex="0" aria-label="Rueda de memoria I">
@@ -202,7 +203,7 @@
         <div class="part part-lock" data-part="lock" role="button" tabindex="0" aria-label="Cerrojo de la caja">
           <span class="part-aura" aria-hidden="true"></span>
           <img class="lock-bolt" src="assets/sprites/perno.svg" alt="" draggable="false" data-sprite="perno">
-          <img class="lock-body" src="assets/sprites/cilindro-cerradura.svg" alt="" draggable="false" data-sprite="cilindro-cerradura">
+          <img class="lock-body" src="assets/sprites/cilindro-cerradura.png" alt="" draggable="false" data-sprite="cilindro-cerradura">
           <span class="lock-led" aria-hidden="true"></span>
         </div>
 
@@ -212,7 +213,7 @@
       </div>
 
       <div class="tool-cursor" id="tool-cursor" hidden aria-hidden="true">
-        <img id="tool-cursor-img" src="assets/sprites/carrete-cobre.svg" alt="" draggable="false">
+        <img id="tool-cursor-img" src="assets/sprites/carrete-cobre.png" alt="" draggable="false">
         <span class="cursor-dot"></span>
       </div>
 
@@ -225,20 +226,24 @@
       <div class="inventory-keys">
         <span class="key-rail" aria-hidden="true"></span>
         <div class="key-row">
-          <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" aria-label="Llave 1">
-            <img src="assets/sprites/llave-1.svg" alt="" draggable="false" data-sprite="llave-1">
+          <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 1">
+            <img src="assets/sprites/llave-1.png" alt="" draggable="false" data-sprite="llave-1">
+            <span class="key-number" aria-hidden="true">1</span>
             <span class="item-name">Llave 1</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" aria-label="Llave 2">
-            <img src="assets/sprites/llave-2.svg" alt="" draggable="false" data-sprite="llave-2">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 2">
+            <img src="assets/sprites/llave-2.png" alt="" draggable="false" data-sprite="llave-2">
+            <span class="key-number" aria-hidden="true">2</span>
             <span class="item-name">Llave 2</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" aria-label="Llave 3">
-            <img src="assets/sprites/llave-3.svg" alt="" draggable="false" data-sprite="llave-3">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 3">
+            <img src="assets/sprites/llave-3.png" alt="" draggable="false" data-sprite="llave-3">
+            <span class="key-number" aria-hidden="true">3</span>
             <span class="item-name">Llave 3</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" aria-label="Llave 4">
-            <img src="assets/sprites/llave-4.svg" alt="" draggable="false" data-sprite="llave-4">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 4">
+            <img src="assets/sprites/llave-4.png" alt="" draggable="false" data-sprite="llave-4">
+            <span class="key-number" aria-hidden="true">4</span>
             <span class="item-name">Llave 4</span>
           </button>
         </div>
@@ -246,7 +251,7 @@
 
       <div class="inventory-tools">
         <button class="inventory-item inventory-tool is-active" type="button" data-tool="wire" aria-label="Carrete de cobre">
-          <img src="assets/sprites/carrete-cobre.svg" alt="" draggable="false" data-sprite="carrete-cobre">
+          <img src="assets/sprites/carrete-cobre.png" alt="" draggable="false" data-sprite="carrete-cobre">
           <span class="item-name">Cable</span>
         </button>
         <button class="inventory-item inventory-tool" type="button" data-tool="scissors" aria-label="Tijeras">
