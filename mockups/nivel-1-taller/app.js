@@ -395,12 +395,10 @@ const CABLE_ART = {
   eyeletY: 335,
   eyeletSpan: 1314,
   rise: 220,
-  flatten: 0.65,
   tagHang: 24,
   drawMs: 400,
 };
 
-const PREVIEW_FLATTEN = 0.42;
 let cableSerial = 0;
 
 function partClearance(point) {
@@ -437,15 +435,15 @@ function chooseBow(from, to) {
   return autoBow(PARTS[from], PARTS[to]);
 }
 
-function arcGeometry(start, end, bow, flatten = CABLE_ART.flatten) {
+function arcGeometry(start, end, bow) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const chord = Math.hypot(dx, dy) || 1;
   const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
   const scaleX = chord / CABLE_ART.eyeletSpan;
-  const scaleY = scaleX * flatten * bow;
+  const scaleY = scaleX * bow;
   const normal = { x: dy / chord, y: -dx / chord };
-  const rise = CABLE_ART.rise * scaleX * flatten * bow;
+  const rise = CABLE_ART.rise * scaleX * bow;
   const control = {
     x: (start.x + end.x) / 2 + normal.x * rise * 2,
     y: (start.y + end.y) / 2 + normal.y * rise * 2,
@@ -624,7 +622,7 @@ function updateCablePreview(sourceId, clientX, clientY) {
   const start = rimPoint(from, target, from.r);
   const end = targetId === null ? pointer : rimPoint(target, from, target.r);
   const bow = targetId === null ? autoBow(start, end) : chooseBow(sourceId, targetId);
-  const geometry = arcGeometry(start, end, bow, targetId === null ? PREVIEW_FLATTEN : CABLE_ART.flatten);
+  const geometry = arcGeometry(start, end, bow);
   const preview = ensurePreview();
   preview.arc.setAttribute('transform', geometry.wrapperTransform);
   preview.image.setAttribute('transform', geometry.imageTransform);

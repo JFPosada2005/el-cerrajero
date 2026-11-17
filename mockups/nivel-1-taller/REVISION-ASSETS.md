@@ -30,7 +30,7 @@ Todos los PNG de IA tenían fondo transparente real (alpha en las esquinas) salv
 | `engranaje.png` | 2048×2048 | Ruedas de memoria I y II | Recorte y reducción a `rueda-engranaje.png` (1022×1024) |
 | `alarma.png` | 2048×2048 | Campana de alarma | Recorte y reducción a `campana-alarma.png` (508×512) |
 | `tijeras.png` | 1456×720 | Herramienta de corte y cursor | Recorte y reducción a `tijeras.png` (800×369) |
-| `cable.png` | 2752×1536 | Cables del mecanismo | Recorte a 1600×480; se usa como arco entre piezas, no como sprite recto |
+| `cable.png` | 2752×1536 | Cables del mecanismo | Recorte a 1600×480; arco entre piezas con escala uniforme, sin compresión vertical |
 
 ### Llaves 2–4
 
