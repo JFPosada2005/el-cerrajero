@@ -19,8 +19,8 @@ http://localhost:8000/mockups/nivel-1-taller/
 - **Arrastrar:** mantener presionado un objeto del inventario y soltarlo sobre una pieza de la cerradura.
 - **Llave sobre rueda:** hace girar la rueda.
 - **Llave sobre cerrojo:** retrae o cierra el perno.
-- **Carrete de cobre:** hacer clic en dos piezas para tender un cable temporal. El cable toma el color de la llave activa.
-- **Tijeras:** hacer clic sobre un cable para cortarlo.
+- **Carrete de cobre:** hacer clic en dos piezas para tender un cable. El cable se estira desde el origen hasta el destino y la etiqueta toma el color de la llave activa.
+- **Tijeras:** hacer clic sobre un cable para cortarlo. El cursor hace el gesto de corte, el cable salta y deja una chispa.
 - **Campana:** hacer clic para hacerla sonar.
 - **Contrato, pista y bitácora:** son objetos sobre la mesa. Al hacer clic se abren como documentos. `Esc`, el botón de cerrar o el fondo los cierran.
 - **Probar:** demostración visual del recorrido y del perno.
@@ -31,7 +31,7 @@ Los botones `Probar` y `Ensayo` no ejecutan la lógica del juego: son demostraci
 
 ## Sprites
 
-La mayoría de los props principales ya usan los **assets de IA** integrados: fondo, ladrón, contrato, pista, libreta, bocallave, cilindro, carrete, llaves 1–4 y la textura de la placa. Quedan en SVG las piezas mecánicas que necesitan geometría exacta: engranajes, perno, campana, tijeras, engranaje-herramienta y mesa.
+La mayoría de los props principales usan los **assets de IA** integrados: fondo, ladrón, contrato, pista, libreta, bocallave, cilindro, carrete, llaves 1–4, ruedas de engranaje, campana, tijeras, cable y la textura de la placa. Quedan en SVG el perno, la mesa y el marco de la placa, porque necesitan geometría exacta o no había un equivalente fotorrealista.
 
 La revisión completa de lo recibido está en [`REVISION-ASSETS.md`](REVISION-ASSETS.md): qué se usó, qué se ajustó y por qué los ZIP de la carpeta WEB no encajaron.
 
@@ -70,7 +70,9 @@ No hay lógica de juego, ni importaciones de `src/core` o `src/game`, ni validac
 
 ## Notas de integración
 
-- Las fuentes definitivas serán Fraunces e Inter self-hosted; este mockup usa Georgia y Segoe UI como sustituto.
+- Las fuentes del mockup son **Bodoni Moda** (display), **Jost** (UI) e **IBM Plex Mono** (lecturas técnicas), self-hosted en `assets/fonts/`. La propuesta original de Fraunces/Inter quedó reemplazada por esta combinación más art déco/noir.
+- Los cables usan `cable.png` como arco fotográfico entre las piezas: los eyelets del asset se alinean con los extremos del cable y la imagen se estira desde el origen al conectar. Las etiquetas cuelgan del punto medio del arco.
+- El riel del llavero queda detrás de las llaves: el latón se ve a través del ojo de cada llave y la pieza no parece cortada al seleccionarla.
 - Las coordenadas principales del mecanismo usan un `viewBox 900×560` y posiciones porcentuales para facilitar el reemplazo del editor SVG.
 - El cursor personalizado oculta el cursor nativo solo sobre el escenario. En los objetos de papel y en el inventario se usa el cursor normal.
 - En pantallas angostas el mecanismo se desplaza horizontalmente dentro del escenario; la página no genera scroll lateral.

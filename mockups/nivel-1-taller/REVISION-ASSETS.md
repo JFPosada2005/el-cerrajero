@@ -19,14 +19,18 @@ Todos los PNG de IA tenían fondo transparente real (alpha en las esquinas) salv
 |---|---:|---|---|
 | `fondo-banco.png` | 2752×1536 | Fondo de escena | Reencuadrado a 2048×1152 y optimizado a `fondo-banco.jpg` |
 | `ladron.png` | 1024×1024 | Personaje | Recorte al cuerpo, 387×960; se usa a la derecha |
-| `bocallave-entrada.png` | 1696×2528 | Entrada | Recorte + reducción a 700×1200 |
-| `cilindro-cerradura.png` | 1856×2304 | Cerrojo | Recorte + reducción a 796×1200 |
-| `carrete-cobre.png` | 1024×1024 | Herramienta cable | Recorte a 850×910 |
-| `contrato.png` | 1024×1024 | Objeto contrato | Recorte a 818×1000 |
-| `libreta.png` | 1024×1024 | Objeto bitácora | Recorte a 1000×782 |
-| `llave-1.png` | 1024×1024 | Llave 1 | Recorte a 327×1072 |
-| `nota-pista (con fondo).png` | 1024×1024 | Objeto pista | Se quitó el fondo negro y se recortó a 905×770 |
+| `bocallave-entrada.png` | 1696×2528 | Entrada | Recorte + reducción a 525×900 |
+| `cilindro-cerradura.png` | 1856×2304 | Cerrojo | Recorte + reducción a 597×900 |
+| `carrete-cobre.png` | 1024×1024 | Herramienta cable | Recorte a 841×900 |
+| `contrato.png` | 1024×1024 | Objeto contrato | Recorte a 736×900 |
+| `libreta.png` | 1024×1024 | Objeto bitácora | Recorte a 900×704 |
+| `llave-1.png` | 1024×1024 | Llave 1 | Recorte a 250×820 |
+| `nota-pista (con fondo).png` | 1024×1024 | Objeto pista | Se quitó el fondo negro y se recortó a 900×766 |
 | `placa-mecanismo.png` | 1024×1024 | Placa | Se usó su superficie interior para `placa-textura`; el marco se rehizo en SVG |
+| `engranaje.png` | 2048×2048 | Ruedas de memoria I y II | Recorte y reducción a `rueda-engranaje.png` (1022×1024) |
+| `alarma.png` | 2048×2048 | Campana de alarma | Recorte y reducción a `campana-alarma.png` (508×512) |
+| `tijeras.png` | 1456×720 | Herramienta de corte y cursor | Recorte y reducción a `tijeras.png` (800×369) |
+| `cable.png` | 2752×1536 | Cables del mecanismo | Recorte a 1600×480; se usa como arco entre piezas, no como sprite recto |
 
 ### Llaves 2–4
 
@@ -36,7 +40,7 @@ Se generaron a partir de `llave-1.png` recoloreando la banda de esmalte en HSV:
 - `llave-3.png`: coral.
 - `llave-4.png`: violeta.
 
-La silueta es idéntica. El número grabado se cubre con un pequeño distintivo HTML (`key-number`) en el inventario, para que cada llave muestre 1–4 sin regenerar la imagen.
+La silueta es idéntica. Los distintivos numéricos HTML se retiraron: partían visualmente la llave en el llavero. La identificación queda en el `aria-label`, el color de la banda y la posición dentro del riel.
 
 ### Cursor de llave
 
@@ -72,9 +76,9 @@ Así se usa el material de la placa sin perder el layout horizontal del mecanism
 
 ### Conclusión de la revisión WEB
 
-Los packs no eran sprites listos para este estilo: eran pixel art, modelos 3D cartoon, texturas de 64 px o un atlas de mesa. Por eso se conservaron los SVG detallados para las piezas mecánicas y se usaron los assets IA para los materiales y props principales.
+Los packs no eran sprites listos para este estilo: eran pixel art, modelos 3D cartoon, texturas de 64 px o un atlas de mesa. Con la segunda tanda de IA se reemplazaron las piezas mecánicas más visibles —engranajes, campana, tijeras y cable— y quedaron en SVG solo el perno, la mesa y el marco de la placa.
 
-Si más adelante se quiere subir el realismo de los engranajes, pernos, tijeras, campana o mesa, el siguiente paso sería renderizar modelos 3D con Blender o encargar esos sprites en el mismo estilo de la IA. Los SVG actuales son consistentes y funcionan, pero son la parte más “ilustrada” del conjunto.
+Si más adelante se quiere subir el realismo del perno o de la mesa, el siguiente paso sería renderizar modelos 3D con Blender o encargar esos sprites en el mismo estilo de la IA.
 
 ---
 
@@ -82,13 +86,11 @@ Si más adelante se quiere subir el realismo de los engranajes, pernos, tijeras,
 
 | Archivo | Estado | Por qué |
 |---|---|---|
-| `rueda-engranaje.svg` | Se usa | Geometría simétrica, dientes parejos, gira sin deformarse; se oscureció para combinar con la IA |
 | `perno.svg` | Se usa | Barra de acero con collar de latón; el asset WEB no tenía un perno adecuado |
-| `campana-alarma.svg` | Se usa | Se rediseñó con base, badajo y striker rojo; el pack no traía campana |
-| `tijeras.svg` | Se usa | Vector limpio; el modelo de KayKit era cartoon |
-| `engranaje-herramienta.svg` | Se usa | Icono de herramienta bloqueada; el engranaje WEB era pixel art |
 | `mesa-madera.svg` | Se usa | Superficie de banco oscura y limpia; el .blend gótico no era un sprite |
 | `placa-marco.svg` | Nuevo | Marco de bronce, tornillos y placas sobre la textura de la IA |
+
+Los SVG de engranajes, campana, tijeras y engranaje-herramienta quedan como respaldo, pero el mockup ya usa los PNG de IA. `cable-braid.png` se descartó: el cable se resuelve con la imagen completa recortada en arco.
 
 ---
 
@@ -106,7 +108,6 @@ Si más adelante se quiere subir el realismo de los engranajes, pernos, tijeras,
 
 ## 5. Pendiente / opcional
 
-- Un engranaje fotorrealista en PNG sería la mayor mejora visual pendiente.
-- Un perno y una campana pintados con la misma luz de la IA.
+- Un perno pintado con la misma luz de la IA.
 - Una mesa de nogal fotorrealista recortada en primer plano.
 - Si se consiguen, se guardan con los mismos nombres y el mockup los toma sin cambiar la estructura.

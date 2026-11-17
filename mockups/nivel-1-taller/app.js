@@ -5,7 +5,9 @@ const NS = 'http://www.w3.org/2000/svg';
 const stage = $('#stage');
 const mechanism = $('#mechanism');
 const wireGroup = $('#wire-group');
+const wires = $('#wires');
 const pulseLayer = $('#pulse-layer');
+const previewLayer = $('#preview-layer');
 const toolCursor = $('#tool-cursor');
 const toolCursorImg = $('#tool-cursor-img');
 const toastEl = $('#toast');
@@ -34,8 +36,8 @@ const KEY_COLORS = {
 };
 
 const HINTS = [
-  'Probá la llave 1-2-3 y mirá por dónde pasa.',
-  'Cada rueda recuerda cuántas teclas correctas van. ¿Alguna deja pasar una tecla de más?',
+  'La caja no pide una llave larga: pide tres pasos en orden. Cada rueda debe recordar el suyo.',
+  'Hay un cable de más. El pulso encuentra un atajo y el cerrojo no llega a ceder.',
 ];
 
 const state = {
@@ -53,6 +55,7 @@ const state = {
 };
 
 const isFinePointer = window.matchMedia('(pointer: fine)').matches;
+const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 if (isFinePointer) {
   document.body.classList.add('has-custom-cursor');
 }
@@ -205,6 +208,7 @@ function setTool(tool, key = state.key) {
   $$('.inventory-tool').forEach((button) => {
     button.classList.toggle('is-active', button.dataset.tool === tool);
   });
+  $$('.cable.is-targeted').forEach((cable) => cable.classList.remove('is-targeted'));
   const source = cursorSource(tool, state.key);
   if (source !== undefined && source !== null) {
     const sourceImage = $('img', source);
@@ -258,6 +262,7 @@ function flashPart(element) {
 function clearSource() {
   state.source = null;
   $$('.part.is-source').forEach((part) => part.classList.remove('is-source'));
+  hideCablePreview();
 }
 
 function rotateGear(element) {
@@ -314,7 +319,7 @@ function applyToPart(element) {
     return;
   }
   if (state.tool === 'scissors') {
-    showToast('Apuntá a un cable para cortarlo.');
+    showToast('Apunta a un cable para cortarlo.');
     sounds.error();
   }
 }
@@ -324,7 +329,7 @@ function handleWireClick(id, element) {
     state.source = id;
     element.classList.add('is-source');
     sounds.click();
-    showToast(`Cable desde ${PARTS[id].label}. Elegí el destino.`);
+    showToast(`Cable desde ${PARTS[id].label}. Elige el destino.`);
     return;
   }
   if (state.source === id) {
@@ -357,8 +362,19 @@ function registerCable(element) {
       return;
     }
     event.stopPropagation();
-    cutCable(element);
+    cutCable(element, event);
   });
+  const hit = $('.cable-hit', element);
+  if (hit !== null) {
+    hit.addEventListener('pointerenter', () => {
+      if (state.tool === 'scissors') {
+        element.classList.add('is-targeted');
+      }
+    });
+    hit.addEventListener('pointerleave', () => {
+      element.classList.remove('is-targeted');
+    });
+  }
 }
 
 function rimPoint(from, to, radius) {
@@ -369,6 +385,257 @@ function rimPoint(from, to, radius) {
     x: from.x + (dx / length) * radius,
     y: from.y + (dy / length) * radius,
   };
+}
+
+const CABLE_ART = {
+  href: 'assets/sprites/cable.png',
+  width: 1600,
+  height: 480,
+  eyeletX: 142,
+  eyeletY: 335,
+  eyeletSpan: 1314,
+  rise: 220,
+  flatten: 0.65,
+  tagHang: 24,
+  drawMs: 400,
+};
+
+const PREVIEW_FLATTEN = 0.42;
+let cableSerial = 0;
+
+function partClearance(point) {
+  let clearance = Infinity;
+  for (const part of Object.values(PARTS)) {
+    clearance = Math.min(clearance, Math.hypot(point.x - part.x, point.y - part.y) - part.r);
+  }
+  return clearance;
+}
+
+function autoBow(start, end) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const length = Math.hypot(dx, dy) || 1;
+  const normal = { x: dy / length, y: -dx / length };
+  const midX = (start.x + end.x) / 2;
+  const midY = (start.y + end.y) / 2;
+  let best = 1;
+  let bestClearance = -Infinity;
+  for (const sign of [1, -1]) {
+    const clearance = partClearance({
+      x: midX + normal.x * 55 * sign,
+      y: midY + normal.y * 55 * sign,
+    });
+    if (clearance > bestClearance) {
+      best = sign;
+      bestClearance = clearance;
+    }
+  }
+  return best;
+}
+
+function chooseBow(from, to) {
+  return autoBow(PARTS[from], PARTS[to]);
+}
+
+function arcGeometry(start, end, bow, flatten = CABLE_ART.flatten) {
+  const dx = end.x - start.x;
+  const dy = end.y - start.y;
+  const chord = Math.hypot(dx, dy) || 1;
+  const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
+  const scaleX = chord / CABLE_ART.eyeletSpan;
+  const scaleY = scaleX * flatten * bow;
+  const normal = { x: dy / chord, y: -dx / chord };
+  const rise = CABLE_ART.rise * scaleX * flatten * bow;
+  const control = {
+    x: (start.x + end.x) / 2 + normal.x * rise * 2,
+    y: (start.y + end.y) / 2 + normal.y * rise * 2,
+  };
+  return {
+    start,
+    end,
+    chord,
+    angle,
+    scaleX,
+    scaleY,
+    rise,
+    control,
+    path: `M${start.x} ${start.y}Q${control.x} ${control.y} ${end.x} ${end.y}`,
+    midpoint: curveMidpoint(start, control, end),
+    wrapperTransform: `translate(${start.x} ${start.y}) rotate(${angle})`,
+    imageTransform: `scale(${scaleX} ${scaleY}) translate(${-CABLE_ART.eyeletX} ${-CABLE_ART.eyeletY})`,
+  };
+}
+
+function compressedTransform(geometry, amountX, amountY) {
+  return `scale(${geometry.scaleX * amountX} ${geometry.scaleY * amountY}) translate(${-CABLE_ART.eyeletX} ${-CABLE_ART.eyeletY})`;
+}
+
+function animateCableArc(image, geometry, onDone) {
+  if (prefersReducedMotion) {
+    image.setAttribute('transform', geometry.imageTransform);
+    onDone();
+    return;
+  }
+  const started = performance.now();
+  function frame(now) {
+    const t = Math.min(1, (now - started) / CABLE_ART.drawMs);
+    const eased = 1 - Math.pow(1 - t, 3);
+    image.setAttribute(
+      'transform',
+      compressedTransform(geometry, 0.06 + eased * 0.94, 0.35 + eased * 0.65),
+    );
+    if (t < 1) {
+      requestAnimationFrame(frame);
+      return;
+    }
+    image.setAttribute('transform', geometry.imageTransform);
+    onDone();
+  }
+  requestAnimationFrame(frame);
+}
+
+function buildCableTag(key, midpoint) {
+  const tag = svgElement('g', {
+    class: 'cable-tag',
+    transform: `translate(${midpoint.x} ${midpoint.y + CABLE_ART.tagHang})`,
+  });
+  tag.append(svgElement('path', { class: 'tag-loop', d: 'M0-14v-7' }));
+  tag.append(svgElement('circle', { class: 'tag-ring', cx: 0, cy: -24, r: 3.5 }));
+  tag.append(svgElement('rect', { class: 'tag-body', x: -19, y: -14, width: 38, height: 28, rx: 5 }));
+  tag.append(svgElement('circle', { class: 'tag-dot', cx: -9, cy: 0, r: 4.5, fill: KEY_COLORS[key] ?? '#f2ede3' }));
+  const text = svgElement('text', { class: 'tag-text', x: 7, y: 4, 'text-anchor': 'middle' });
+  text.textContent = key;
+  tag.append(text);
+  return tag;
+}
+
+function createCable({ from, to, key, bow, animate = false }) {
+  const start = rimPoint(PARTS[from], PARTS[to], PARTS[from].r);
+  const end = rimPoint(PARTS[to], PARTS[from], PARTS[to].r);
+  const geometry = arcGeometry(start, end, bow);
+  cableSerial += 1;
+  const cable = svgElement('g', {
+    class: `cable${animate ? ' is-drawing' : ''}`,
+    'data-cable': `cable-${cableSerial}`,
+    'data-key': key,
+    'data-from': from,
+    'data-to': to,
+  });
+  cable.append(svgElement('path', { class: 'cable-hit', d: geometry.path, fill: 'none' }));
+  const arc = svgElement('g', { class: 'cable-arc', transform: geometry.wrapperTransform });
+  const stretch = svgElement('g', { class: 'cable-stretch' });
+  const shake = svgElement('g', { class: 'cable-shake' });
+  const image = svgElement('image', {
+    class: 'cable-image',
+    href: CABLE_ART.href,
+    x: '0',
+    y: '0',
+    width: String(CABLE_ART.width),
+    height: String(CABLE_ART.height),
+    transform: animate ? compressedTransform(geometry, 0.06, 0.35) : geometry.imageTransform,
+  });
+  shake.append(image);
+  stretch.append(shake);
+  arc.append(stretch);
+  cable.append(arc);
+  cable.append(buildCableTag(key, geometry.midpoint));
+
+  wireGroup.append(cable);
+  registerCable(cable);
+
+  if (animate) {
+    window.setTimeout(() => cable.classList.add('is-drawn'), 30);
+    animateCableArc(image, geometry, () => {
+      window.setTimeout(() => cable.classList.remove('is-drawing', 'is-drawn'), 380);
+    });
+  }
+  return cable;
+}
+
+const INITIAL_CABLES = [
+  { from: 'entry', to: 'gear-1', key: '1', bow: 1 },
+  { from: 'entry', to: 'lock', key: '2', bow: -1 },
+  { from: 'gear-1', to: 'lock', key: '1', bow: 1 },
+  { from: 'gear-2', to: 'lock', key: '3', bow: 1 },
+];
+
+function seedCables() {
+  for (const cable of INITIAL_CABLES) {
+    createCable(cable);
+  }
+}
+
+function hoveredPartId(clientX, clientY, sourceId) {
+  const target = document.elementFromPoint(clientX, clientY);
+  const part = target === null ? null : target.closest('.part');
+  if (part === null) {
+    return null;
+  }
+  const id = part.dataset.part;
+  if (id === sourceId || id === 'bell' || PARTS[id] === undefined) {
+    return null;
+  }
+  return id;
+}
+
+function ensurePreview() {
+  let arc = $('.cable-preview-arc', previewLayer);
+  if (arc !== null) {
+    return {
+      arc,
+      image: $('.cable-preview-image', previewLayer),
+      line: $('.cable-preview-line', previewLayer),
+      plug: $('.cable-preview-plug', previewLayer),
+    };
+  }
+  arc = svgElement('g', { class: 'cable-preview-arc' });
+  const image = svgElement('image', {
+    class: 'cable-preview-image',
+    href: CABLE_ART.href,
+    x: '0',
+    y: '0',
+    width: String(CABLE_ART.width),
+    height: String(CABLE_ART.height),
+  });
+  arc.append(image);
+  const line = svgElement('path', { class: 'cable-preview-line', fill: 'none' });
+  const plug = svgElement('g', { class: 'cable-preview-plug' });
+  plug.append(svgElement('circle', { class: 'cable-preview-ring', r: '12' }));
+  plug.append(svgElement('circle', { class: 'cable-preview-dot', r: '5' }));
+  previewLayer.append(arc);
+  previewLayer.append(line);
+  previewLayer.append(plug);
+  return { arc, image, line, plug };
+}
+
+function updateCablePreview(sourceId, clientX, clientY) {
+  const from = PARTS[sourceId];
+  if (from === undefined) {
+    previewLayer.replaceChildren();
+    return;
+  }
+  const rect = wires.getBoundingClientRect();
+  const pointer = {
+    x: ((clientX - rect.left) / rect.width) * 900,
+    y: ((clientY - rect.top) / rect.height) * 560,
+  };
+  const targetId = hoveredPartId(clientX, clientY, sourceId);
+  const target = targetId === null ? pointer : PARTS[targetId];
+  const start = rimPoint(from, target, from.r);
+  const end = targetId === null ? pointer : rimPoint(target, from, target.r);
+  const bow = targetId === null ? autoBow(start, end) : chooseBow(sourceId, targetId);
+  const geometry = arcGeometry(start, end, bow, targetId === null ? PREVIEW_FLATTEN : CABLE_ART.flatten);
+  const preview = ensurePreview();
+  preview.arc.setAttribute('transform', geometry.wrapperTransform);
+  preview.image.setAttribute('transform', geometry.imageTransform);
+  preview.line.setAttribute('d', geometry.path);
+  preview.plug.setAttribute('transform', `translate(${end.x} ${end.y})`);
+  preview.plug.classList.toggle('is-target', targetId !== null);
+  preview.line.classList.toggle('is-target', targetId !== null);
+}
+
+function hideCablePreview() {
+  previewLayer.replaceChildren();
 }
 
 function curveMidpoint(start, control, end) {
@@ -398,43 +665,14 @@ function connectCable(from, to) {
     existing.remove();
     state.cables.delete(key);
   }
-  const start = rimPoint(PARTS[from], PARTS[to], PARTS[from].r);
-  const end = rimPoint(PARTS[to], PARTS[from], PARTS[to].r);
-  const dx = end.x - start.x;
-  const dy = end.y - start.y;
-  const length = Math.hypot(dx, dy) || 1;
-  const control = {
-    x: (start.x + end.x) / 2 - (dy / length) * 44,
-    y: (start.y + end.y) / 2 + (dx / length) * 44,
-  };
-  const path = `M${start.x} ${start.y}Q${control.x} ${control.y} ${end.x} ${end.y}`;
-  const cable = svgElement('g', {
-    class: 'cable is-new',
-    'data-cable': `dynamic-${Date.now()}`,
-    'data-key': state.key,
-    'data-from': from,
-    'data-to': to,
+  createCable({
+    from,
+    to,
+    key: state.key,
+    bow: chooseBow(from, to),
+    animate: true,
   });
-  cable.append(svgElement('path', { class: 'cable-hit', d: path, fill: 'none' }));
-  cable.append(svgElement('path', { class: 'cable-shadow', d: path, fill: 'none' }));
-  cable.append(svgElement('path', { class: 'cable-core', d: path, fill: 'none' }));
-  cable.append(svgElement('path', { class: 'cable-sheen', d: path, fill: 'none' }));
-  cable.append(svgElement('circle', { class: 'terminal', cx: start.x, cy: start.y, r: 7 }));
-  cable.append(svgElement('circle', { class: 'terminal', cx: end.x, cy: end.y, r: 7 }));
-
-  const midpoint = curveMidpoint(start, control, end);
-  const tag = svgElement('g', { class: 'cable-tag', transform: `translate(${midpoint.x} ${midpoint.y})` });
-  tag.append(svgElement('path', { class: 'tag-loop', d: 'M0-14v-7' }));
-  tag.append(svgElement('circle', { class: 'tag-ring', cx: 0, cy: -24, r: 3.5 }));
-  tag.append(svgElement('rect', { class: 'tag-body', x: -19, y: -14, width: 38, height: 28, rx: 5 }));
-  tag.append(svgElement('circle', { class: 'tag-dot', cx: -9, cy: 0, r: 4.5, fill: KEY_COLORS[state.key] }));
-  const text = svgElement('text', { class: 'tag-text', x: 7, y: 4, 'text-anchor': 'middle' });
-  text.textContent = state.key;
-  tag.append(text);
-  cable.append(tag);
-
-  wireGroup.append(cable);
-  registerCable(cable);
+  hideCablePreview();
   updateMissingSocket();
   flashPart(partElement(from));
   flashPart(partElement(to));
@@ -442,19 +680,41 @@ function connectCable(from, to) {
   showToast(`Cable de la llave ${state.key}: ${PARTS[from].label} → ${PARTS[to].label}.`);
 }
 
-function cutCable(element) {
+function spawnCutSpark(x, y) {
+  const spark = document.createElement('div');
+  spark.className = 'cut-spark';
+  spark.style.left = `${x}px`;
+  spark.style.top = `${y}px`;
+  document.body.append(spark);
+  window.setTimeout(() => spark.remove(), 420);
+}
+
+function cutCable(element, event = null) {
   const from = element.dataset.from;
   const to = element.dataset.to;
   if (from !== undefined && to !== undefined) {
     state.cables.delete(pairKey(from, to));
   }
   element.classList.add('is-cutting');
+  let x = 0;
+  let y = 0;
+  if (event !== null && event.clientX !== undefined) {
+    x = event.clientX;
+    y = event.clientY;
+  } else {
+    const rect = element.getBoundingClientRect();
+    x = rect.left + rect.width / 2;
+    y = rect.top + rect.height / 2;
+  }
+  spawnCutSpark(x, y);
+  toolCursor.classList.add('is-snapping');
+  window.setTimeout(() => toolCursor.classList.remove('is-snapping'), 260);
   sounds.snip();
-  showToast('Cable cortado.');
+  showToast('El cable salta y queda cortado.');
   window.setTimeout(() => {
     element.remove();
     updateMissingSocket();
-  }, 260);
+  }, 300);
 }
 
 function updateMissingSocket() {
@@ -476,7 +736,7 @@ function probeMechanism() {
     flashPart(lock);
   }
   $$('.cable').forEach((cable, index) => {
-    cable.style.animationDelay = `${index * 80}ms`;
+    cable.style.setProperty('--pulse-delay', `${index * 70}ms`);
     cable.classList.add('is-pulsing');
   });
   sounds.plug();
@@ -485,7 +745,7 @@ function probeMechanism() {
     mechanism.classList.remove('is-probing');
     $$('.cable').forEach((cable) => {
       cable.classList.remove('is-pulsing');
-      cable.style.animationDelay = '';
+      cable.style.removeProperty('--pulse-delay');
     });
   }, 1800);
 }
@@ -652,7 +912,7 @@ document.addEventListener('pointerup', (event) => {
     applyToPart(part);
   } else if (cable !== null && state.tool === 'scissors') {
     state.suppressClickUntil = performance.now() + 260;
-    cutCable(cable);
+    cutCable(cable, event);
   }
   if (stage.contains(target) === false) {
     hideCursor();
@@ -665,15 +925,20 @@ stage.addEventListener('pointermove', (event) => {
   }
   if (event.target.closest('.table-object') !== null) {
     hideCursor();
+    hideCablePreview();
     return;
   }
   showCursor(event.clientX, event.clientY);
+  if (state.tool === 'wire' && state.source !== null) {
+    updateCablePreview(state.source, event.clientX, event.clientY);
+  }
 });
 
 stage.addEventListener('pointerleave', () => {
   if (state.dragging === false) {
     hideCursor();
   }
+  hideCablePreview();
 });
 
 /* Piezas. */
@@ -696,13 +961,12 @@ $$('.part').forEach((part) => {
   });
 });
 
-$$('.cable').forEach(registerCable);
-
 /* Botones de acción. */
 probeButton.addEventListener('click', probeMechanism);
 assaultButton.addEventListener('click', assaultMechanism);
 
 /* Estado inicial. */
+seedCables();
 setTool('wire', '1');
 updateMissingSocket();
 window.setTimeout(hideStageHint, 6200);

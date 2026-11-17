@@ -24,7 +24,7 @@ La guía completa de nombres, medidas e integración está en [`GUIA-ASSETS.md`]
 
 ## 2. Bloque de estilo base
 
-Usá este bloque al inicio de cada prompt. Si la herramienta limita el largo (Firefly corta en 750 caracteres), conservá la primera frase y el objeto; recortá el resto.
+Usa este bloque al inicio de cada prompt. Si la herramienta limita el largo (Firefly corta en 750 caracteres), conservá la primera frase y el objeto; recortá el resto.
 
 ```text
 Precision noir game asset, 1930s art deco electromechanical workshop, aged brass, dark walnut, ivory paper, muted teal and coral accents, cinematic warm key light from top-left and cool teal rim light from the right, handcrafted premium puzzle game, highly detailed, clean silhouette, centered, isolated on transparent background, no text, no watermark, no logo, no pixel art, no CRT scanlines, no neon, no steampunk goggles, no background clutter.
@@ -50,7 +50,7 @@ text, letters, words, watermark, logo, signature, UI frame, browser chrome, heav
 
 ## 3. Orden de generación recomendado
 
-1. **Ancla de estilo:** `rueda-engranaje` no se genera con IA, pero podés usar una imagen de referencia de brass/gear de la web. El ancla real puede ser `bocallave-entrada` o `ladron`.
+1. **Ancla de estilo:** `rueda-engranaje` no se genera con IA, pero puedes usar una imagen de referencia de brass/gear de la web. El ancla real puede ser `bocallave-entrada` o `ladron`.
 2. **Personaje:** `ladron.png`.
 3. **Escenario:** `fondo-banco.png`.
 4. **Props de papel/cuero:** `contrato.png`, `nota-pista.png`, `libreta.png`.
@@ -228,7 +228,7 @@ Precision noir game asset, large rectangular aged brass mechanism plate, art dec
 - **Llave con números raros:** borrá el número y ponelo en HTML/Photopea.
 - **Personaje con manos o pies mal:** regenerá; no intentes arreglar anatomía compleja en Photopea.
 - **Placa con texto:** borralo; el texto va en HTML.
-- **Fondo demasiado ocupado en el centro:** recortá o oscurecé el centro; la placa tapa esa zona.
+- **Fondo demasiado ocupado en el centro:** recorta u oscurece el centro; la placa tapa esa zona.
 
 ## 6. Checklist de salida
 

@@ -27,6 +27,7 @@ La guía se dividió en dos rutas para que no mezcles prompts de IA con búsqued
 | `bocallave-entrada.png` | 512×768 | **IA o vector web** | IA / Web |
 | `cilindro-cerradura.png` | 768×960 | **IA o 3D/vector web** | IA / Web |
 | `carrete-cobre.png` | 1024×1024 | **IA o icono web** | IA / Web |
+| `cable.png` | 1600×480 | **IA (arco con eyelets)** | IA |
 | `llave-1.png` | 512×1024 | **IA o SVG web** | IA / Web |
 | `llave-2.png` | 512×1024 | Recolorear `llave-1` | IA |
 | `llave-3.png` | 512×1024 | Recolorear `llave-1` | IA |
@@ -105,6 +106,7 @@ llave-3.png
 llave-4.png
 tijeras.png
 carrete-cobre.png
+cable.png
 engranaje-herramienta.png
 ladron.png
 contrato.png
@@ -127,7 +129,7 @@ Opcionales: `resorte.png`, `terminal.png`, `chispa.png`.
 - Sin sombras horneadas fuertes: el CSS ya aplica sombras.
 - Sin texto, logos, watermarks ni rips de juegos.
 
-**Estado del mockup:** el fondo y la textura de la placa se optimizaron a JPG; los props con transparencia siguen en PNG. La placa se compone de `placa-textura.jpg` + `placa-marco.svg`. Los originales PNG quedan en las carpetas del escritorio.
+**Estado del mockup:** la segunda tanda de IA ya reemplazó los engranajes, la campana, las tijeras y el cable; esta tabla queda como guía de búsqueda para futuras piezas, no como estado actual. El fondo y la textura de la placa se optimizaron a JPG; los props con transparencia siguen en PNG. La placa se compone de `placa-textura.jpg` + `placa-marco.svg`. Los originales PNG quedan en las carpetas del escritorio.
 
 ## Créditos
 

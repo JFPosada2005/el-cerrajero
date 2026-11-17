@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>El Cerrajero — Taller del Nivel 1</title>
+  <link rel="preload" href="assets/fonts/BodoniModa-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Jost-Variable.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-tool="wire" data-key="1">
@@ -74,99 +76,12 @@
 
         <svg class="wires" id="wires" viewBox="0 0 900 560" aria-hidden="true">
           <defs>
-            <linearGradient id="cable-core" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#4a3520"/>
-              <stop offset="0.45" stop-color="#241a12"/>
-              <stop offset="1" stop-color="#100b08"/>
-            </linearGradient>
-            <linearGradient id="cable-sheen" x1="0" y1="0" x2="1" y2="0">
-              <stop offset="0" stop-color="#f0cf6a" stop-opacity="0"/>
-              <stop offset="0.45" stop-color="#f0cf6a" stop-opacity="0.42"/>
-              <stop offset="1" stop-color="#f0cf6a" stop-opacity="0"/>
-            </linearGradient>
-            <linearGradient id="tag-brass" x1="0" y1="0" x2="1" y2="1">
-              <stop offset="0" stop-color="#f6dc92"/>
-              <stop offset="0.5" stop-color="#c79a32"/>
-              <stop offset="1" stop-color="#5c3f12"/>
-            </linearGradient>
-            <radialGradient id="terminal" cx="38%" cy="32%" r="70%">
-              <stop offset="0" stop-color="#f6dc92"/>
-              <stop offset="0.55" stop-color="#b58a24"/>
-              <stop offset="1" stop-color="#3a2a12"/>
-            </radialGradient>
-            <filter id="wire-shadow" x="-20%" y="-40%" width="140%" height="180%">
-              <feDropShadow dx="0" dy="5" stdDeviation="4" flood-color="#000" flood-opacity="0.65"/>
-            </filter>
             <filter id="tag-shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.7"/>
             </filter>
           </defs>
 
-          <g id="wire-group">
-            <g class="cable" data-cable="entry-gear1" data-key="1" data-from="entry" data-to="gear-1">
-              <path class="cable-hit" d="M196 300Q246 214 296 159" fill="none"></path>
-              <path class="cable-shadow" d="M196 300Q246 214 296 159" fill="none"></path>
-              <path class="cable-core" d="M196 300Q246 214 296 159" fill="none"></path>
-              <path class="cable-sheen" d="M196 300Q246 214 296 159" fill="none"></path>
-              <circle class="terminal" cx="196" cy="300" r="7"></circle>
-              <circle class="terminal" cx="296" cy="159" r="7"></circle>
-              <g class="cable-tag" transform="translate(246 222)">
-                <path class="tag-loop" d="M0-14v-7"></path>
-                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
-                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
-                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f0cf6a"></circle>
-                <text class="tag-text" x="7" y="4" text-anchor="middle">1</text>
-              </g>
-            </g>
-
-            <g class="cable" data-cable="entry-lock" data-key="2" data-from="entry" data-to="lock">
-              <path class="cable-hit" d="M196 315C330 410 560 396 686 203" fill="none"></path>
-              <path class="cable-shadow" d="M196 315C330 410 560 396 686 203" fill="none"></path>
-              <path class="cable-core" d="M196 315C330 410 560 396 686 203" fill="none"></path>
-              <path class="cable-sheen" d="M196 315C330 410 560 396 686 203" fill="none"></path>
-              <circle class="terminal" cx="196" cy="315" r="7"></circle>
-              <circle class="terminal" cx="686" cy="203" r="7"></circle>
-              <g class="cable-tag" transform="translate(438 372)">
-                <path class="tag-loop" d="M0-14v-7"></path>
-                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
-                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
-                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#38c6b8"></circle>
-                <text class="tag-text" x="7" y="4" text-anchor="middle">2</text>
-              </g>
-            </g>
-
-            <g class="cable" data-cable="gear1-lock" data-key="1" data-from="gear-1" data-to="lock">
-              <path class="cable-hit" d="M415 165C500 112 610 118 685 178" fill="none"></path>
-              <path class="cable-shadow" d="M415 165C500 112 610 118 685 178" fill="none"></path>
-              <path class="cable-core" d="M415 165C500 112 610 118 685 178" fill="none"></path>
-              <path class="cable-sheen" d="M415 165C500 112 610 118 685 178" fill="none"></path>
-              <circle class="terminal" cx="415" cy="165" r="7"></circle>
-              <circle class="terminal" cx="685" cy="178" r="7"></circle>
-              <g class="cable-tag" transform="translate(550 124)">
-                <path class="tag-loop" d="M0-14v-7"></path>
-                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
-                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
-                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f0cf6a"></circle>
-                <text class="tag-text" x="7" y="4" text-anchor="middle">1</text>
-              </g>
-            </g>
-
-            <g class="cable" data-cable="gear2-lock" data-key="3" data-from="gear-2" data-to="lock">
-              <path class="cable-hit" d="M615 270C646 252 672 234 700 220" fill="none"></path>
-              <path class="cable-shadow" d="M615 270C646 252 672 234 700 220" fill="none"></path>
-              <path class="cable-core" d="M615 270C646 252 672 234 700 220" fill="none"></path>
-              <path class="cable-sheen" d="M615 270C646 252 672 234 700 220" fill="none"></path>
-              <circle class="terminal" cx="615" cy="270" r="7"></circle>
-              <circle class="terminal" cx="700" cy="220" r="7"></circle>
-              <g class="cable-tag" transform="translate(660 246)">
-                <path class="tag-loop" d="M0-14v-7"></path>
-                <circle class="tag-ring" cx="0" cy="-24" r="3.5"></circle>
-                <rect class="tag-body" x="-19" y="-14" width="38" height="28" rx="5"></rect>
-                <circle class="tag-dot" cx="-9" cy="0" r="4.5" fill="#f06a4a"></circle>
-                <text class="tag-text" x="7" y="4" text-anchor="middle">3</text>
-              </g>
-            </g>
-          </g>
+          <g id="wire-group"></g>
 
           <g id="alarm-layer">
             <path class="alarm-shadow" d="M80 500C280 520 600 520 800 500" fill="none"></path>
@@ -179,6 +94,7 @@
           </g>
 
           <g id="pulse-layer"></g>
+          <g id="preview-layer"></g>
         </svg>
 
         <span class="plate-alarm-label">Alarma</span>
@@ -190,13 +106,13 @@
 
         <div class="part part-gear part-gear-1" data-part="gear-1" role="button" tabindex="0" aria-label="Rueda de memoria I">
           <span class="part-aura" aria-hidden="true"></span>
-          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.svg" alt="" draggable="false" data-sprite="rueda-engranaje">
+          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.png" alt="" draggable="false" data-sprite="rueda-engranaje">
           <span class="gear-numeral" aria-hidden="true">I</span>
         </div>
 
         <div class="part part-gear part-gear-2" data-part="gear-2" role="button" tabindex="0" aria-label="Rueda de memoria II">
           <span class="part-aura" aria-hidden="true"></span>
-          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.svg" alt="" draggable="false" data-sprite="rueda-engranaje">
+          <img class="gear-sprite" src="assets/sprites/rueda-engranaje.png" alt="" draggable="false" data-sprite="rueda-engranaje">
           <span class="gear-numeral" aria-hidden="true">II</span>
         </div>
 
@@ -208,7 +124,7 @@
         </div>
 
         <button class="part part-bell" type="button" data-part="bell" aria-label="Campana de alarma">
-          <img src="assets/sprites/campana-alarma.svg" alt="" draggable="false" data-sprite="campana-alarma">
+          <img src="assets/sprites/campana-alarma.png" alt="" draggable="false" data-sprite="campana-alarma">
         </button>
       </div>
 
@@ -217,10 +133,10 @@
         <span class="cursor-dot"></span>
       </div>
 
-      <p class="stage-hint" id="stage-hint">Elegí una herramienta y probala sobre la cerradura.</p>
+      <p class="stage-hint" id="stage-hint">Elige una herramienta y pruébala sobre el mecanismo.</p>
     </main>
 
-    <p class="mobile-scroll-note">Deslizá el mecanismo para recorrerlo →</p>
+    <p class="mobile-scroll-note">Desliza el mecanismo para recorrerlo →</p>
 
     <footer class="inventory" id="inventory" aria-label="Inventario del cerrajero">
       <div class="inventory-keys">
@@ -228,22 +144,18 @@
         <div class="key-row">
           <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 1">
             <img src="assets/sprites/llave-1.png" alt="" draggable="false" data-sprite="llave-1">
-            <span class="key-number" aria-hidden="true">1</span>
             <span class="item-name">Llave 1</span>
           </button>
           <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 2">
             <img src="assets/sprites/llave-2.png" alt="" draggable="false" data-sprite="llave-2">
-            <span class="key-number" aria-hidden="true">2</span>
             <span class="item-name">Llave 2</span>
           </button>
           <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 3">
             <img src="assets/sprites/llave-3.png" alt="" draggable="false" data-sprite="llave-3">
-            <span class="key-number" aria-hidden="true">3</span>
             <span class="item-name">Llave 3</span>
           </button>
           <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 4">
             <img src="assets/sprites/llave-4.png" alt="" draggable="false" data-sprite="llave-4">
-            <span class="key-number" aria-hidden="true">4</span>
             <span class="item-name">Llave 4</span>
           </button>
         </div>
@@ -255,11 +167,11 @@
           <span class="item-name">Cable</span>
         </button>
         <button class="inventory-item inventory-tool" type="button" data-tool="scissors" aria-label="Tijeras">
-          <img src="assets/sprites/tijeras.svg" alt="" draggable="false" data-sprite="tijeras">
+          <img src="assets/sprites/tijeras.png" alt="" draggable="false" data-sprite="tijeras">
           <span class="item-name">Tijera</span>
         </button>
         <button class="inventory-item inventory-tool is-locked" type="button" data-tool="gear" aria-label="Engranaje, se desbloquea en el contrato 02" aria-disabled="true">
-          <img src="assets/sprites/engranaje-herramienta.svg" alt="" draggable="false" data-sprite="engranaje-herramienta">
+          <img src="assets/sprites/rueda-engranaje.png" alt="" draggable="false" data-sprite="rueda-engranaje">
           <span class="item-name">Engranaje · contrato 02</span>
           <span class="lock-badge" aria-hidden="true">
             <svg viewBox="0 0 24 24"><rect x="6" y="11" width="12" height="8" rx="2"></rect><path d="M9 11V8a3 3 0 0 1 6 0v3"></path></svg>
@@ -303,8 +215,8 @@
   <template id="tpl-hint">
     <article class="paper paper-hint">
       <p class="paper-kicker">Pista <span id="hint-index">1</span> de 2</p>
-      <h2>El encargo</h2>
-      <p class="paper-hint-text" id="hint-text">Probá la llave 1-2-3 y mirá por dónde pasa.</p>
+      <h2>Pista del taller</h2>
+      <p class="paper-hint-text" id="hint-text">La caja no pide una llave larga: pide tres pasos en orden. Cada rueda debe recordar el suyo.</p>
       <button class="paper-button" id="next-hint" type="button">Siguiente pista</button>
     </article>
   </template>
@@ -314,9 +226,9 @@
       <p class="paper-kicker">Bitácora</p>
       <h2>Notas del caso</h2>
       <ol class="log-list">
-        <li class="is-info"><span>21:04</span><p>El mecanismo quedó a medio armar. Falta un cable y hay dos de más.</p></li>
-        <li class="is-info"><span>21:05</span><p>Probá la llave y después pedí el ensayo.</p></li>
-        <li class="is-bad"><span>21:06</span><p>Marcas de ganzúa en 2. El ladrón entró por ahí.</p></li>
+        <li class="is-info"><span>21:04</span><p>Llave 1-2-3: el pulso se detuvo en la rueda I. Sin marcas en el cerrojo.</p></li>
+        <li class="is-bad"><span>21:05</span><p>Llave 2: el perno cedió y el ladrón salió por el cable Entrada → Cerrojo.</p></li>
+        <li class="is-bad"><span>21:06</span><p>Llave 1-1: la alarma quedó armada. El segundo salto cayó al vacío.</p></li>
       </ol>
     </article>
   </template>
