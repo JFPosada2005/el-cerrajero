@@ -147,7 +147,7 @@ Qué puede y qué no puede saber cada capa (verificado en el código):
 - **API:** `validateTM` (`tm.js:50-122`), `createTM` (`tm.js:124-143`), `runTM` (`tm.js:145-194`), `acceptsTM` (`tm.js:196-198`).
 - **Invariantes:** determinista por forma (a lo sumo una regla por par estado/símbolo); el blanco está en el alfabeto de cinta pero no en el de entrada; el alfabeto de entrada ⊆ alfabeto de cinta; `move` es `L` o `R`; los estados de aceptación no tienen reglas (`tm.js:50-122`).
 - **Semántica:** cinta infinita en ambas direcciones como `Map` disperso; cabezal inicia en 0 (`tm.js:154-160`). Cada paso: si el estado acepta → `accept`; si no hay regla → `alarm`; si `steps === maxSteps` → `limit`; si no, escribir/mover/transitar (`tm.js:162-193`). `output` = cinta del primer al último símbolo no blanco (`tapeOutput`, `tm.js:28-48`).
-- **Frames:** `{ step, state, head, read, rule, window: { start, symbols } }` con ventana de 7 casillas (`head ± 3`, `windowSymbols` en `tm.js:8-14`), tope `maxFrames` (`tm.js:16-26`).
+- **Frames:** `{ step, state, head, read, rule, window: { start, symbols } }` con ventana de 7 casillas (`head ± 3`, `windowSymbols` en `tm.js:8-14`), tope `maxFrames`; el frame terminal (`accept`/`alarm`/`limit`) siempre se conserva: si el tope está lleno, reemplaza el último slot, así el replay termina en la configuración real (`pushFrame` y `runTM` en `tm.js`).
 - **El porqué:** por Rice, cualquier propiedad no trivial de lo que computa una MT es indecidible, y la detención también lo es; por eso cada corrida lleva tope de pasos y el juez trata el tope como `jam` (§5).
 
 ---
@@ -226,7 +226,7 @@ Nota: `moved` conserva la pila existente del cable (`tests/blueprint.test.js:48-
 ### 6.3 `levels.js` — esquema y validación (`src/game/levels.js`)
 
 - `LEVELS = [level1, …, level5]` (`levels.js:10`); `getLevel(id)` (`levels.js:337-343`) lanza `unknown level` si no existe.
-- `validateLevel(level)` (`levels.js:317-336`) verifica: campos top-level (`checkTopLevel`, `levels.js:12-25`); llaves de un carácter sin duplicar (`checkKeys`, `26-43`); exactamente una celda/sección inicial y al menos un cerrojo (`checkPuzzleCells` 44-63, `checkDrumPuzzle` 64-96); cables contra celdas existentes, partes requeridas (`gear` para lazos, `spring` para resortes, `stack` para pilas) y sin resortes en lazo (`checkWires` 127-166, `checkDrumBlueprint` 97-126); alfabeto del objetivo igual a las llaves en orden (`checkTarget` 168-189); ejemplos que el objetivo acepta/rechaza (`checkExamples` 190-228); líneas de ladrón para cada razón posible del objetivo (`checkThief` 229-264); vocabulario sin palabras académicas (`checkCopy` 265-291, lista `BANNED` en `levels.js:11`); pila bien formada (`checkStack` 292-307).
+- `validateLevel(level)` (`levels.js:317-336`) verifica: campos top-level (`checkTopLevel`, `levels.js:12-25`); llaves de un carácter sin duplicar (`checkKeys`, `26-43`); exactamente una celda/sección inicial y al menos un cerrojo (`checkPuzzleCells` 44-63, `checkDrumPuzzle` 64-96); cables contra celdas existentes, partes requeridas (`gear` para lazos, `spring` para resortes, `stack` para pilas) y sin resortes en lazo (`checkWires` 127-166, `checkDrumBlueprint` 97-126); alfabeto del objetivo igual a las llaves en orden (`checkTarget` 168-189); ejemplos que el objetivo acepta/rechaza (`checkExamples` 190-228); líneas de ladrón según el tipo de objetivo (`checkThief` 229-264): `jam`/`alarm`/`wrong-output` si hay una fase de función, `intruder`/`lockout` si hay una fase de lenguaje; el juez acotado de lenguaje puede devolver `jam` y el nivel 4 no define esa línea, así que `thiefReport` cae a `intruder` (`thief.js:13`); vocabulario sin palabras académicas (`checkCopy` 265-291, lista `BANNED` en `levels.js:11`); pila bien formada (`checkStack` 292-307).
 
 ### 6.4 `thief.js`, `catalog.js` y progreso
 
@@ -270,10 +270,10 @@ Secciones exactas por archivo: contrato/título/cliente/brief/llaves/partes/ladr
 
 | Archivo | Qué fija |
 |---|---|
-| `dfa.test.js` | `simulateDFA`/`runDFA`, validación estricta, `areEquivalentDFA` y mínimo shortlex (`'01'`/`'10'` de largo 2) |
+| `dfa.test.js` | `simulateDFA`/`runDFA`, validación estricta, `areEquivalentDFA` y mínimo shortlex fijado en `'0'` y `'01'` |
 | `nfa.test.js` | Clausura-ε con ciclos, frames de activos, `nfaToDFA`, equivalencia; `'211'` fijado |
 | `pda.test.js` | push/pop y orden cima-primero, ε tras fin de entrada, pila vacía, `limit` en lazo ε, frames del camino aceptador |
-| `tm.test.js` | Mover a la izquierda del inicio, `alarm`, `limit`, salida recortada, blanco, aceptador sin reglas |
+| `tm.test.js` | Mover a la izquierda del inicio, `alarm`, `limit`, salida recortada, blanco, aceptador sin reglas, frame terminal conservado con el tope lleno |
 | `order.test.js` | Orden shortlex, conteo `enumerateWords` (2047 con ≤ 10 sobre 2 llaves), RNG determinista |
 | `limits.test.js` | `DEFAULT_LIMITS` y `withLimits` |
 | `blueprint.test.js` | Cada efecto de `applyEdit`: `removed`/`kept`/`added`/`moved`/`blocked` (+`needs-gear`, `spring-loop`) |
@@ -294,6 +294,10 @@ Cómo correr: `npm test` (Node con runner nativo, sin dependencias). Los tests s
 **Congelado** (`AGENTS.md:15`): `src/core/*`, `src/game/*`, el flujo funcional de `src/main.js` (`startLevel` 472, `startBuild` 484, `renderWorkshop` 501, `renderDrumWorkshop` 754, `handleProbe` 954, `handleAssault` 972, `handlePinEdit` 921, `loadProgress` 118, `saveProgress` 133, `showWin` 1037), datos `level1.js`…`level5.js`, jueces, oráculos, funciones, `blueprint`, `machines`, `levels.js`.
 
 **Presentación libre** (`AGENTS.md:16`): `styles.css`, `index.html`, el render de `src/ui/*` (`graphEditor.js`, `drumEditor.js`, `tapePanel.js`), assets, fuentes, sonido, animaciones y la capa visual de `main.js` — siempre que no cambien reglas, datos a motores ni callbacks (`onConnect`/`onCut`/`onEdit`, formas de `frames`, contrato `{ blueprint, effect, reason }`).
+
+**Invariantes que viven en la UI y sí están congelados.** El guard de `drumEditor.js` que impide abrir el editor de púas en las secciones con `accept: true` no es decoración: protege la invariante de `createTM` de que un estado de aceptación no tenga reglas. Un remaster puede cambiar por completo el aspecto del tambor, pero no puede permitir que una púa llegue a la sección final. Lo mismo vale para cualquier validación de UI que impida construir una máquina inválida.
+
+**Fuera del remaster.** `tests/*` es la red de seguridad del congelamiento: no se edita ni se borra un test para que pase un cambio visual; sí se pueden agregar tests. `serve.py` es infraestructura de desarrollo y no se toca.
 
 **Preguntar antes / informar después / declarar en el PR** (`AGENTS.md:17-19`): ver §1.
 
@@ -329,7 +333,7 @@ En la UI visible están prohibidas las palabras académicas (`checkCopy`/`BANNED
 3. **Tope "segundo número ≤ 31" (L5).** El diseño (§4.3) lo enuncia como regla; el código no lo impone: lo que acota es `sumInputs` (`functions.js:23-41`, `maxBits: 4` + acarreos hasta k = 8/5). Efecto equivalente en la práctica.
 4. **Línea de victoria.** El diseño (§4.2) cita "probó {tested} combinaciones y se rindió"; los `giveUp` reales dicen "El ladrón probó todas las combinaciones…" (p. ej. `level4.js:21`). Misma idea, otro texto.
 5. **Suites de test del diseño (§9) sin archivo propio:** `flow`, `progress`, `vocabulary`, `architecture`, `hygiene` no existen como `tests/*.test.js` (la lista real está en §9); parte de esas reglas sí están cubiertas indirectamente (`levels.test.js` valida vocabulario vía `validateLevel`→`checkCopy`; `catalog.test.js` cubre desbloqueo).
-6. **Conteo de púas del sumador L5.** El diseño (§8) dice 15; la tabla implementada y verificada en `tests/level5.test.js` tiene **16** (4 en `seek`, 3 en `dec`, 3 en `toPlus`, 3 en `carry`, 3 en `clean`). Manda la tabla verificada; el número del diseño quedó desactualizado.
+6. **Conteo de púas del sumador L5 (resuelto).** El diseño decía 15; la tabla implementada y verificada en `tests/level5.test.js` tiene **16** (4 en `seek`, 3 en `dec`, 3 en `toPlus`, 3 en `carry`, 3 en `clean`). `DESIGN.md` §8 y D8 ya dicen 16.
 
 ## Key Learnings
 

@@ -13,16 +13,20 @@ function windowSymbols(tape, blank, head) {
   return symbols;
 }
 
-function pushFrame(frames, record, maxFrames, step, state, head, read, rule, tape, blank) {
+function pushFrame(frames, record, maxFrames, step, state, head, read, rule, tape, blank, terminal = false) {
   if (record !== true) {
-    return;
-  }
-  if (frames.length >= maxFrames) {
     return;
   }
   const shown = rule === null ? null : { ...rule };
   const window = { start: head - 3, symbols: windowSymbols(tape, blank, head) };
-  frames.push({ step, state, head, read, rule: shown, window });
+  const frame = { step, state, head, read, rule: shown, window };
+  if (frames.length < maxFrames) {
+    frames.push(frame);
+    return;
+  }
+  if (terminal === true && maxFrames > 0) {
+    frames[maxFrames - 1] = frame;
+  }
 }
 
 function tapeOutput(tape, blank) {
@@ -161,18 +165,18 @@ export function runTM(tm, input, options = {}) {
   const frames = [];
   while (true) {
     if (tm.accept.includes(state)) {
-      pushFrame(frames, record, maxFrames, steps, state, head, readCell(tape, tm.blank, head), null, tape, tm.blank);
+      pushFrame(frames, record, maxFrames, steps, state, head, readCell(tape, tm.blank, head), null, tape, tm.blank, true);
       return { accepted: true, outcome: 'accept', steps, frames, output: tapeOutput(tape, tm.blank) };
     }
     const read = readCell(tape, tm.blank, head);
     const row = tm.transitions[state];
     const rule = row === undefined ? undefined : row[read];
     if (rule === undefined) {
-      pushFrame(frames, record, maxFrames, steps, state, head, read, null, tape, tm.blank);
+      pushFrame(frames, record, maxFrames, steps, state, head, read, null, tape, tm.blank, true);
       return { accepted: false, outcome: 'alarm', steps, frames, output: tapeOutput(tape, tm.blank) };
     }
     if (steps === maxSteps) {
-      pushFrame(frames, record, maxFrames, steps, state, head, read, rule, tape, tm.blank);
+      pushFrame(frames, record, maxFrames, steps, state, head, read, rule, tape, tm.blank, true);
       return { accepted: false, outcome: 'limit', steps, frames, output: tapeOutput(tape, tm.blank) };
     }
     pushFrame(frames, record, maxFrames, steps, state, head, read, rule, tape, tm.blank);

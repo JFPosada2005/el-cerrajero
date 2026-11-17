@@ -192,6 +192,8 @@ Archivos: `styles.css`, `index.html` (preload), `src/ui/*`, `assets/fonts/`, `do
 
 **La lógica no se toca.** El remaster trabaja sobre `styles.css`, `index.html`, la presentación de `src/ui/*`, assets y movimiento. Los motores, jueces, datos y flujo funcional están congelados; ver [`docs/LOGIC.md`](LOGIC.md) y `AGENTS.md`. Si un cambio de lógica parece necesario, se pregunta al owner antes; si se hace por error, se informa y el owner decide.
 
+Dos matices: el guard de `drumEditor.js` que impide editar las secciones finales es lógica congelada, no presentación; y `tests/*` no se edita para acomodar el remaster. `serve.py` queda fuera del alcance visual.
+
 ## 14. Playtest
 
 Preguntas (sin ayudar):

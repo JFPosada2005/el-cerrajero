@@ -30,7 +30,7 @@
 | D5 | Each level unlocks new parts: gear (self-loop) from L2, fork and spring from L3, stack from L4, drum and tape on L5. | Makes S4's "one new part per level" concrete. |
 | D6 | **L3 rule: "contains 1-2-2 or 2-1-1"**, not "contains 01 or 10". **Approved 2026-11-05.** | "01 or 10" is the same as "has both symbols": its minimal deterministic machine has 4 cells, while the fork version needs 6, so the fork would teach nothing (verified). |
 | D7 | L4 repair = balanced lever turns (never empty). L4 build = Aⁿ Bⁿ with n ≥ 1. The stack mechanism accepts **by final state**, over a base symbol `Z`. | Difficulty goes up: the build needs a phase cell that the repair does not. |
-| D8 | L5 = **binary addition**. Repair = a +1 counter. Build = an adder made of the +1 section, a −1 section and a loop. 15 pins in total (verified). | Matches Engram decision #254 and the "computation judge" the brief asks for. Reusing the repaired section shows progress. |
+| D8 | L5 = **binary addition**. Repair = a +1 counter. Build = an adder made of the +1 section, a −1 section and a loop. 16 pins in total (verified). | Matches Engram decision #254 and the "computation judge" the brief asks for. Reusing the repaired section shows progress. |
 | D9 | One thief character who learns a new trick per level. `game/thief.js` turns a verdict into story lines. | S4 asks for a thief that gets smarter. |
 | D10 | Saved progress format v2: `{ version: 2, completed, repaired }`. The current v1 format is migrated. | Lets the map unlock levels and lets a player skip a repair they already did. |
 
@@ -251,6 +251,7 @@ RunResult = {
   2. No rule for the current symbol → halt with `alarm`.
   3. `steps === maxSteps` → halt with `limit`.
 - `runTM` also returns `output`: the tape from the leftmost to the rightmost non-blank cell.
+- Terminal frames (`accept`, `alarm`, `limit`) are always recorded. When `maxFrames` is full, the terminal frame replaces the last slot, so a replay ends at the real final configuration.
 
 ---
 
@@ -617,9 +618,9 @@ Every counterexample below was checked in the scratch probes (Appendix A).
 
 ### L5: the central bank (tape and control drum)
 - **Layout**: the tape sits above the drum. The drum has one ring per section and one pin slot per symbol (0, 1, +, empty). A slot opens a popover with three pickers: write, move ←/→, next section. An empty slot means alarm.
-- **Probar** animates the head step by step, with speeds 1×, 4× and instant. Frames are capped at 2000.
+- **Probar** animates the head step by step, with speeds 1×, 4× and instant. Frames are capped at 2000; the terminal frame (`accept`, `alarm`, `limit`) is always kept, replacing the last slot when the cap is full, so the tape replay ends at the real final configuration.
 - **Repair** (+1): the 1-pin in the carry section writes 1 → **`1`** (wrong-output: shows 11, expected 10).
-- **Build** (adder, 15 pins, all 256 pairs pass):
+- **Build** (adder, 16 pins, all 256 pairs pass):
   - carried-over `seek` section has no `+` pin → **`0+0`** (alarm)
   - carry section still exits to "Listo" → **`0+1`** (wrong-output: `1+0`)
 - **Thief lines**: forged deposits, e.g. "depositó {key} y el contador marcó {actual} en vez de {expected}".
@@ -759,7 +760,7 @@ All probes ran in the scratch copy with `HOME`/`TMP` pointing inside it.
 - `node probe3a.mjs`: L3 build `211`, `2211`, `1211`, `''`; L1 build `314`.
 - `node probe2.mjs` and `probe3b.mjs`:
   - L4: Dyck fix passes; Dyck bug `A`; AⁿBⁿ passes; `AABABB`; `AAB`; 2,047 words for length ≤ 10
-  - L5: increment bug `1`; adder 15 pins, 0 failures over 256 pairs, worst case 230 steps (31+31 = 520, 127+127 = 2572)
+  - L5: increment bug `1`; adder 16 pins, 0 failures over 256 pairs, worst case 230 steps (31+31 = 520, 127+127 = 2572)
   - L5 build bugs `0+0` (alarm) and `0+1` (wrong-output)
 - `git status --short` in the workspace: empty before and after.
 
