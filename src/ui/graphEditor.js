@@ -1,6 +1,40 @@
 const SVG_NS = 'http://www.w3.org/2000/svg';
 const NODE_RADIUS = 44;
 const LOOP_LABEL_OFFSET = 118;
+const VIEWBOX_PADDING = 100;
+const VIEWBOX_MIN_HEIGHT = 300;
+
+/**
+ * Encuadre del `#canvas` a partir de las celdas reales del nivel: bounding
+ * box + padding uniforme para nodos, cables y etiquetas. Si el alto útil
+ * es muy chico, se amplía el padding vertical para no achatar la escena.
+ * Función pura (sin DOM) para que el parent y los tests la compartan.
+ */
+export function viewBoxForCells(cells, padding = VIEWBOX_PADDING) {
+  if (!Array.isArray(cells) || cells.length === 0) {
+    return '0 0 820 520';
+  }
+  let minX = Infinity;
+  let minY = Infinity;
+  let maxX = -Infinity;
+  let maxY = -Infinity;
+  for (const cell of cells) {
+    minX = Math.min(minX, cell.x);
+    minY = Math.min(minY, cell.y);
+    maxX = Math.max(maxX, cell.x);
+    maxY = Math.max(maxY, cell.y);
+  }
+  let x = minX - padding;
+  let y = minY - padding;
+  let width = maxX - minX + padding * 2;
+  let height = maxY - minY + padding * 2;
+  if (height < VIEWBOX_MIN_HEIGHT) {
+    const extra = (VIEWBOX_MIN_HEIGHT - height) / 2;
+    y -= extra;
+    height = VIEWBOX_MIN_HEIGHT;
+  }
+  return `${x} ${y} ${width} ${height}`;
+}
 function svgElement(tag, attributes = {}) {
   const element = document.createElementNS(SVG_NS, tag);
   for (const [name, value] of Object.entries(attributes)) {

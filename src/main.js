@@ -9,7 +9,7 @@ import { runTM } from './core/tm.js';
 import { functionFor } from './game/functions.js';
 import { judge } from './game/judge.js';
 import { thiefReport } from './game/thief.js';
-import { createGraphEditor } from './ui/graphEditor.js';
+import { createGraphEditor, viewBoxForCells } from './ui/graphEditor.js';
 import { createDrumEditor } from './ui/drumEditor.js';
 import { createTapePanel } from './ui/tapePanel.js';
 import { createWorkbenchScene } from './ui/workbenchScene.js';
@@ -21,6 +21,7 @@ import { createLevelScene as createLevel4Scene } from './ui/levels/level4Scene.j
 import { createLevelScene as createLevel5Scene } from './ui/levels/level5Scene.js';
 import { loadManifest } from './ui/assets.js';
 import { createAudio } from './ui/audio.js';
+import { LEVEL_BRIEFS } from './ui/levelBriefs.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
 const SOUND_KEY = 'el-cerrajero:sound';
 const app = document.querySelector('#app');
@@ -301,10 +302,12 @@ function stackActionWord() {
 }
 function selectStackTop(value) {
   stackTop = value;
+  sfx('chip');
   renderTools();
 }
 function selectStackAction(value) {
   stackAction = value;
+  sfx('chip');
   renderTools();
 }
 function renderStack(stack) {
@@ -509,7 +512,7 @@ function handleConnect(from, to, tool) {
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
   if (tool.kind === 'spring') {
-    sfx('cable');
+    sfx('spring');
     appendLog(`Tendiste un resorte: ${from} → ${to}.`);
     return;
   }
@@ -648,7 +651,7 @@ function renderSceneWorkshop() {
 
   const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   canvas.id = 'canvas';
-  canvas.setAttribute('viewBox', '0 0 820 520');
+  canvas.setAttribute('viewBox', viewBoxForCells(state.puzzle.cells));
   canvas.setAttribute('role', 'img');
   canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
   levelScene.editorSlot.append(canvas);
@@ -924,6 +927,7 @@ function showTapeFrame(run) {
   drumEditor.light(frame.state, frame.read);
 }
 function probeTape() {
+  sfx('tape');
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const input = state.puzzle.examples.runs[0].input;
   const run = runTM(machine, input, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
@@ -950,12 +954,13 @@ function assaultTape(machine, verdict) {
   if (verdict.counterexample === null) {
     return;
   }
+  sfx('tape');
   const run = runTM(machine, verdict.counterexample, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
   showTapeFrame(run);
 }
 function handlePinEdit(edit) {
   const rules = structuredClone(state.blueprint.rules);
-  sfx('gear');
+  sfx('pin');
   if (rules[edit.section] === undefined) {
     rules[edit.section] = {};
   }
@@ -1008,6 +1013,7 @@ function handleProbe() {
   }
 }
 function handleAssault() {
+  sfx('steps');
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const verdict = judge(state.puzzle, machine);
   const report = thiefReport(verdict, state.level);
@@ -1040,14 +1046,17 @@ function handleAssault() {
 }
 function openWorkshopDoc(kind) {
   sfx('paper');
+  const brief = LEVEL_BRIEFS[state.level.id] ?? null;
   if (kind === 'contract') {
-    openModal(`Contrato ${state.level.contract}`, state.level.client, state.puzzle.goal, 'Entendido', () => {});
+    const body = brief !== null ? `${brief.context}\n\n${state.puzzle.goal}` : state.puzzle.goal;
+    openModal(`Contrato ${state.level.contract}`, state.level.client, body, 'Entendido', () => {}, 'contract');
     return;
   }
   if (kind === 'hint') {
     const hints = state.puzzle.hints ?? [];
-    const text = hints.length > 0 ? hints[0] : 'No hay pistas para este contrato.';
-    openModal('Pista', 'Pista del taller', text, 'Entendido', () => {});
+    const fallback = hints.length > 0 ? hints[0] : 'No hay pistas para este contrato.';
+    const text = brief !== null ? brief.tutorial : fallback;
+    openModal('Pista', 'Pista del taller', text, 'Entendido', () => {}, 'hint');
     return;
   }
   if (kind === 'log') {
@@ -1055,7 +1064,7 @@ function openWorkshopDoc(kind) {
       ? [...workbenchView.slots.log.querySelectorAll('.wb-log-entry')].map((item) => item.textContent)
       : [];
     const body = entries.length > 0 ? entries.join('\n') : state.puzzle.intro;
-    openModal('Bitácora', 'Notas del caso', body, 'Cerrar', () => {});
+    openModal('Bitácora', 'Notas del caso', body, 'Cerrar', () => {}, 'log');
   }
 }
 async function toggleSound() {
@@ -1095,11 +1104,14 @@ async function initAudio() {
   }
   audio.setEnabled(soundOn);
 }
-function openModal(eyebrow, title, body, actionLabel, onAction) {
+function openModal(eyebrow, title, body, actionLabel, onAction, paper = null) {
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop';
   const modal = document.createElement('section');
   modal.className = 'modal';
+  if (paper === 'contract' || paper === 'hint' || paper === 'log') {
+    modal.classList.add(`modal--${paper}`);
+  }
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
   const brow = document.createElement('p');
@@ -1156,7 +1168,7 @@ function showRepairModal() {
   openModal(`Contrato ${state.level.contract}`, 'Mecanismo reparado', state.level.phases.build.goal, 'Construir el nuevo', startBuild);
 }
 function showWin() {
-  sfx('bell');
+  sfx('success');
   const progress = loadProgress();
   if (progress.completed.includes(state.level.id) === false) {
     progress.completed.push(state.level.id);

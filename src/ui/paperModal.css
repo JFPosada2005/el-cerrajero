@@ -106,6 +106,43 @@
   outline-offset: 3px;
 }
 
+/* Papel abierto: la textura del asset viste el modal y el papel CSS queda
+ * debajo como respaldo (si el archivo falta, se sigue leyendo). `cover`
+ * para no deformar: el contrato es vertical (512×704) y la pista y la
+ * bitácora apaisadas. El texto oscuro sobre papel claro, el botón de latón
+ * y el foco no cambian; sin animaciones que respetar en reduce. */
+.modal.modal--contract,
+.modal.modal--hint,
+.modal.modal--log {
+  background-color: #f2ede3;
+  background-position: center, 0 0, 0 0;
+  background-repeat: no-repeat, no-repeat, no-repeat;
+}
+
+.modal.modal--contract {
+  background-image:
+    url("../../assets/shared/paper/contract.webp"),
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(180deg, #f2ede3 0%, #e6d9c2 100%);
+  background-size: cover, auto, auto;
+}
+
+.modal.modal--hint {
+  background-image:
+    url("../../assets/shared/paper/hint.webp"),
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(180deg, #f2ede3 0%, #e6d9c2 100%);
+  background-size: cover, auto, auto;
+}
+
+.modal.modal--log {
+  background-image:
+    url("../../assets/shared/paper/log.webp"),
+    radial-gradient(ellipse at 20% 0%, rgba(255, 255, 255, 0.55), transparent 55%),
+    linear-gradient(180deg, #f2ede3 0%, #e6d9c2 100%);
+  background-size: cover, auto, auto;
+}
+
 @media (max-width: 480px) {
   .modal {
     padding: 22px 20px 20px;

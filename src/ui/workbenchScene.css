@@ -501,6 +501,13 @@
   display: none;
 }
 
+/* Sala de recuento inmersiva: el mismo alto que el resto (100dvh menos el
+ * header). Sin el descuento de 268 px del drum-room no inmersivo, que dejaba
+ * el stage de N5 en ~632 px y la placa aplastada. */
+.wb-scene.is-immersive.is-drum-room .wb-stage {
+  height: calc(100dvh - var(--wb-header-h));
+}
+
 /* Línea de estado mudada a la escena (`hudSlot`, cualquier nivel): sin caja
  * de franja aunque el nodo viaje con sus clases; cada escena la posiciona
  * en su ranura. El fallback directo (`> .wb-status`) sigue arriba. */

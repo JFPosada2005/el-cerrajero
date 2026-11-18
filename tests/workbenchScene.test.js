@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createWorkbenchScene } from '../src/ui/workbenchScene.js';
@@ -10,6 +10,7 @@ const source = readFileSync(join(here, '..', 'src', 'ui', 'workbenchScene.js'), 
 const css = readFileSync(join(here, '..', 'src', 'ui', 'workbenchScene.css'), 'utf8');
 const modalCss = readFileSync(join(here, '..', 'src', 'ui', 'paperModal.css'), 'utf8');
 const mainSource = readFileSync(join(here, '..', 'src', 'main.js'), 'utf8');
+const manifest = JSON.parse(readFileSync(join(here, '..', 'assets', 'manifest.json'), 'utf8'));
 
 // --- DOM falso mínimo (solo document.createElement + textContent) ---
 function element(tag) {
@@ -617,6 +618,50 @@ test('el estado mudado a la escena es línea sin caja en cualquier nivel', () =>
   assert.ok(rule.includes('font-size: 14px'), 'línea de 14 px');
   assert.ok(rule.includes('rgba(242, 237, 227, 0.92)'), 'tinta clara del taller');
   assert.ok(rule.includes('border-bottom'), 'una línea grabada, no una barra');
+});
+
+test('el drum-room inmersivo no achica el stage', () => {
+  const at = css.indexOf('.wb-scene.is-immersive.is-drum-room .wb-stage');
+  assert.ok(at > 0, 'N5 inmersivo tiene regla de alto propia');
+  const rule = css.slice(at, css.indexOf('}', at));
+  assert.ok(rule.includes('height: calc(100dvh - var(--wb-header-h))'), 'mismo alto que el resto, sin descuento');
+});
+
+test('el contrato lleva contexto y la pista el tutorial del nivel', () => {
+  assert.ok(mainSource.includes('LEVEL_BRIEFS[state.level.id]'), 'openWorkshopDoc usa los briefs');
+  assert.ok(mainSource.includes('brief.context'), 'el contrato suma el contexto');
+  assert.ok(mainSource.includes('state.puzzle.goal'), 'el contrato conserva la regla');
+  assert.ok(mainSource.includes('brief.tutorial'), 'la pista usa el tutorial');
+  assert.ok(mainSource.includes('hints[0]'), 'fallback a la pista del puzzle si falta el nivel');
+});
+
+test('los seis SFX nuevos están cableados en main.js', () => {
+  for (const id of ['chip', 'pin', 'spring', 'tape', 'success', 'steps']) {
+    assert.ok(mainSource.includes(`sfx('${id}')`), `falta sfx('${id}')`);
+    const slot = manifest.sfx?.[id];
+    assert.ok(slot, `el manifiesto no declara sfx.${id}`);
+    assert.equal(slot.status, 'available', `sfx.${id} no está available`);
+    assert.ok(existsSync(join(here, '..', slot.final)), `falta el archivo de sfx.${id}: ${slot.final}`);
+  }
+  assert.ok(mainSource.includes('selectStackTop'), 'chip vive en la pila');
+  assert.ok(!mainSource.includes("sfx('gear')"), 'la púa ya no suena a engranaje');
+});
+
+test('el modal abre el papel que corresponde con su textura', () => {
+  assert.ok(mainSource.includes('modal--${paper}'), 'openModal aplica la clase del papel');
+  for (const kind of ['contract', 'hint', 'log']) {
+    assert.ok(mainSource.includes(`'${kind}')`) || mainSource.includes(`'${kind}',`), `openWorkshopDoc pasa ${kind}`);
+    const at = modalCss.lastIndexOf(`.modal.modal--${kind} {`);
+    assert.ok(at > 0, `el modal ${kind} tiene regla propia`);
+    const rule = modalCss.slice(at, modalCss.indexOf('}', at));
+    assert.ok(rule.includes('cover'), `el papel ${kind} no se deforma`);
+    const urls = [...rule.matchAll(/url\(["']?([^"')]+)["']?\)/g)].map((match) => match[1]);
+    assert.ok(urls.length > 0, `el modal ${kind} no declara textura`);
+    for (const url of urls) {
+      const disk = join(here, '..', 'src', 'ui', url);
+      assert.ok(existsSync(disk), `textura inexistente: ${url}`);
+    }
+  }
 });
 
 test('el estado muestra el símbolo del alfabeto, no el carrete', () => {

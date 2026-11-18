@@ -94,12 +94,30 @@ test('Guardar emits the pin', () => {
   byLabel(collect(root.children, 'pin-choice'), 'Escribe vacío').fire('click');
   byLabel(collect(root.children, 'pin-choice'), 'Guardar').fire('click');
   assert.deepEqual(calls, [{ type: 'set-pin', section: 'carry', read: '1', pin: { write: '_', move: 'L', to: 'carry' } }]);
+  assert.equal(collect(root.children, 'pin-editor').length, 0, 'Guardar cierra el panel de la púa');
+});
+test('Guardar cierra el panel aunque no cambie nada', () => {
+  const { root, calls } = setup();
+  byLabel(collect(root.children, 'drum-pin'), 'Sección Llevar, símbolo 1').fire('click');
+  assert.equal(collect(root.children, 'pin-editor').length, 1);
+  byLabel(collect(root.children, 'pin-choice'), 'Guardar').fire('click');
+  assert.equal(calls.length, 1);
+  assert.equal(collect(root.children, 'pin-editor').length, 0, 'el panel desaparece tras guardar');
 });
 test('Vaciar emits null', () => {
   const { root, calls } = setup();
   byLabel(collect(root.children, 'drum-pin'), 'Sección Llevar, símbolo 1').fire('click');
   byLabel(collect(root.children, 'pin-choice'), 'Vaciar').fire('click');
   assert.deepEqual(calls, [{ type: 'set-pin', section: 'carry', read: '1', pin: null }]);
+  assert.equal(collect(root.children, 'pin-editor').length, 0, 'Vaciar cierra el panel de la púa');
+});
+test('Cancelar cierra el editor sin emitir', () => {
+  const { root, calls } = setup();
+  byLabel(collect(root.children, 'drum-pin'), 'Sección Llevar, símbolo 1').fire('click');
+  assert.equal(collect(root.children, 'pin-editor').length, 1);
+  byLabel(collect(root.children, 'pin-choice'), 'Cancelar').fire('click');
+  assert.deepEqual(calls, []);
+  assert.equal(collect(root.children, 'pin-editor').length, 0, 'Cancelar cierra el panel de la púa');
 });
 test('light marks the section and the pin', () => {
   const { root, editor } = setup();
