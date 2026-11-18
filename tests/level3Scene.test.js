@@ -121,7 +121,7 @@ test('no crea editor, cables, llaves, juicio ni lógica', () => {
 
 test('placeholders marcados a producir: fondo, lámparas, bifurcador y resorte', () => {
   const scene = createLevelScene({});
-  const placeholders = all(scene).filter((node) => node.getAttribute('data-status') === 'placeholder');
+  const placeholders = all(scene).filter((node) => node.getAttribute('data-status') === 'a producir');
   assert.ok(placeholders.length >= 5, `hay ${placeholders.length} placeholders`);
   for (const node of placeholders) {
     assert.equal(node.getAttribute('data-todo'), 'a producir');
@@ -173,6 +173,88 @@ test('dispose suelta la escena sin romper el resto', () => {
   assert.equal(scene.element.parentNode, null);
   assert.equal(shell.children.length, 0);
   assert.doesNotThrow(() => scene.dispose());
+});
+
+test('sala de seguridad: serie de placa y aviso de alarma con vocabulario de taller', () => {
+  const scene = createLevelScene({});
+  const text = texts(scene).join(' · ');
+  assert.ok(text.includes('N.º'), 'la placa lleva su serie como la del mockup');
+  assert.ok(text.includes('Alarma'), 'la placa rotula la línea de alarma');
+});
+
+test('el editor real cabe: #canvas dentro del slot para 5–8 casillas a 1440 y 390', () => {
+  function rulesOf(css) {
+    const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    return clean
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }));
+  }
+  function bodyFor(exact) {
+    const found = rulesOf(sceneCss).find((rule) =>
+      rule.selector.split(',').map((part) => part.trim()).includes(exact),
+    );
+    assert.ok(found, `hay regla para ${exact}`);
+    return found.body;
+  }
+  const root = bodyFor('.level-scene[data-level="3"]');
+  assert.ok(/display\s*:\s*grid/.test(root), 'la raíz es grilla del stage');
+  assert.ok(/grid-template-rows\s*:\s*minmax\(0,\s*1fr\)/.test(root), 'la raíz limita su fila al alto del stage');
+  assert.ok(/height\s*:\s*100%/.test(root), 'la raíz ocupa el alto del stage');
+  assert.ok(/max-height\s*:\s*100%/.test(root), 'la raíz no supera el alto del stage');
+  assert.ok(/min-height\s*:\s*0/.test(root), 'la raíz puede encogerse');
+  assert.ok(/overflow\s*:\s*hidden/.test(root), 'la escena no empuja la página');
+  assert.ok(/box-sizing\s*:\s*border-box/.test(root), 'la raíz mide borde incluido');
+
+  const room = bodyFor('.level-scene[data-level="3"] .museum-room');
+  assert.ok(/display\s*:\s*flex/.test(room), 'la sala es columna flexible');
+  assert.ok(/flex-direction\s*:\s*column/.test(room), 'la sala apila placa y marcha');
+  assert.ok(/min-height\s*:\s*0/.test(room), 'la sala puede encogerse');
+
+  const plate = bodyFor('.level-scene[data-level="3"] .museum-plate');
+  assert.ok(/flex\s*:\s*1/.test(plate), 'la placa toma el alto libre');
+  assert.ok(/min-height\s*:\s*0/.test(plate), 'la placa puede encogerse');
+
+  const slot = bodyFor('.level-scene[data-level="3"] .museum-editor-slot');
+  assert.ok(/flex\s*:\s*1/.test(slot), 'el slot toma el alto libre de la placa');
+  assert.ok(/min-height\s*:\s*0/.test(slot), 'el slot puede encogerse');
+  assert.ok(/overflow\s*:\s*auto/.test(slot), 'el desborde vive dentro del slot');
+  assert.ok(!/min-height\s*:\s*\d+px/.test(slot), 'el slot no fija un mínimo que pelee con el flex');
+
+  const canvas = bodyFor('.level-scene[data-level="3"] .museum-editor-slot #canvas');
+  assert.ok(/height\s*:\s*100%/.test(canvas), 'el #canvas escala por alto');
+  assert.ok(/width\s*:\s*auto/.test(canvas), 'el #canvas no se estira en ancho');
+  assert.ok(!/(?:^|[^-])width\s*:\s*100%/.test(canvas), 'el #canvas no estira el mecanismo');
+  assert.ok(/max-width\s*:\s*100%/.test(canvas), 'el #canvas nunca supera el ancho del slot');
+  assert.ok(/max-height\s*:\s*100%/.test(canvas), 'el #canvas nunca supera el alto del slot');
+  assert.ok(/margin-inline\s*:\s*auto/.test(canvas), 'el #canvas queda centrado');
+  assert.ok(/aspect-ratio/.test(canvas), 'el #canvas conserva la proporción 820×520');
+
+  assert.ok(/@media[^{]*max-width\s*:\s*700px/.test(sceneCss), 'hay ajuste para 390×844');
+  assert.ok(
+    /@media[^{]*max-width\s*:\s*700px[\s\S]*?\.museum-editor-slot\s+#canvas[\s\S]*?min-width\s*:\s*560px/.test(sceneCss),
+    'el mínimo de 560px queda confinado al slot en angosto',
+  );
+  assert.ok(/@media[^{]*max-height\s*:\s*\d+px/.test(sceneCss), 'la ayuda se compacta en ventanas bajas');
+  assert.ok(
+    /@media[^{]*max-height\s*:\s*900px[\s\S]*?\.museum-glyphs[\s\S]*?display\s*:\s*none/.test(sceneCss),
+    'los glifos salen del flujo a 900 px o menos para darle el alto al editor',
+  );
+  assert.ok(
+    /@media[^{]*max-height\s*:\s*900px[\s\S]*?\.museum-editor-note[\s\S]*?display\s*:\s*none/.test(sceneCss),
+    'la nota de ayuda sale del flujo a 900 px o menos',
+  );
+});
+
+test('materia del mockup: latón, bronce, papel y las tres familias', () => {
+  const lower = sceneCss.toLowerCase();
+  assert.ok(lower.includes('cinzel'), 'títulos en Cinzel');
+  assert.ok(lower.includes('oswald'), 'interfaz en Oswald');
+  assert.ok(lower.includes('special elite'), 'papel en Special Elite');
+  assert.ok(sceneCss.includes('#d4a72c') || lower.includes('brass'), 'latón del mockup');
+  assert.ok(sceneCss.includes('#38c6b8') || lower.includes('teal'), 'teal del ala de noche');
+  assert.ok(sceneCss.includes('#f2ede3') || lower.includes('paper'), 'papel ivory del taller');
 });
 
 test('CSS con alcance, foco, 44 px y movimiento reducido', () => {

@@ -3,7 +3,7 @@
 // Aporta fondo, mesa, placa, utilería y decoración. No crea el editor
 // real (el parent monta el #canvas en `editorSlot`), ni cables, llaves,
 // juicio o lógica. Todo asset final figura como "a producir" con
-// `data-asset` + `data-status="placeholder"`; el dibujo es CSS/SVG propio.
+// `data-asset` + `data-status="a producir"`; el dibujo es CSS/SVG propio.
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -28,7 +28,7 @@ function svgNode(tag, attributes = {}) {
 
 function markPlaceholder(element, asset) {
   element.setAttribute('data-asset', asset);
-  element.setAttribute('data-status', 'placeholder');
+  element.setAttribute('data-status', 'a producir');
   element.setAttribute('data-todo', 'a producir');
 }
 
@@ -46,7 +46,7 @@ function phaseId(phase) {
   return 'repair';
 }
 
-// Glifo del bifurcador: derivación en "Y" de latón.
+// Glifo del bifurcador: derivación en "Y" de latón con bocas de contacto.
 function forkGlyph() {
   const svg = svgNode('svg', {
     viewBox: '0 0 24 28',
@@ -55,7 +55,7 @@ function forkGlyph() {
     focusable: 'false',
   });
   svg.append(svgNode('path', {
-    d: 'M12 3 L12 14 M12 14 L5 24 M12 14 L19 24',
+    d: 'M12 4 L12 14 M12 14 L5 24 M12 14 L19 24',
     fill: 'none',
     stroke: 'currentColor',
     'stroke-width': '2.4',
@@ -63,10 +63,15 @@ function forkGlyph() {
     'stroke-linejoin': 'round',
   }));
   svg.append(svgNode('circle', { cx: '12', cy: '14', r: '2.2', fill: 'currentColor' }));
+  for (const [cx, cy] of [['12', '4'], ['5', '24'], ['19', '24']]) {
+    svg.append(svgNode('circle', {
+      cx, cy, r: '2.6', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6',
+    }));
+  }
   return svg;
 }
 
-// Glifo del resorte: muelle en zigzag punteado, sin llave.
+// Glifo del resorte: muelle en zigzag punteado con topes, sin llave.
 function springGlyph() {
   const svg = svgNode('svg', {
     viewBox: '0 0 48 16',
@@ -75,7 +80,7 @@ function springGlyph() {
     focusable: 'false',
   });
   svg.append(svgNode('path', {
-    d: 'M3 8 L9 2 L15 14 L21 2 L27 14 L33 2 L39 14 L45 8',
+    d: 'M6 8 L11 2 L17 14 L23 2 L29 14 L35 2 L41 8',
     fill: 'none',
     stroke: 'currentColor',
     'stroke-width': '2',
@@ -83,6 +88,8 @@ function springGlyph() {
     'stroke-linejoin': 'round',
     'stroke-dasharray': '3 2',
   }));
+  svg.append(svgNode('circle', { cx: '4', cy: '8', r: '2.2', fill: 'currentColor' }));
+  svg.append(svgNode('circle', { cx: '44', cy: '8', r: '2.2', fill: 'currentColor' }));
   return svg;
 }
 
@@ -111,6 +118,17 @@ function lampFigure(variant) {
     fill: 'none',
     stroke: 'currentColor',
     'stroke-width': '2',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '20', cy: '34', r: '11',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '1.2',
+    opacity: '0.35',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '20', cy: '10', r: '1.8',
+    fill: 'currentColor',
   }));
   svg.append(svgNode('line', {
     x1: '8', y1: '48', x2: '32', y2: '48',
@@ -215,6 +233,15 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   plate.append(tags);
   plate.append(editorSlot);
   plate.append(glyphs);
+  plate.append(node('span', 'museum-plate-serial', 'Sala 03 · N.º 0303'));
+  plate.append(node('span', 'museum-plate-alarm', 'Alarma'));
+
+  const rivets = node('div', 'museum-rivets');
+  rivets.setAttribute('aria-hidden', 'true');
+  for (const corner of ['tl', 'tr', 'bl', 'br']) {
+    rivets.append(node('span', `museum-rivet museum-rivet--${corner}`));
+  }
+  plate.append(rivets);
 
   // Estado de la prueba: el parent muestra aquí el paso de la llave.
   const statusSlot = node('aside', 'museum-status');
@@ -225,10 +252,15 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
     node('p', 'museum-status-note', 'Aquí el taller muestra la marcha de la prueba.'),
   );
 
+  // Sala: columna flexible que contiene placa y marcha dentro del alto
+  // del stage. El fondo y la mesa son decorado absoluto y no participan.
+  const room = node('div', 'museum-room');
+  room.append(plate);
+  room.append(statusSlot);
+
   element.append(backdrop);
   element.append(bench);
-  element.append(plate);
-  element.append(statusSlot);
+  element.append(room);
 
   let disposed = false;
   function dispose() {
