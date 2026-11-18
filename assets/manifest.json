@@ -388,8 +388,8 @@
       "kind": "audio",
       "priority": "P0",
       "status": "available",
-      "license": "Freesound — licencia pendiente de confirmar",
-      "source": "Freesound (https://freesound.org/); página exacta del click pendiente; recortado y exportado a OGG mono 44,1 kHz"
+      "license": "Pixabay Content License",
+      "source": "freesound_community — Pixabay 43196 — https://pixabay.com/sound-effects/film-special-effects-ui-click-43196/; recortado y exportado a OGG mono 44,1 kHz"
     },
     "cable": {
       "final": "assets/audio/sfx/cable.ogg",
