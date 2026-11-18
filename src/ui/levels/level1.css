@@ -6,18 +6,20 @@
  * lo monta el parent dentro de `.level-editor` y acá solo se integra
  * (fondo transparente, sin borde de panel).
  *
- * Sin botones ni focos propios: el decorado no es interactivo y lleva
- * `pointer-events: none` para no tapar el mecanismo. El `:focus-visible`
- * queda para lo que monte el parent (celdas y cables del `#canvas`).
+ * Papeles, campana, ladrón y tijera son los controles reales: botones
+ * transparentes sin caja (fondo transparente, sin borde) con foco visible
+ * teal y área táctil ≥44 px. El parent engancha los handlers sobre sus
+ * `data-action`; la escena no decide nada.
  */
 
 .level-scene[data-level="1"] {
-  position: relative;
+  position: absolute;
+  inset: 0;
   width: 100%;
-  aspect-ratio: 16 / 9;
-  min-height: 320px;
+  height: 100%;
+  min-height: 0;
   overflow: hidden;
-  border-radius: 14px;
+  border-radius: 0;
   background: #05080c;
   color: #f2ede3;
   font-size: 16px;
@@ -54,22 +56,25 @@
   pointer-events: none;
 }
 
+/* El ladrón es decorado: sin acción, sin foco, sin animación. */
 .level-scene[data-level="1"] .level-thief {
   position: absolute;
   right: 0.4%;
   bottom: 7%;
+  z-index: 1;
   height: 59%;
   width: auto;
   opacity: 0.96;
   pointer-events: none;
 }
 
-/* Placa: reserva el centro para el mecanismo real. */
+/* Placa: la máquina sobre la mesa, al centro. Ocupa ~62% del ancho para
+ * dejar banda de mesa libre abajo para los props. */
 .level-scene[data-level="1"] .level-plate {
   position: absolute;
   left: 50%;
   top: 50%;
-  width: 72%;
+  width: 62%;
   aspect-ratio: 900 / 560;
   transform: translate(-50%, -52%);
 }
@@ -170,11 +175,11 @@
   box-shadow: none;
 }
 
-/* Papeles y campana: decorado sobre la mesa, sin acciones. */
+/* Papeles a la izquierda de la mesa, sobre la banda libre. */
 .level-scene[data-level="1"] .level-papers {
   position: absolute;
   left: 1.6%;
-  bottom: 2.6%;
+  bottom: 48px;
   display: flex;
   align-items: flex-end;
   gap: 15px;
@@ -188,9 +193,20 @@
   padding: 0;
 }
 
+/* Papeles, campana y tijera: los controles diegéticos sobre la mesa.
+ * Sin caja de botón (fondo transparente, sin borde); el foco va con
+ * contorno teal y cada prop mide ≥44 px. */
 .level-scene[data-level="1"] .level-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 44px;
+  min-height: 44px;
   margin: 0;
-  pointer-events: none;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
 }
 
 .level-scene[data-level="1"] .level-paper img {
@@ -205,7 +221,8 @@
 }
 
 .level-scene[data-level="1"] .level-paper-name,
-.level-scene[data-level="1"] .level-bell-name {
+.level-scene[data-level="1"] .level-bell-name,
+.level-scene[data-level="1"] .level-scissors-name {
   margin: 4px 0 0;
   color: #c9a45c;
   font-size: 12px;
@@ -219,11 +236,23 @@
 
 .level-scene[data-level="1"] .level-bell {
   position: absolute;
-  right: 11%;
-  bottom: 4%;
+  right: 23%;
+  bottom: 48px;
+  z-index: 3;
   width: 72px;
+  min-width: 44px;
+  min-height: 44px;
   margin: 0;
-  pointer-events: none;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: transform 120ms ease-out;
+}
+
+/* La campana es un control: se mueve solo al pulsarla, no en loop. */
+.level-scene[data-level="1"] .level-bell:active {
+  transform: rotate(-6deg) scale(0.96);
 }
 
 .level-scene[data-level="1"] .level-bell img {
@@ -233,23 +262,210 @@
   pointer-events: none;
 }
 
-/* Foco visible para lo que monte el parent dentro de la escena. */
+/* Tijera junto a la libreta: ~64 px; `is-active` marca el modo corte. */
+.level-scene[data-level="1"] .level-scissors {
+  position: absolute;
+  left: calc(1.6% + 318px);
+  bottom: 48px;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 64px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.level-scene[data-level="1"] .level-scissors img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-scissors.is-active {
+  outline: 2px solid #d4a72c;
+  outline-offset: 2px;
+  filter: drop-shadow(0 0 6px rgba(212, 167, 44, 0.8));
+}
+
+/* Placa de ensayo: latón sobre la mesa, a la derecha junto a la campana. */
+.level-scene[data-level="1"] .level-trial {
+  position: absolute;
+  right: 13.5%;
+  bottom: 48px;
+  z-index: 3;
+  min-width: 96px;
+  min-height: 56px;
+  margin: 0;
+  padding: 10px 18px;
+  font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #17130a;
+  background: linear-gradient(180deg, #f0cf6a 0%, #d4a72c 60%, #a37f22 100%);
+  border: 1px solid #7a5a12;
+  border-radius: 8px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
+  cursor: pointer;
+}
+
+.level-scene[data-level="1"] .level-trial:active {
+  transform: scale(0.97);
+}
+
+/* Ranura de carretes: el rack vive en la mesa, centro-derecha. Reserva el
+ * alto del carrete completo + chapa del símbolo (≈104 px), sin recortes. */
+.level-scene[data-level="1"] .level-keys {
+  position: absolute;
+  left: 39%;
+  bottom: 48px;
+  z-index: 3;
+  display: flex;
+  max-width: 32%;
+  min-height: 104px;
+  min-width: 44px;
+  overflow: visible;
+}
+
+/* Ranura de estado: último renglón de la mesa, una línea grabada. */
+.level-scene[data-level="1"] .level-hud {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  z-index: 2;
+  width: max-content;
+  max-width: calc(100% - 32px);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-hud .wb-status {
+  min-height: 0;
+  padding: 4px 14px;
+  font-size: 14px;
+  color: #f2ede3;
+  color: rgba(242, 237, 227, 0.92);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(212, 167, 44, 0.65);
+  border-radius: 0;
+  box-shadow: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.level-scene[data-level="1"] .level-hud .active-key,
+.level-scene[data-level="1"] .level-hud .legend {
+  font-size: 14px;
+  color: #f2ede3;
+  color: rgba(242, 237, 227, 0.92);
+}
+
+/* Foco visible con contorno teal para los props accionables. */
+.level-scene[data-level="1"] .level-paper:focus-visible,
+.level-scene[data-level="1"] .level-bell:focus-visible,
+.level-scene[data-level="1"] .level-trial:focus-visible,
+.level-scene[data-level="1"] .level-scissors:focus-visible,
 .level-scene[data-level="1"] :focus-visible {
   outline: 2px solid #38c6b8;
   outline-offset: 3px;
 }
 
 @media (max-width: 900px) {
+  /* Placa arriba de la banda: 92% de ancho, aspecto 4/3. */
   .level-scene[data-level="1"] .level-plate {
-    width: 94%;
+    top: 8px;
+    width: 92%;
+    aspect-ratio: 4 / 3;
+    transform: translateX(-50%);
   }
 
+  /* El ladrón se apoya en la mesa entre la placa y los props. */
   .level-scene[data-level="1"] .level-thief {
-    height: 44%;
+    left: 50%;
+    right: auto;
+    top: 300px;
+    bottom: auto;
+    width: 110px;
+    height: auto;
+    transform: translateX(-50%);
+  }
+
+  /* Papeles chicos a la izquierda de la banda. */
+  .level-scene[data-level="1"] .level-paper img {
+    width: 60px;
+  }
+
+  .level-scene[data-level="1"] .level-paper-item:first-child .level-paper img {
+    width: 68px;
+  }
+
+  .level-scene[data-level="1"] .level-papers {
+    left: 8px;
+    bottom: 190px;
+    gap: 10px;
+  }
+
+  /* En 390 px los rótulos de campana y tijera se pisan: el prop se lee
+   * solo y el nombre queda en el aria-label. */
+  .level-scene[data-level="1"] .level-bell-name,
+  .level-scene[data-level="1"] .level-scissors-name {
+    display: none;
+  }
+
+  .level-scene[data-level="1"] .level-scissors {
+    left: 236px;
+    right: auto;
+    bottom: 190px;
+    width: 48px;
   }
 
   .level-scene[data-level="1"] .level-bell {
+    right: 8px;
+    bottom: 190px;
+    width: 52px;
+  }
+
+  /* Ensayo sobre la campana, misma columna derecha. */
+  .level-scene[data-level="1"] .level-trial {
+    right: 8px;
+    bottom: 262px;
+    min-width: 88px;
+    min-height: 44px;
+    padding: 10px 14px;
+  }
+
+  /* Rack centrado al pie; estado en una línea corta sobre él. */
+  .level-scene[data-level="1"] .level-keys {
+    left: 50%;
+    right: auto;
+    bottom: 8px;
+    max-width: calc(100% - 16px);
+    transform: translateX(-50%);
+  }
+
+  .level-scene[data-level="1"] .level-keys #scissors span {
     display: none;
+  }
+
+  .level-scene[data-level="1"] .level-keys #scissors {
+    min-width: 44px;
+  }
+
+  .level-scene[data-level="1"] .level-hud {
+    bottom: 116px;
+    max-width: calc(100% - 16px);
   }
 }
 
@@ -272,8 +488,8 @@
   }
 
   .level-scene[data-level="1"] .level-plate {
-    width: auto;
-    height: 82%;
+    width: 62%;
+    max-height: 72%;
     aspect-ratio: 900 / 560;
   }
 
@@ -282,5 +498,33 @@
     right: 4%;
     top: 12%;
     bottom: 16%;
+  }
+}
+
+/* --- Ambiente: roce de papeles con movimiento permitido. La campana es
+ * un control (solo se mueve al pulsarla) y el ladrón es decorado quieto;
+ * la tijera no se anima para no distraer. Los engranajes ya giran (60 s)
+ * desde `graphVisuals.css`; acá no se duplican. --- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes level1-touch {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(0.8deg);
+    }
+  }
+
+  .level-scene[data-level="1"] .level-paper {
+    animation: level1-touch 6s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="1"] .level-paper-item:nth-child(2) .level-paper {
+    animation-delay: -2s;
+  }
+
+  .level-scene[data-level="1"] .level-paper-item:nth-child(3) .level-paper {
+    animation-delay: -4s;
   }
 }

@@ -148,7 +148,7 @@ test('fondo, ladrón, campana y papeles con los assets finales; mesa y placa en 
   const view = setup();
   const images = findAll(view.element, (n) => n.tag === 'img');
   const sources = images.map((n) => n.getAttribute('src'));
-  assert.ok(sources.length >= 9, `la escena trae sus props, hay ${sources.length} imágenes`);
+  assert.ok(sources.length >= 10, `la escena trae sus props, hay ${sources.length} imágenes`);
   const finalSources = [
     'assets/levels/01/background.webp',
     'assets/levels/01/thief.webp',
@@ -156,6 +156,7 @@ test('fondo, ladrón, campana y papeles con los assets finales; mesa y placa en 
     'assets/levels/01/props/hint.webp',
     'assets/levels/01/props/log.webp',
     'assets/levels/01/props/bell.webp',
+    'assets/levels/01/props/scissors.webp',
   ];
   for (const src of finalSources) {
     assert.ok(sources.includes(src), `falta el asset final ${src}`);
@@ -170,11 +171,16 @@ test('fondo, ladrón, campana y papeles con los assets finales; mesa y placa en 
   const marked = findAll(view.element, (n) => n.getAttribute('data-status') === 'final');
   assert.equal(marked.length, finalSources.length, 'cada asset final declara su estado');
   for (const node of marked) {
-    assert.match(String(node.getAttribute('data-asset')), /^n1\./, 'el slot viene del manifiesto');
+    const slot = String(node.getAttribute('data-asset'));
+    assert.ok(/^n1\./.test(slot) || slot === 'levels.01.scissors', `el slot viene del manifiesto: ${slot}`);
     assert.ok(existsSync(join(ROOT, String(node.getAttribute('data-src')))), 'data-src apunta a un archivo real');
   }
   const thief = findOne(view.element, (n) => classes(n).includes('level-thief'), 'el ladrón');
-  assert.match(thief.getAttribute('alt'), /ladrón/);
+  assert.equal(thief.tag, 'img', 'el ladrón es decorado, no botón');
+  assert.equal(thief.getAttribute('alt'), '', 'decorado puro sin texto alternativo');
+  assert.equal(thief.getAttribute('aria-hidden'), 'true', 'fuera del lector');
+  assert.equal(thief.getAttribute('data-action'), null, 'el ladrón no emite acciones');
+  assert.ok(!findAll(view.element, (n) => n.tag === 'button').some((node) => findAll(node, (inner) => inner === thief).length > 0), 'ningún botón envuelve al ladrón');
   const papers = findOne(view.element, (n) => classes(n).includes('level-papers'), 'los papeles');
   assert.equal(papers.tag, 'ul');
   assert.deepEqual(
@@ -201,11 +207,64 @@ test('la escena no crea editor, cables, llaves ni lógica', () => {
   }
   assert.ok(!source.includes('.innerHTML'), 'datos por textContent, sin innerHTML');
   const view = setup();
-  assert.equal(findAll(view.element, (n) => n.tag === 'button').length, 0, 'sin botones: no hay acciones en la escena');
+  const buttons = findAll(view.element, (n) => n.tag === 'button');
+  assert.equal(buttons.length, 6, `los seis props diegéticos son botones, hay ${buttons.length}`);
+  assert.deepEqual(
+    buttons.map((node) => node.getAttribute('data-action')).sort(),
+    ['assault', 'contract', 'cut', 'hint', 'log', 'probe'],
+    'cada botón emite su intención con data-action',
+  );
+  for (const button of buttons) {
+    assert.equal(button.type, 'button', 'botones reales');
+    assert.ok(button.getAttribute('aria-label'), 'todo prop accionable tiene nombre accesible');
+  }
   assert.equal(findAll(view.element, (n) => n.tag === 'svg' || n.tag === 'canvas').length, 0, 'sin dibujo propio');
   assert.equal(findAll(view.element, (n) => n.getAttribute('tabindex') !== null).length, 0, 'sin focos propios');
   assert.equal(findAll(view.element, (n) => n.listenerTypes().length > 0).length, 0, 'sin listeners: la escena no decide nada');
   assert.equal(view.statusSlot, null, 'el nivel 1 no usa pila: el parent usa el slot de estado del shell');
+});
+
+test('props diegéticos: contrato, pista, bitácora, campana, ensayo y tijera', () => {
+  const view = setup();
+  const byAction = {};
+  for (const button of findAll(view.element, (n) => n.tag === 'button')) {
+    byAction[button.getAttribute('data-action')] = button;
+  }
+  assert.equal(byAction.contract.getAttribute('aria-label'), 'Abrir contrato');
+  assert.equal(byAction.hint.getAttribute('aria-label'), 'Pedir una pista');
+  assert.equal(byAction.log.getAttribute('aria-label'), 'Abrir la bitácora');
+  assert.equal(byAction.probe.getAttribute('aria-label'), 'Probar la llave en la cerradura');
+  assert.equal(byAction.assault.getAttribute('aria-label'), 'Ejecutar el ensayo');
+  assert.equal(byAction.cut.getAttribute('aria-label'), 'Cortar un cable');
+  assert.ok(classes(byAction.contract).includes('level-paper'), 'el contrato es el papel de la mesa');
+  assert.ok(classes(byAction.hint).includes('level-paper'), 'la pista es un papel de la mesa');
+  assert.ok(classes(byAction.log).includes('level-paper'), 'la bitácora es un papel de la mesa');
+  assert.ok(classes(byAction.probe).includes('level-bell'), 'la campana prueba');
+  assert.ok(classes(byAction.assault).includes('level-trial'), 'el ensayo es su placa de latón');
+  assert.ok(classes(byAction.cut).includes('level-scissors'), 'la tijera corta');
+  assert.equal(
+    findOne(byAction.assault, (n) => classes(n).includes('level-trial-name'), 'el rótulo').textContent,
+    'Ensayo',
+    'rótulo visible de taller',
+  );
+  for (const action of ['contract', 'hint', 'log', 'probe']) {
+    const images = findAll(byAction[action], (n) => n.tag === 'img');
+    assert.equal(images.length, 1, `el prop ${action} conserva su imagen`);
+  }
+  assert.deepEqual(
+    findAll(byAction.contract, (n) => classes(n).includes('level-paper-name')).map((n) => n.textContent),
+    ['Contrato'],
+    'el papel conserva su rótulo visible',
+  );
+  const thiefImages = findAll(view.element, (n) => n.tag === 'img' && classes(n).includes('level-thief'));
+  assert.equal(thiefImages.length, 1, 'el ladrón sigue en la escena como decorado');
+  assert.ok(!classes(thiefImages[0].parent).includes('level-trial'), 'el ensayo no envuelve al ladrón');
+  const scissorsImage = findAll(byAction.cut, (n) => n.tag === 'img')[0];
+  assert.equal(scissorsImage.getAttribute('src'), 'assets/levels/01/props/scissors.webp');
+  assert.equal(scissorsImage.getAttribute('data-asset'), 'levels.01.scissors');
+  assert.equal(scissorsImage.getAttribute('data-status'), 'final');
+  assert.ok(existsSync(join(ROOT, 'assets/levels/01/props/scissors.webp')), 'la tijera final existe en disco');
+  assert.deepEqual(view.actions, ['contract', 'hint', 'log', 'probe', 'assault', 'cut']);
 });
 
 test('vocabulario de taller, sin jerga académica', () => {
@@ -229,6 +288,25 @@ test('dispose saca la escena sin tocar el editor', () => {
   assert.equal(slot.children.length, 0, 'el dispose no vacía el slot: el parent desmonta el editor');
 });
 
+test('css diegético: props como botones, tijera de 64px y foco teal', () => {
+  for (const selector of ['.level-paper', '.level-bell', '.level-trial', '.level-scissors']) {
+    assert.ok(css.includes(selector), `el prop ${selector} tiene reglas propias`);
+  }
+  assert.ok(css.includes('width: 64px'), 'la tijera mide ~64 px junto a la libreta');
+  assert.ok(css.includes('.level-scissors.is-active'), 'el modo corte se ve en la tijera');
+  assert.ok(css.includes('background: transparent'), 'los props no tienen caja de botón');
+  assert.ok(css.includes('min-height: 44px'), 'área táctil ≥44 px');
+  assert.ok(css.includes('#38c6b8'), 'foco visible con contorno teal');
+  assert.ok(!css.includes('.level-thief-button'), 'el ladrón ya no es botón');
+  const thiefStart = css.indexOf('.level-scene[data-level="1"] .level-thief {');
+  assert.ok(thiefStart > 0, 'el ladrón decorativo tiene regla propia');
+  const thiefRule = css.slice(thiefStart, css.indexOf('}', thiefStart));
+  assert.ok(thiefRule.includes('pointer-events: none'), 'el decorado no tapa clics');
+  const paperStart = css.indexOf('.level-scene[data-level="1"] .level-paper {');
+  const paperRule = css.slice(paperStart, css.indexOf('}', paperStart));
+  assert.ok(!paperRule.includes('pointer-events: none'), 'el papel recibe eventos');
+});
+
 test('css con alcance, canvas integrado, foco y movimiento reducido', () => {
   assert.ok(css.includes('.level-scene[data-level="1"]'), 'alcance por nivel');
   assert.ok(!css.includes('.level-scene[data-level="2"]'), 'este archivo es solo del nivel 1');
@@ -244,4 +322,82 @@ test('css con alcance, canvas integrado, foco y movimiento reducido', () => {
     return value.endsWith('px') && Number.isFinite(px) && px < 12;
   });
   assert.deepEqual(tooSmall, [], 'ningún texto baja de 12 px');
+});
+
+test('la escena ocupa toda la ventana, sin recuadro', () => {
+  const rootAt = css.indexOf('.level-scene[data-level="1"] {');
+  assert.ok(rootAt === 0 || rootAt > 0, 'la raíz tiene regla propia');
+  const root = css.slice(rootAt, css.indexOf('}', rootAt));
+  assert.ok(root.includes('position: absolute'), 'la escena sale del flujo');
+  assert.ok(root.includes('inset: 0'), 'cubre todo el stage');
+  assert.ok(root.includes('height: 100%'), 'alto completo');
+  assert.ok(!root.includes('border-radius: 14px'), 'sin recuadro');
+  assert.ok(!root.includes('aspect-ratio: 16 / 9'), 'sin formato fijo');
+});
+
+test('la placa es la máquina al centro, con banda de mesa libre', () => {
+  const plateAt = css.indexOf('.level-scene[data-level="1"] .level-plate {');
+  assert.ok(plateAt > 0, 'la placa tiene regla propia');
+  const plate = css.slice(plateAt, css.indexOf('}', plateAt));
+  assert.ok(plate.includes('left: 50%'), 'centrada');
+  assert.ok(plate.includes('width: 62%'), 'máquina al centro, no fondo');
+  assert.ok(!plate.includes('width: 78%'), 'ya no llena la pantalla');
+});
+
+test('banda de mesa sin solape: papeles, rack, campana, ensayo y línea', () => {
+  const papersAt = css.indexOf('.level-scene[data-level="1"] .level-papers {');
+  const papers = css.slice(papersAt, css.indexOf('}', papersAt));
+  assert.ok(papers.includes('bottom: 48px'), 'papeles sobre la banda');
+  const keysAt = css.indexOf('.level-scene[data-level="1"] .level-keys {');
+  assert.ok(keysAt > 0, 'el rack tiene ranura propia');
+  const keys = css.slice(keysAt, css.indexOf('}', keysAt));
+  assert.ok(keys.includes('bottom: 48px'), 'rack en la misma banda');
+  assert.ok(keys.includes('left: 39%'), 'rack al centro-derecha, sin tapar papeles');
+  const bellAt = css.indexOf('.level-scene[data-level="1"] .level-bell {');
+  const bell = css.slice(bellAt, css.indexOf('}', bellAt));
+  assert.ok(bell.includes('right: 23%'), 'campana a la derecha, fuera de la placa');
+  assert.ok(bell.includes('bottom: 48px'), 'campana en la banda');
+  const trialAt = css.indexOf('.level-scene[data-level="1"] .level-trial {');
+  assert.ok(trialAt > 0, 'el ensayo tiene placa propia');
+  const trial = css.slice(trialAt, css.indexOf('}', trialAt));
+  assert.ok(trial.includes('right: 13.5%'), 'ensayo a la derecha junto a la campana');
+  assert.ok(trial.includes('min-width: 96px'), 'placa tocable');
+  assert.ok(trial.includes('min-height: 56px'), 'placa tocable en alto');
+  const hudAt = css.indexOf('.level-scene[data-level="1"] .level-hud {');
+  assert.ok(hudAt > 0, 'la línea de estado tiene ranura propia');
+  const hud = css.slice(hudAt, css.indexOf('}', hudAt));
+  assert.ok(hud.includes('bottom: 6px'), 'último renglón de la mesa');
+  assert.ok(hud.includes('translateX(-50%)'), 'línea centrada');
+});
+
+test('ambiente animado solo con movimiento permitido', () => {
+  const motionAt = css.indexOf('prefers-reduced-motion: no-preference');
+  assert.ok(motionAt > 0, 'las animaciones viven bajo no-preference');
+  const motion = css.slice(motionAt);
+  assert.ok(motion.includes('@keyframes level1-touch'), 'roce de papeles');
+  assert.ok(motion.includes('.level-paper'), 'los papeles tienen roce');
+  assert.ok(motion.includes('6s'), 'ritmo lento de ambiente');
+  assert.ok(motion.includes('infinite'), 'en bucle');
+  assert.ok(!motion.includes('sway'), 'la campana no tiene vaivén en loop');
+  assert.ok(!motion.includes('breathe'), 'el ladrón decorativo está quieto');
+  assert.ok(!motion.includes('scissors'), 'la tijera no se anima');
+});
+
+test('ranuras keys y hud expuestas para el parent', () => {
+  const view = setup();
+  assert.strictEqual(view.keysSlot.getAttribute('data-slot'), 'keys');
+  assert.ok(classes(view.keysSlot).includes('level-keys'));
+  assert.equal(view.keysSlot.children.length, 0, 'el parent monta palette y herramientas');
+  assert.strictEqual(view.hudSlot.getAttribute('data-slot'), 'hud');
+  assert.ok(classes(view.hudSlot).includes('level-hud'));
+  assert.equal(view.hudSlot.children.length, 0, 'el parent muda la línea de estado');
+});
+
+test('keysSlot reserva el carrete completo sin recortes', () => {
+  const at = css.indexOf('.level-scene[data-level="1"] .level-keys {');
+  assert.ok(at > 0, 'la ranura de carretes tiene regla propia');
+  const rule = css.slice(at, css.indexOf('}', at));
+  assert.ok(rule.includes('min-height: 104px'), 'alto de carrete + chapa del símbolo');
+  assert.ok(!rule.includes('overflow: hidden'), 'sin recorte vertical');
+  assert.ok(!rule.includes('overflow: clip'), 'sin recorte vertical');
 });

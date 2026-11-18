@@ -1,17 +1,22 @@
 // Escena visual del nivel 1 — Banco del Llano.
 //
-// Solo decorado: fondo, mesa, placa, ladrón, papeles y campana. No crea
-// editor, cables, llaves, juicio ni lógica; el parent monta el `#canvas`
-// real dentro de `editorSlot` y conserva probar, ensayo, máquinas,
-// jueces, datos y callbacks.
+// Fondo a pantalla completa, placa-máquina al centro y mesa con ranuras:
+// `editorSlot` (mecanismo real), `keysSlot` (carretes y herramientas que el
+// parent mueve desde el inventario) y `hudSlot` (línea de estado que el
+// parent mueve desde el shell). Cada prop accionable es un `<button
+// type="button">` real con `data-action` y `aria-label`; la escena no decide
+// nada: el parent engancha sus manejadores reales sobre esos `data-action`.
+// El ladrón es decorado (sin acción); el ensayo vive en su propia placa de
+// latón. No crea editor, cables, llaves, juicio ni lógica; el parent monta
+// el `#canvas` real dentro de `editorSlot`.
 //
-// Fondo, ladrón, papeles y campana son assets finales
-// (`assets/levels/01/*`, slots `n1.*` del manifiesto) y llevan
-// `data-asset` + `data-status="final"` + `data-src`. La mesa
-// (`mesa-madera.svg`) y la placa (`placa-textura.jpg`, `placa-marco.svg`)
-// siguen en `mockups/` porque no tienen slot final (ver
-// `docs/ASSET-INTEGRATION.md` §3). Si un asset falta, el navegador
-// muestra el marco igual: la escena no se bloquea.
+// Fondo, ladrón, papeles, campana y tijera son assets finales
+// (`assets/levels/01/*`, slots `n1.*` del manifiesto —la tijera declara su
+// ruta `levels.01.scissors`) y llevan `data-asset` + `data-status="final"` +
+// `data-src`. La mesa (`mesa-madera.svg`) y la placa (`placa-textura.jpg`,
+// `placa-marco.svg`) siguen en `mockups/` porque no tienen slot final (ver
+// `docs/ASSET-INTEGRATION.md` §3). Si un asset falta, el navegador muestra
+// el marco igual: la escena no se bloquea.
 
 const SPRITES = 'mockups/nivel-1-taller/assets/sprites';
 
@@ -51,17 +56,20 @@ function finalImage(src, asset, { alt = '', hidden = true } = {}) {
   return node;
 }
 
-function paperFigure(src, name, asset) {
+function paperProp(src, name, asset, action, label) {
   const item = document.createElement('li');
   item.className = 'level-paper-item';
-  const figure = document.createElement('figure');
-  figure.className = 'level-paper';
-  figure.append(finalImage(src, asset, { alt: '' }));
-  const name_ = document.createElement('figcaption');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'level-paper';
+  button.setAttribute('data-action', action);
+  button.setAttribute('aria-label', label);
+  button.append(finalImage(src, asset, { alt: '' }));
+  const name_ = document.createElement('span');
   name_.className = 'level-paper-name';
   name_.textContent = name;
-  figure.append(name_);
-  item.append(figure);
+  button.append(name_);
+  item.append(button);
   return item;
 }
 
@@ -91,10 +99,11 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   element.append(bench);
 
   const thief = finalImage('assets/levels/01/thief.webp', 'n1.thief', {
-    alt: 'El ladrón observa desde la penumbra',
-    hidden: false,
+    alt: '',
+    hidden: true,
   });
   thief.className = 'level-thief';
+  thief.setAttribute('aria-hidden', 'true');
   element.append(thief);
 
   const plate = document.createElement('div');
@@ -126,23 +135,62 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   const papers = document.createElement('ul');
   papers.className = 'level-papers';
   papers.setAttribute('aria-label', 'Papeles sobre la mesa');
-  papers.append(paperFigure('assets/levels/01/props/contract.webp', 'Contrato', 'n1.contract'));
-  papers.append(paperFigure('assets/levels/01/props/hint.webp', 'Pista', 'n1.hint'));
-  papers.append(paperFigure('assets/levels/01/props/log.webp', 'Bitácora', 'n1.log'));
+  papers.append(paperProp('assets/levels/01/props/contract.webp', 'Contrato', 'n1.contract', 'contract', 'Abrir contrato'));
+  papers.append(paperProp('assets/levels/01/props/hint.webp', 'Pista', 'n1.hint', 'hint', 'Pedir una pista'));
+  papers.append(paperProp('assets/levels/01/props/log.webp', 'Bitácora', 'n1.log', 'log', 'Abrir la bitácora'));
   element.append(papers);
 
-  const bell = document.createElement('figure');
+  const bell = document.createElement('button');
+  bell.type = 'button';
   bell.className = 'level-bell';
+  bell.setAttribute('data-action', 'probe');
+  bell.setAttribute('aria-label', 'Probar la llave en la cerradura');
   bell.append(finalImage('assets/levels/01/props/bell.webp', 'n1.bell', { alt: '' }));
-  const bellName = document.createElement('figcaption');
+  const bellName = document.createElement('span');
   bellName.className = 'level-bell-name';
   bellName.textContent = 'Campana de alarma';
   bell.append(bellName);
   element.append(bell);
 
+  const scissors = document.createElement('button');
+  scissors.type = 'button';
+  scissors.className = 'level-scissors';
+  scissors.setAttribute('data-action', 'cut');
+  scissors.setAttribute('aria-label', 'Cortar un cable');
+  scissors.append(finalImage('assets/levels/01/props/scissors.webp', 'levels.01.scissors', { alt: '' }));
+  const scissorsName = document.createElement('span');
+  scissorsName.className = 'level-scissors-name';
+  scissorsName.textContent = 'Tijera';
+  scissors.append(scissorsName);
+  element.append(scissors);
+
+  const trial = document.createElement('button');
+  trial.type = 'button';
+  trial.className = 'level-trial';
+  trial.setAttribute('data-action', 'assault');
+  trial.setAttribute('aria-label', phase === 'build' ? 'Ejecutar el asalto' : 'Ejecutar el ensayo');
+  const trialName = document.createElement('span');
+  trialName.className = 'level-trial-name';
+  trialName.textContent = phase === 'build' ? 'Asalto' : 'Ensayo';
+  trial.append(trialName);
+  element.append(trial);
+
+  const keysSlot = document.createElement('div');
+  keysSlot.className = 'level-keys';
+  keysSlot.setAttribute('data-slot', 'keys');
+  keysSlot.setAttribute('role', 'group');
+  keysSlot.setAttribute('aria-label', 'Carretes y herramientas');
+  element.append(keysSlot);
+
+  const hudSlot = document.createElement('div');
+  hudSlot.className = 'level-hud';
+  hudSlot.setAttribute('data-slot', 'hud');
+  hudSlot.setAttribute('aria-label', 'Marcha del mecanismo');
+  element.append(hudSlot);
+
   function dispose() {
     element.remove();
   }
 
-  return { element, editorSlot, statusSlot: null, dispose };
+  return { element, editorSlot, statusSlot: null, keysSlot, hudSlot, actions: ['contract', 'hint', 'log', 'probe', 'assault', 'cut'], dispose };
 }
