@@ -309,8 +309,8 @@
         "kind": "image",
         "priority": "P0",
         "status": "available",
-        "license": "Proyecto — asset original",
-        "source": "Generado con Pillow; 128×40, 2× de la base de 64×20"
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 128×40"
       },
       "chip": {
         "final": "assets/levels/04/chip.webp",
@@ -318,8 +318,8 @@
         "kind": "image",
         "priority": "P0",
         "status": "available",
-        "license": "Proyecto — asset original",
-        "source": "Generado con Pillow; 112×64, 2× de la ficha de 56×32"
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 112×64"
       },
       "selectors": {
         "final": "assets/levels/04/selectors.svg",
