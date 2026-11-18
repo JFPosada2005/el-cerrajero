@@ -509,6 +509,13 @@ function animateCableArc(image, geometry, onDone) {
   requestAnimationFrame(frame);
 }
 
+function placeLabel(label) {
+  if (label.startsWith('el ')) {
+    return `al ${label.slice(3)}`;
+  }
+  return `a ${label}`;
+}
+
 function buildCableTag(key, midpoint) {
   const tag = svgElement('g', {
     class: 'cable-tag',
@@ -537,7 +544,7 @@ function createCable({ from, to, key, bow, animate = false }) {
     'data-to': to,
     role: 'button',
     tabindex: '0',
-    'aria-label': `Cable de la llave ${key}: ${PARTS[from].label} a ${PARTS[to].label}`,
+    'aria-label': `Cable de la llave ${key}: ${PARTS[from].label} ${placeLabel(PARTS[to].label)}`,
   });
   cable.append(svgElement('path', { class: 'cable-hit', d: geometry.path, fill: 'none' }));
   const arc = svgElement('g', { class: 'cable-arc', transform: geometry.wrapperTransform });
@@ -729,9 +736,18 @@ function cutCable(element, event = null) {
   window.setTimeout(() => toolCursor.classList.remove('is-snapping'), 260);
   sounds.snip();
   showToast('El cable salta y queda cortado.');
+  const hadFocus = document.activeElement === element;
   window.setTimeout(() => {
     element.remove();
     updateMissingSocket();
+    if (hadFocus === true) {
+      const remaining = wireGroup.querySelector('.cable');
+      if (remaining !== null) {
+        remaining.focus();
+      } else {
+        wires.focus();
+      }
+    }
   }, 300);
 }
 

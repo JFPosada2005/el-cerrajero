@@ -1384,7 +1384,7 @@ body[data-tool="gear"] .tool-cursor {
 .dossier {
   position: relative;
   z-index: 1;
-  width: min(540px, 92vw);
+  width: min(540px, calc(100vw - 44px));
   border-radius: 8px;
   animation: dossier-in 220ms var(--ease-out) both;
 }
