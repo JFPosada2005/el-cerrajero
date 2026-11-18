@@ -1,6 +1,6 @@
 # Plan de assets P1 — remaster
 
-**Estado:** P1-1 vectorial, P1-2 fondos y papel ejecutados en `feat/remaster-assets-p1`. Quedan los SFX P1 y los retratos del ladrón.
+**Estado:** P1-1, P1-2 y P1-3 ejecutados en `feat/remaster-assets-p1`. Queda la fuente del sonido de éxito, los retratos del ladrón y la revisión de Felipe.
 **Rama:** `feat/remaster-assets-p1`, creada desde `feat/remaster-assets` (P0). Cuando el PR de P0 se mergee, rebasar sobre `feat/remaster-integration`.
 **Alcance:** `assets/`, `docs/` y `CREDITS.md`. No se toca `src/`, `src/game`, `tests/`, `index.html` ni `styles.css`.
 **Contrato:** [`docs/ASSET-MANIFEST.md`](ASSET-MANIFEST.md) y [`assets/manifest.json`](../assets/manifest.json).
@@ -103,3 +103,12 @@ Freesound (CC0) o Pixabay (Pixabay License). El agente recorta, normaliza, convi
 - `assets/manifest.json`: 53 rutas `available`.
 - `CREDITS.md` actualizado.
 - Pendiente: 6 SFX P1 y retratos del ladrón.
+
+### Checkpoint 2026-11-18 — P1-3 SFX
+
+- Seis SFX P1 exportados a `assets/audio/sfx/`.
+- success 1,24 s (15 KB), spring 0,65 s (9 KB), chip 0,24 s (7 KB), tape 1,00 s (11 KB), pin 0,27 s (6 KB), steps 1,08 s (6 KB). Total 53 KB.
+- `assets/manifest.json`: 59 rutas `available`.
+- Licencias: cinco de Freesound; `steps` es CC BY 4.0 y requiere atribución. `success` queda pendiente de fuente.
+- El resorte es un boing de jaw harp; si Felipe lo siente demasiado cómico, se reemplaza por un resorte metálico.
+- Pendiente: retratos del ladrón y revisión de Felipe.

@@ -80,5 +80,11 @@ Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del
 | Campana | `assets/audio/sfx/bell.ogg` | [rgjpb — Freesound 686265](https://freesound.org/s/686265/) | CC0 1.0 |
 | Papel | `assets/audio/sfx/paper.ogg` | [Nicolas4677 — Freesound 446631](https://freesound.org/s/446631/) | CC0 1.0 |
 | Error | `assets/audio/sfx/error.ogg` | [Lesiakower — Pixabay 437420](https://pixabay.com/sound-effects/error-mistake-sound-effect-incorrect-answer-437420/) | Pixabay Content License |
+| Éxito | `assets/audio/sfx/success.ogg` | Archivo del owner; fuente pendiente de confirmar | Pendiente |
+| Resorte | `assets/audio/sfx/spring.ogg` | [magnuswaker — Freesound 540790](https://freesound.org/s/540790/) | CC0 1.0 |
+| Ficha | `assets/audio/sfx/chip.ogg` | [tris6970 — Freesound 350496](https://freesound.org/s/350496/) | CC0 1.0 |
+| Cinta | `assets/audio/sfx/tape.ogg` | [quatricise — Freesound 790841](https://freesound.org/s/790841/) | CC0 1.0 |
+| Púa | `assets/audio/sfx/pin.ogg` | [Godowan — Freesound 235280](https://freesound.org/s/235280/) | CC0 1.0 |
+| Pasos | `assets/audio/sfx/steps.ogg` | [Hawkeye_Sprout — Freesound 469080](https://freesound.org/s/469080/) | CC BY 4.0 — atribución requerida |
 
-Los SFX se recortaron, normalizaron y convirtieron a OGG Vorbis mono 44,1 kHz. El engranaje exige atribución por CC BY 4.0: «Complex Mechanism Short» de Sabacky (Pavel Sabacky), Freesound 807842.
+Los SFX se recortaron, normalizaron y convirtieron a OGG Vorbis mono 44,1 kHz. El engranaje exige atribución por CC BY 4.0: «Complex Mechanism Short» de Sabacky (Pavel Sabacky), Freesound 807842. Los pasos también: «Female steps» de Hawkeye_Sprout, Freesound 469080.
