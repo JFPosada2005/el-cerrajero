@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="64" viewBox="0 0 160 64" role="img" aria-label="Indicador de piso">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#8A651F"/>
+      <stop offset="0.5" stop-color="#D4A72C"/>
+      <stop offset="1" stop-color="#8A651F"/>
+    </linearGradient>
+    <linearGradient id="glass" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#1B2430"/>
+      <stop offset="1" stop-color="#0B0F14"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="156" height="60" rx="10" fill="#141B24" stroke="#2A3646" stroke-width="2"/>
+  <rect x="8" y="8" width="144" height="48" rx="7" fill="url(#glass)" stroke="url(#brass)" stroke-width="2"/>
+  <path d="M12 12h136" stroke="#F2EDE3" stroke-width="1" opacity="0.06"/>
+  <g stroke="#8A651F" stroke-width="2" stroke-linecap="round" opacity="0.85">
+    <path d="M20 45v5M40 45v5M60 45v5M80 45v5M100 45v5M120 45v5M140 45v5"/>
+    <path d="M20 52h120" stroke-width="1.5" opacity="0.5"/>
+  </g>
+  <g fill="none" stroke="#D4A72C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 27l-5 5 5 5"/>
+    <path d="M142 27l5 5-5 5"/>
+  </g>
+</svg>

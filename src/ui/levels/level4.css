@@ -1,0 +1,1003 @@
+/* Escena del nivel 4 — Teatro Municipal (tramoya del montacargas). */
+/* Alcance estricto: todo selector empieza con .level-scene[data-level="4"]. */
+/* Tipografías del mockup: Cinzel (títulos), Oswald (interfaz), Special Elite (papeles). */
+/* Inmersiva (§9): la escena ocupa todo el stage (position absolute, inset 0, */
+/* sin marcos); la placa va centrada y más grande sobre la mesa. Los props */
+/* (papeles, cuerda, palanca, tijera) son botones reales sin caja, con foco */
+/* teal y área táctil ≥44 px; el parent engancha los handlers sobre sus */
+/* `data-action`. Contención: la escena nunca desplaza la página; el desborde */
+/* vive adentro del editor y de la pila. Referencia: level5.css (counting-editor). */
+
+.level-scene[data-level="4"] {
+  --l4-velvet: #4a0f1e;
+  --l4-velvet-deep: #2a0812;
+  --l4-velvet-fold: #6b1a2c;
+  --l4-brass: #d4a72c;
+  --l4-brass-2: #f0cf6a;
+  --l4-brass-dark: #7a5a12;
+  --l4-iron: #232a33;
+  --l4-paper: #f2ede3;
+  --l4-ink: #17130a;
+  --l4-teal: #38c6b8;
+  --l4-wood: #2b1d16;
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  min-width: 0;
+  gap: 0;
+  padding: 12px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(120% 90% at 20% 0%, #5c1425 0%, var(--l4-velvet) 45%, var(--l4-velvet-deep) 100%);
+  color: var(--l4-paper);
+  font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Fondo final del teatro (n4.background): foto con oscurecimiento para el
+   contraste del tablero; los pliegues y el terciopelo de la raíz quedan
+   como fallback si el webp falta. */
+.level-scene[data-level="4"] .l4-backdrop {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.55)),
+    url("../../../assets/levels/04/background.webp"),
+    repeating-linear-gradient(
+      90deg,
+      rgb(0 0 0 / 0.22) 0 26px,
+      rgb(255 255 255 / 0.04) 26px 40px,
+      rgb(0 0 0 / 0.22) 40px 78px
+    );
+  background-size: auto, cover, auto;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.level-scene[data-level="4"] .l4-rail-top {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 12px;
+  background: linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 55%, var(--l4-brass-dark) 100%);
+}
+
+.level-scene[data-level="4"] .l4-curtain {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 72px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--l4-velvet-fold) 0 12px,
+      var(--l4-velvet-deep) 12px 24px
+    );
+  border-right: 2px solid var(--l4-brass-dark);
+}
+
+.level-scene[data-level="4"] .l4-curtain.is-left {
+  left: 0;
+}
+
+.level-scene[data-level="4"] .l4-curtain.is-right {
+  right: 0;
+  transform: scaleX(-1);
+}
+
+/* Luz cálida desde arriba a la izquierda + filo teal a la derecha (mockup). */
+.level-scene[data-level="4"] .l4-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 6%, rgb(240 207 106 / 0.16) 0%, transparent 28%),
+    radial-gradient(circle at 82% 72%, rgb(56 198 184 / 0.08) 0%, transparent 34%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgb(0 0 0 / 0.4) 100%);
+}
+
+/* Mesa de trabajo de nogal al pie de la escena (CSS estructural). */
+.level-scene[data-level="4"] .l4-bench {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 22%;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgb(255 255 255 / 0.05) 0%, transparent 24%),
+    repeating-linear-gradient(90deg, rgb(255 255 255 / 0.018) 0 1px, transparent 1px 8px),
+    linear-gradient(180deg, #241811 0%, #150e0b 62%, #0d0907 100%);
+  border-top: 1px solid rgb(122 90 18 / 0.5);
+}
+
+/* Polvo de escenario: motas tenues que suben en la luz. Solo ambiente. */
+.level-scene[data-level="4"] .l4-dust {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    radial-gradient(circle, rgb(240 207 106 / 0.8) 0 1px, transparent 1.5px),
+    radial-gradient(circle, rgb(242 237 227 / 0.6) 0 1px, transparent 1.5px);
+  background-size: 180px 160px, 260px 220px;
+  background-position: 12% 78%, 68% 62%;
+}
+
+/* Contenedor de tramoya: columna contenida, el cuerpo crece. */
+.level-scene[data-level="4"] .l4-rig {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* Cuerpo: placa del mecanismo (≤65%) + tramoya lateral, sin salir del rig. */
+.level-scene[data-level="4"] .l4-body {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 65%) minmax(0, 1fr);
+  flex: 1 1 auto;
+  gap: 12px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.level-scene[data-level="4"] .l4-plate-wrap {
+  display: flex;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+/* La placa es el centro de la composición, más grande sobre la mesa. */
+.level-scene[data-level="4"] .l4-plate {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 14px 18px 12px;
+  border: 3px solid var(--l4-brass);
+  border-radius: 12px;
+  outline: 1px solid var(--l4-brass-dark);
+  outline-offset: 4px;
+  background: linear-gradient(180deg, #2b2118 0%, #1b150e 100%);
+  box-shadow: 0 24px 60px rgb(0 0 0 / 0.45);
+}
+
+.level-scene[data-level="4"] .l4-rivets {
+  position: absolute;
+  inset: 8px;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-rivet {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #fff6cf 0%, var(--l4-brass) 40%, #3a2a12 100%);
+  box-shadow: inset 0 0 0 1px rgb(0 0 0 / 0.55);
+}
+
+/* Cabecera: títulos centrados de la placa. */
+.level-scene[data-level="4"] .l4-head {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+}
+
+.level-scene[data-level="4"] .l4-titles {
+  flex: 1 1 auto;
+  min-width: 0;
+  text-align: center;
+}
+
+.level-scene[data-level="4"] .l4-kicker {
+  margin: 0;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 24px;
+  line-height: 1.2;
+  color: var(--l4-brass-2);
+}
+
+.level-scene[data-level="4"] .l4-serial {
+  margin: 2px 0 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l4-paper);
+  opacity: 0.8;
+}
+
+/* El editor crece y su desborde vive adentro, nunca en la página. */
+.level-scene[data-level="4"] .l4-editor-slot {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  border: 2px dashed var(--l4-brass-dark);
+  border-radius: 8px;
+  background: rgb(0 0 0 / 0.25);
+}
+
+/* El #canvas real escala por alto, centrado y sin deformar (nunca estirado). */
+.level-scene[data-level="4"] .l4-editor-slot #canvas {
+  display: block;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  min-height: 0;
+  margin-inline: auto;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Leyenda de una sola línea: título + palancas; el texto completo vive en el dock. */
+.level-scene[data-level="4"] .l4-legend {
+  flex: 0 0 auto;
+  min-width: 0;
+  overflow: hidden;
+  margin: 2px 2px 0;
+  padding: 6px 12px;
+  border-radius: 8px;
+  background: var(--l4-paper);
+  color: var(--l4-ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.level-scene[data-level="4"] .l4-legend-title {
+  display: inline;
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l4-brass-dark);
+}
+
+.level-scene[data-level="4"] .l4-legend-keys {
+  display: inline;
+  margin: 0 0 0 8px;
+  font-size: 14px;
+}
+
+/* Estado sin franja: línea grabada sobre la placa, 14 px y contraste AA. */
+.level-scene[data-level="4"] .l4-seal {
+  flex: 0 0 auto;
+  margin: 0;
+  padding-top: 8px;
+  border-top: 1px solid rgb(212 167 44 / 0.45);
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  text-align: center;
+  color: var(--l4-brass-2);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.7);
+}
+
+/* Tramoya lateral: botonera PROBAR/ENSAYO en fila + pila real. Entra sin
+   scroll a 1440×900 y 1920×1080: nada de overflow con barra. */
+.level-scene[data-level="4"] .l4-column {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+  overflow: visible;
+  padding: 10px;
+  border: 1px solid var(--l4-brass-dark);
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.35);
+}
+
+/* Botonera de la tramoya: cuerda y palanca lado a lado, mismo diseño. */
+.level-scene[data-level="4"] .l4-lever-row {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.level-scene[data-level="4"] .l4-lever-row .l4-probe,
+.level-scene[data-level="4"] .l4-lever-row .l4-assault {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+/* Props accionables: botones reales sin caja (fondo transparente, sin borde),
+   foco teal y área táctil ≥44 px. El parent engancha los handlers. */
+.level-scene[data-level="4"] .l4-paper,
+.level-scene[data-level="4"] .l4-cut,
+.level-scene[data-level="4"] .l4-probe,
+.level-scene[data-level="4"] .l4-assault {
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Cuerda de prueba: se tira para probar la llave. */
+.level-scene[data-level="4"] .l4-probe {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  transform-origin: 50% 0;
+}
+
+.level-scene[data-level="4"] .l4-probe-cord {
+  width: 6px;
+  height: 64px;
+  border-radius: 3px;
+  background: repeating-linear-gradient(180deg, #c9a86a 0 4px, #6b5320 4px 8px);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-probe-grip {
+  width: 52px;
+  height: 26px;
+  border-radius: 13px;
+  background: linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 55%, var(--l4-brass-dark) 100%);
+  box-shadow: 0 3px 10px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-probe-tag {
+  margin-top: 6px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--l4-brass-2);
+  pointer-events: none;
+}
+
+/* Palanca grande del escenario: el ensayo. En reposo se ve arriba; con el
+   foco o al activarla se ve abajo. Sin JS: las dos láminas se alternan. */
+.level-scene[data-level="4"] .l4-assault {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 6px 10px;
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.25);
+}
+
+.level-scene[data-level="4"] .l4-assault-up,
+.level-scene[data-level="4"] .l4-assault-down {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: 120px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-assault-down {
+  display: none;
+}
+
+.level-scene[data-level="4"] .l4-assault:hover .l4-assault-up,
+.level-scene[data-level="4"] .l4-assault:active .l4-assault-up,
+.level-scene[data-level="4"] .l4-assault:focus-visible .l4-assault-up {
+  display: none;
+}
+
+.level-scene[data-level="4"] .l4-assault:hover .l4-assault-down,
+.level-scene[data-level="4"] .l4-assault:active .l4-assault-down,
+.level-scene[data-level="4"] .l4-assault:focus-visible .l4-assault-down {
+  display: block;
+}
+
+.level-scene[data-level="4"] .l4-assault-tag {
+  font-size: 14px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--l4-paper);
+  pointer-events: none;
+}
+
+/* Selectores finales (n4.selectors): la placa viste el bloque y las seis
+   posiciones viven encima, en dos grupos lado a lado dentro de la columna. */
+.level-scene[data-level="4"] .l4-selectors {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+  padding: 10px;
+  border: 1px solid var(--l4-brass-dark);
+  border-radius: 12px;
+  background: rgb(0 0 0 / 0.35);
+}
+
+.level-scene[data-level="4"] .l4-dial-plate {
+  height: 56px;
+  border-radius: 8px;
+  background: url("../../../assets/levels/04/selectors.svg") center / contain no-repeat;
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-dial-group {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+/* Placa de la pila en la banda: los dos grupos lado a lado. */
+.level-scene[data-level="4"] .l4-dial-groups {
+  display: flex;
+  gap: 12px;
+  min-width: 0;
+}
+
+/* Rótulo visible del grupo: vocabulario de taller, 12 px y contraste AA. */
+.level-scene[data-level="4"] .l4-dial-title {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--l4-brass-2);
+  text-shadow: 0 1px 0 rgb(0 0 0 / 0.7);
+}
+
+.level-scene[data-level="4"] .l4-dial-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+/* Cada dial se ve como control: borde de latón, fondo oscuro, pointer. */
+.level-scene[data-level="4"] .l4-dial {
+  display: flex;
+  flex: 1 1 0;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 8px 4px 6px;
+  border: 1px solid var(--l4-brass);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #1c1410 0%, #100c09 100%);
+  box-shadow: 0 2px 0 rgb(0 0 0 / 0.6), inset 0 1px 0 rgb(255 255 255 / 0.06);
+  cursor: pointer;
+  font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
+}
+
+.level-scene[data-level="4"] .l4-dial:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 0 10px rgb(240 207 106 / 0.35), 0 2px 0 rgb(0 0 0 / 0.6);
+}
+
+/* Luz apagada: punto de latón dormido. */
+.level-scene[data-level="4"] .l4-dial-light {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #5a4a22 0%, #2a2113 100%);
+  box-shadow: inset 0 1px 2px rgb(0 0 0 / 0.8);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-dial-name {
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--l4-paper);
+  pointer-events: none;
+}
+
+/* `is-active` y `aria-pressed` los pone el parent al enganchar
+   `data-stack-*`: placa hundida, borde dorado y luz encendida. */
+.level-scene[data-level="4"] .l4-dial.is-active {
+  border-color: var(--l4-brass-2);
+  background: linear-gradient(180deg, #0d0a07 0%, #151009 100%);
+  box-shadow: inset 0 3px 8px rgb(0 0 0 / 0.75), inset 0 -1px 0 rgb(240 207 106 / 0.25);
+}
+
+.level-scene[data-level="4"] .l4-dial.is-active .l4-dial-light {
+  background: radial-gradient(circle at 35% 30%, #fff6cf 0%, var(--l4-brass-2) 45%, var(--l4-brass-dark) 100%);
+  box-shadow: 0 0 8px rgb(240 207 106 / 0.9);
+}
+
+.level-scene[data-level="4"] .l4-dial.is-active .l4-dial-name {
+  color: var(--l4-brass-2);
+}
+
+/* Hueco donde el parent monta la pila real (#stack-panel). */
+.level-scene[data-level="4"] .l4-status-slot {
+  flex: 0 0 auto;
+  min-height: 44px;
+  min-width: 0;
+  border: 1px dashed var(--l4-brass-dark);
+  border-radius: 8px;
+}
+
+/* La pila real viste los colores de la tramoya, con techo propio. */
+.level-scene[data-level="4"] .l4-status-slot .stack-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px;
+}
+
+.level-scene[data-level="4"] .l4-status-slot .stack-block h2 {
+  margin: 0;
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--l4-brass-2);
+}
+
+.level-scene[data-level="4"] .l4-status-slot #stack-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.level-scene[data-level="4"] .l4-status-slot .stack-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-height: 200px;
+  overflow: auto;
+}
+
+.level-scene[data-level="4"] .l4-status-slot .stack-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 16px;
+  border-radius: 999px;
+  background:
+    url("../../../assets/levels/04/chip.webp"),
+    linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 60%, var(--l4-brass-dark) 100%);
+  background-size: contain, auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
+  font-size: 14px;
+  color: var(--l4-ink);
+}
+
+.level-scene[data-level="4"] .l4-status-slot .stack-chip.is-base {
+  border-radius: 4px;
+  background:
+    url("../../../assets/levels/04/stack-base.webp"),
+    linear-gradient(180deg, #3a434e 0%, #1a1f26 100%);
+  background-size: contain, auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
+  border: 1px solid var(--l4-brass-dark);
+  color: var(--l4-paper);
+}
+
+.level-scene[data-level="4"] .l4-status-slot .stack-empty {
+  margin: 0;
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 14px;
+  text-align: center;
+  color: var(--l4-paper);
+  opacity: 0.6;
+}
+
+/* Banda de mesa: papeles y tijera a la izquierda, carretes y herramientas
+   del parent al centro-derecha, estado del parent como último renglón.
+   En flujo normal dentro del grid: nada se superpone. */
+.level-scene[data-level="4"] .l4-dock {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
+  padding: 8px 12px 6px;
+  background: linear-gradient(180deg, transparent 0%, rgb(0 0 0 / 0.35) 100%);
+  border-top: 1px solid rgb(122 90 18 / 0.5);
+}
+
+.level-scene[data-level="4"] .l4-dock-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  min-width: 0;
+}
+
+/* Hueco donde el parent monta carretes y herramientas (#palette, tijera del
+   shell si hiciera falta, resorte y selectores de pila). Alto de carrete +
+   chapa con letra (≈104 px) y sin recorte vertical: el símbolo A/B queda
+   siempre visible. */
+.level-scene[data-level="4"] .l4-keys-slot {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 104px;
+}
+
+/* Hueco donde el parent mueve la línea de estado: último renglón, 14 px. */
+.level-scene[data-level="4"] .l4-hud-slot {
+  min-width: 0;
+  font-size: 14px;
+  text-align: center;
+  color: var(--l4-paper);
+  text-shadow: 0 1px 4px rgb(0 0 0 / 0.9);
+}
+
+.level-scene[data-level="4"] .l4-hud-slot:empty {
+  display: none;
+}
+
+/* Papeles sobre la mesa: contrato, pista y bitácora en marfil CSS. */
+.level-scene[data-level="4"] .l4-papers {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-scene[data-level="4"] .l4-paper-item {
+  margin: 0;
+  padding: 0;
+}
+
+.level-scene[data-level="4"] .l4-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Papeles sobre la mesa: contrato, pista y bitácora con los assets finales
+   del taller. El modal abierto sigue con papel CSS del parent. */
+.level-scene[data-level="4"] .l4-paper-sheet {
+  display: block;
+  width: 84px;
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 6px 16px rgb(0 0 0 / 0.5);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-paper-item:nth-child(1) .l4-paper-sheet {
+  transform: rotate(-3deg);
+}
+
+.level-scene[data-level="4"] .l4-paper-item:nth-child(2) .l4-paper-sheet {
+  width: 76px;
+  transform: rotate(2deg);
+}
+
+.level-scene[data-level="4"] .l4-paper-item:nth-child(3) .l4-paper-sheet {
+  width: 80px;
+  transform: rotate(-1deg);
+}
+
+.level-scene[data-level="4"] .l4-paper-name {
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--l4-brass-2);
+  text-shadow: 0 1px 4px rgb(0 0 0 / 0.9);
+  pointer-events: none;
+}
+
+/* Tijera sobre la mesa: el corte. `is-active` y `aria-pressed` los pone
+   `toggleScissors` del parent sobre `[data-action="cut"]`. */
+.level-scene[data-level="4"] .l4-cut {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+}
+
+.level-scene[data-level="4"] .l4-cut-glyph {
+  display: block;
+  font-size: 52px;
+  line-height: 1;
+  color: #cfd6dd;
+  text-shadow: 0 2px 0 rgb(0 0 0 / 0.6), 0 0 12px rgb(56 198 184 / 0.25);
+  transform: rotate(-18deg);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-cut-name {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--l4-brass-2);
+  text-shadow: 0 1px 4px rgb(0 0 0 / 0.9);
+  pointer-events: none;
+}
+
+.level-scene[data-level="4"] .l4-cut.is-active {
+  outline: 2px solid var(--l4-brass);
+  outline-offset: 3px;
+  border-radius: 8px;
+  filter: drop-shadow(0 0 8px rgb(212 167 44 / 0.8));
+}
+
+/* Foco visible teal para los props accionables y lo que monte el parent. */
+.level-scene[data-level="4"] .l4-paper:focus-visible,
+.level-scene[data-level="4"] .l4-cut:focus-visible,
+.level-scene[data-level="4"] .l4-probe:focus-visible,
+.level-scene[data-level="4"] .l4-assault:focus-visible,
+.level-scene[data-level="4"] .l4-dial:focus-visible,
+.level-scene[data-level="4"] :focus-visible {
+  outline: 2px solid var(--l4-teal);
+  outline-offset: 3px;
+}
+
+/* En celular la escena también queda contenida al stage: el stage móvil ya
+   tiene su propio alto y scroll; la placa scrollea adentro y la leyenda se
+   esconde (su texto vive en el dock y en el title). Sin scroll horizontal. */
+@media (max-width: 700px) {
+  .level-scene[data-level="4"] {
+    height: 100%;
+    max-height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    padding: 10px;
+  }
+
+  .level-scene[data-level="4"] .l4-rig {
+    overflow: hidden;
+  }
+
+  .level-scene[data-level="4"] .l4-body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow: auto;
+  }
+
+  .level-scene[data-level="4"] .l4-plate-wrap {
+    overflow: visible;
+  }
+
+  .level-scene[data-level="4"] .l4-plate {
+    overflow: visible;
+  }
+
+  .level-scene[data-level="4"] .l4-kicker {
+    font-size: 18px;
+  }
+
+  .level-scene[data-level="4"] .l4-dial-plate {
+    height: 40px;
+  }
+
+  .level-scene[data-level="4"] .l4-dial-groups {
+    flex-direction: column;
+  }
+
+  .level-scene[data-level="4"] .l4-dial {
+    flex: 1 1 90px;
+  }
+
+  .level-scene[data-level="4"] .l4-legend {
+    display: none;
+  }
+
+  .level-scene[data-level="4"] .l4-editor-slot {
+    flex: 0 0 auto;
+    min-height: 240px;
+    overflow: auto;
+  }
+
+  .level-scene[data-level="4"] .l4-editor-slot #canvas {
+    width: 100%;
+    height: auto;
+    max-height: none;
+  }
+
+  .level-scene[data-level="4"] .l4-column {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    overflow: visible;
+  }
+
+  .level-scene[data-level="4"] .l4-lever-row {
+    flex: 1 1 220px;
+    flex-wrap: wrap;
+  }
+
+  .level-scene[data-level="4"] .l4-probe {
+    flex: 0 1 120px;
+  }
+
+  .level-scene[data-level="4"] .l4-assault {
+    flex: 1 1 160px;
+  }
+
+  .level-scene[data-level="4"] .l4-assault-up,
+  .level-scene[data-level="4"] .l4-assault-down {
+    height: 84px;
+  }
+
+  .level-scene[data-level="4"] .l4-selectors {
+    flex: 1 1 100%;
+  }
+
+  .level-scene[data-level="4"] .l4-status-slot {
+    flex: 1 1 160px;
+  }
+
+  .level-scene[data-level="4"] .l4-papers {
+    gap: 8px;
+  }
+
+  .level-scene[data-level="4"] .l4-paper-sheet {
+    width: 56px;
+    height: auto;
+  }
+
+  .level-scene[data-level="4"] .l4-paper-item:nth-child(2) .l4-paper-sheet,
+  .level-scene[data-level="4"] .l4-paper-item:nth-child(3) .l4-paper-sheet {
+    width: 52px;
+    height: auto;
+  }
+
+  .level-scene[data-level="4"] .l4-dock-row {
+    flex-wrap: wrap;
+  }
+
+  .level-scene[data-level="4"] .l4-keys-slot {
+    flex: 1 1 100%;
+    justify-content: flex-start;
+  }
+
+  .level-scene[data-level="4"] .l4-cut-glyph {
+    font-size: 40px;
+  }
+
+  .wb-scene.is-immersive .level-scene[data-level="4"] {
+    padding-top: 72px;
+  }
+}
+
+/* En inmersivo el título ya vive en el header del shell: el encabezado
+   interno se retira y la escena empieza debajo (~84 px) sin tocar el pie. */
+.wb-scene.is-immersive .level-scene[data-level="4"] {
+  padding-top: 84px;
+}
+
+.wb-scene.is-immersive .level-scene[data-level="4"] .l4-head {
+  display: none;
+}
+
+/* --- Ambiente: la tramoya respira. Solo con movimiento permitido; el
+   tablero manda y nada distrae: vaivén mínimo, brillo lento y polvo. --- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes l4-drift {
+    0%,
+    100% {
+      translate: 0 0;
+    }
+    50% {
+      translate: 4px 0;
+    }
+  }
+
+  @keyframes l4-sway {
+    0%,
+    100% {
+      transform: rotate(-1.2deg);
+    }
+    50% {
+      transform: rotate(1.2deg);
+    }
+  }
+
+  @keyframes l4-glow {
+    0%,
+    100% {
+      filter: drop-shadow(0 0 0 rgb(240 207 106 / 0));
+    }
+    50% {
+      filter: drop-shadow(0 0 10px rgb(240 207 106 / 0.55));
+    }
+  }
+
+  @keyframes l4-touch {
+    0%,
+    100% {
+      transform: rotate(0deg);
+    }
+    50% {
+      transform: rotate(0.8deg);
+    }
+  }
+
+  @keyframes l4-rise {
+    0%,
+    100% {
+      background-position: 12% 78%, 68% 62%;
+      opacity: 0.22;
+    }
+    50% {
+      background-position: 12% 70%, 68% 54%;
+      opacity: 0.32;
+    }
+  }
+
+  .level-scene[data-level="4"] .l4-curtain {
+    animation: l4-drift 9s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="4"] .l4-probe {
+    animation: l4-sway 5s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="4"] .l4-assault {
+    animation: l4-glow 4s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="4"] .l4-paper {
+    animation: l4-touch 6s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="4"] .l4-paper-item:nth-child(2) .l4-paper {
+    animation-delay: -2s;
+  }
+
+  .level-scene[data-level="4"] .l4-paper-item:nth-child(3) .l4-paper {
+    animation-delay: -4s;
+  }
+
+  .level-scene[data-level="4"] .l4-dust {
+    animation: l4-rise 14s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="4"],
+  .level-scene[data-level="4"] *,
+  .level-scene[data-level="4"] *::before,
+  .level-scene[data-level="4"] *::after {
+    animation: none;
+    transition: none;
+  }
+}

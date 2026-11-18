@@ -1,0 +1,171 @@
+/* El Cerrajero — carretes de cable del inventario (unidad C).
+ * CSS-only, alcance `.wb-scene #palette`: el carrete viste `#palette`
+ * esté donde esté (inventario del shell o ranura `keysSlot` de la escena),
+ * porque en inmersivo el parent muda la paleta a la mesa. Sin resets
+ * globales, sin selectores de elemento sueltos, sin imágenes fuera de
+ * `assets/levels/01/props/`.
+ * Se carga DESPUÉS de `src/ui/gameChrome.css` y la reemplaza solo dentro
+ * de `#palette`: anula las cuatro `key-N.webp` por el carrete final
+ * (`assets/levels/01/props/spool.webp`) teñido por CSS, sin tocar
+ * herramientas (`.tools > .tool`) ni botones de acción (`.wb-actions`).
+ * El teñido va por `data-tone` (`gold|teal|coral|violet`) que pone el
+ * parent desde `entry.tone`; las variantes 1–4 quedan como fallback.
+ * Solo presentación: el botón real, su `data-key`, su texto/número y su
+ * `aria-label` se conservan; el número queda sobre una chapa del color
+ * del cable (el color nunca es la única señal).
+ */
+
+.wb-scene #palette .key {
+  position: relative;
+  isolation: isolate;
+  display: inline-flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  width: 64px;
+  min-width: 44px;
+  height: 88px;
+  min-height: 44px;
+  padding: 0 0 8px;
+  overflow: visible;
+  border: 0;
+  border-bottom: 3px solid var(--wb-brass, #d4a72c);
+  border-radius: 8px;
+  background-color: transparent;
+  background-image:
+    url("../../assets/levels/01/props/spool.webp"),
+    linear-gradient(180deg, transparent 0 58%, var(--spool, var(--wb-brass, #d4a72c)) 58%);
+  background-repeat: no-repeat, no-repeat;
+  background-position: 50% 0, 0 0;
+  background-size: 54px auto, 100% 100%;
+  color: #17130a;
+  font-family: var(--wb-font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  touch-action: manipulation;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.55));
+  transition: transform 160ms ease-out, filter 160ms ease-out;
+}
+
+/* Tinte del carrete: velo cobre translúcido sobre el arte, pintado DETRÁS
+ * del símbolo (z-index negativo dentro del botón aislado): el número queda
+ * siempre por encima, sin mezclas que lo tapen. Si el velo no cargara, el
+ * carrete sigue cobre con chapa y borde del color. */
+.wb-scene #palette .key::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 0;
+  z-index: -1;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  background: var(--spool-wash, rgba(212, 167, 44, 0.25));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+/* Carrete 1 — dorado (latón): el cobre casi no se tiñe. */
+.wb-scene #palette .key[data-key="1"],
+.wb-scene #palette .key.key-1,
+.wb-scene #palette .key[data-tone="gold"] {
+  --spool: var(--wb-brass, #d4a72c);
+  --spool-wash: rgba(212, 167, 44, 0.25);
+  --spool-glow: rgba(240, 207, 106, 0.55);
+  background-image:
+    url("../../assets/levels/01/props/spool.webp"),
+    linear-gradient(180deg, transparent 0 58%, var(--wb-brass, #d4a72c) 58%);
+  border-bottom-color: var(--wb-brass, #d4a72c);
+}
+
+/* Carrete 2 — teal. */
+.wb-scene #palette .key[data-key="2"],
+.wb-scene #palette .key.key-2,
+.wb-scene #palette .key[data-tone="teal"] {
+  --spool: var(--wb-teal, #38c6b8);
+  --spool-wash: rgba(56, 198, 184, 0.55);
+  --spool-glow: rgba(56, 198, 184, 0.55);
+  background-image:
+    url("../../assets/levels/01/props/spool.webp"),
+    linear-gradient(180deg, transparent 0 58%, var(--wb-teal, #38c6b8) 58%);
+  border-bottom-color: var(--wb-teal, #38c6b8);
+}
+
+/* Carrete 3 — coral. */
+.wb-scene #palette .key[data-key="3"],
+.wb-scene #palette .key.key-3,
+.wb-scene #palette .key[data-tone="coral"] {
+  --spool: var(--wb-coral, #f06a4a);
+  --spool-wash: rgba(240, 106, 74, 0.55);
+  --spool-glow: rgba(240, 106, 74, 0.55);
+  background-image:
+    url("../../assets/levels/01/props/spool.webp"),
+    linear-gradient(180deg, transparent 0 58%, var(--wb-coral, #f06a4a) 58%);
+  border-bottom-color: var(--wb-coral, #f06a4a);
+}
+
+/* Carrete 4 — violeta. */
+.wb-scene #palette .key[data-key="4"],
+.wb-scene #palette .key.key-4,
+.wb-scene #palette .key[data-tone="violet"] {
+  --spool: var(--wb-violet, #a18be0);
+  --spool-wash: rgba(161, 139, 224, 0.6);
+  --spool-glow: rgba(161, 139, 224, 0.6);
+  background-image:
+    url("../../assets/levels/01/props/spool.webp"),
+    linear-gradient(180deg, transparent 0 58%, var(--wb-violet, #a18be0) 58%);
+  border-bottom-color: var(--wb-violet, #a18be0);
+}
+
+.wb-scene #palette .key:hover {
+  transform: translateY(-3px);
+  filter: brightness(1.1) drop-shadow(0 0 9px var(--spool-glow, rgba(240, 207, 106, 0.45))) drop-shadow(0 7px 8px rgba(0, 0, 0, 0.6));
+}
+
+/* Activo elevado con brillo del color del cable. */
+.wb-scene #palette .key.is-active {
+  transform: translateY(-6px);
+  filter: brightness(1.15) drop-shadow(0 0 12px var(--spool-glow, rgba(240, 207, 106, 0.55))) drop-shadow(0 9px 10px rgba(0, 0, 0, 0.6));
+}
+
+.wb-scene #palette .key.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 1px;
+  width: 22px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--spool, var(--wb-brass-2, #f0cf6a));
+  box-shadow: 0 0 10px var(--spool-glow, rgba(240, 207, 106, 0.7));
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.wb-scene #palette .key:focus-visible {
+  outline: 2px solid var(--wb-teal, #38c6b8);
+  outline-offset: 3px;
+}
+
+.wb-scene #palette .key:disabled,
+.wb-scene #palette .key[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: grayscale(0.5);
+}
+
+/* --- Movimiento reducido: carretes estáticos --- */
+@media (prefers-reduced-motion: reduce) {
+  .wb-scene #palette .key {
+    transition: none;
+  }
+
+  .wb-scene #palette .key:hover,
+  .wb-scene #palette .key.is-active {
+    transform: none;
+  }
+}

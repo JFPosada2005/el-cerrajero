@@ -299,6 +299,8 @@ Cómo correr: `npm test` (Node con runner nativo, sin dependencias). Los tests s
 
 **Fuera del remaster.** `tests/*` es la red de seguridad del congelamiento: no se edita ni se borra un test para que pase un cambio visual; sí se pueden agregar tests. `serve.py` es infraestructura de desarrollo y no se toca.
 
+**Autorizaciones del owner (2026-11-17).** Se autorizó **Aut-1** y **Aut-2** del plan de remasterización. Aut-1 permite reescribir la capa visual de `renderWorkshop`, `renderDrumWorkshop`, `openModal`, `renderTitle` y `renderMap`, manteniendo las mismas llamadas a los editores, `toMachine`, `handleProbe`, `handleAssault`, `handlePinEdit`, los callbacks y los datos que reciben los motores. Aut-2 permite pasar los pasos completos de la corrida a la interfaz (`frameStates`, `renderStack`, `showTapeFrame`) sin tocar los motores. El resto del congelamiento sigue vigente. Ver [`docs/REMASTER-PLAN.md`](REMASTER-PLAN.md) §8 y [`AGENTS.md`](../AGENTS.md).
+
 **Preguntar antes / informar después / declarar en el PR** (`AGENTS.md:17-19`): ver §1.
 
 ---

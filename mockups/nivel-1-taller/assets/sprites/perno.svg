@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 128" width="512" height="128">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#c4ced9"/>
+      <stop offset="0.22" stop-color="#8b97a5"/>
+      <stop offset="0.55" stop-color="#4f5a68"/>
+      <stop offset="1" stop-color="#1b222b"/>
+    </linearGradient>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#5c3f12"/>
+      <stop offset="0.5" stop-color="#c79a32"/>
+      <stop offset="1" stop-color="#5c3f12"/>
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-50%" width="120%" height="220%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#000" flood-opacity="0.6"/>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M28 38h330l38-16h86v84h-86l-38-16H28z" fill="url(#steel)" stroke="#1b222b" stroke-width="5"/>
+    <path d="M38 48h320v32H38z" fill="#b9c2cf" opacity="0.28"/>
+    <path d="M28 38h330l38-16h16v92h-16l-38-16H28z" fill="none" stroke="#f2f5f8" stroke-width="2" opacity="0.35"/>
+    <rect x="324" y="24" width="34" height="80" rx="8" fill="url(#brass)" stroke="#3a2a12" stroke-width="4"/>
+    <path d="M340 28v72" stroke="#5c3f12" stroke-width="3" opacity="0.8"/>
+    <path d="M40 48v32M56 48v32" stroke="#4a5563" stroke-width="3" opacity="0.5"/>
+    <path d="M442 38l22-14v80l-22-14z" fill="#d9e1e9" stroke="#2a333e" stroke-width="4"/>
+    <path d="M28 64h330" stroke="#2a333e" stroke-width="2" opacity="0.6"/>
+    <path d="M38 76h320" stroke="#38c6b8" stroke-width="1.5" opacity="0.18"/>
+  </g>
+</svg>

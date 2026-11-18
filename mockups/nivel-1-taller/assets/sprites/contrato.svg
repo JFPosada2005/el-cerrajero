@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 384" width="512" height="384">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbf5e8"/>
+      <stop offset="0.55" stop-color="#f2e9d6"/>
+      <stop offset="1" stop-color="#ddceb2"/>
+    </linearGradient>
+    <linearGradient id="fold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d7c5a5"/>
+      <stop offset="1" stop-color="#bda986"/>
+    </linearGradient>
+    <radialGradient id="wax" cx="35%" cy="30%" r="80%">
+      <stop offset="0" stop-color="#b34a3c"/>
+      <stop offset="0.55" stop-color="#8e2f2a"/>
+      <stop offset="1" stop-color="#5a1b17"/>
+    </radialGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="14" stdDeviation="12" flood-color="#000" flood-opacity="0.55"/>
+    </filter>
+    <filter id="inner" x="-10%" y="-10%" width="120%" height="120%">
+      <feGaussianBlur in="SourceAlpha" stdDeviation="4" result="b"/>
+      <feOffset dy="3" result="o"/>
+      <feComposite in="o" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="d"/>
+      <feFlood flood-color="#7a5a12" flood-opacity="0.3"/>
+      <feComposite in2="d" operator="in"/>
+      <feComposite in2="SourceAlpha" operator="in" result="s"/>
+      <feMerge><feMergeNode in="SourceGraphic"/><feMergeNode in="s"/></feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#shadow)">
+    <path d="M44 38l330-18 94 34-10 286-326 20L36 326z" fill="url(#paper)" stroke="#9a825c" stroke-width="3"/>
+    <path d="M44 38l330-18 94 34-10 34-96-34-318 18z" fill="#fff9ee" opacity="0.55"/>
+    <path d="M374 54l94 34-10 256-84 16z" fill="url(#fold)" opacity="0.55"/>
+    <path d="M44 38l8 288 318 14-4-302z" fill="none" stroke="#b9a273" stroke-width="2" opacity="0.6"/>
+    <g stroke="#7a5a12" stroke-linecap="round" opacity="0.34">
+      <path d="M86 108h242M86 132h210M86 156h258M86 180h232M86 204h196M86 228h240M86 252h174" stroke-width="5"/>
+      <path d="M86 288h84" stroke-width="7"/>
+      <path d="M300 288h58" stroke-width="3"/>
+    </g>
+    <circle cx="372" cy="276" r="48" fill="url(#wax)" stroke="#4a120e" stroke-width="3"/>
+    <circle cx="372" cy="276" r="34" fill="none" stroke="#d9a79c" stroke-width="2" opacity="0.35"/>
+    <path d="M372 256c7 0 12 5 12 12 0 5-3 9-8 11v16h-8v-16c-5-2-8-6-8-11 0-7 5-12 12-12z" fill="#4a120e"/>
+    <path d="M360 306c10 10 20 14 30 10" fill="none" stroke="#5a1b17" stroke-width="4" stroke-linecap="round" opacity="0.6"/>
+    <path d="M64 60c40-8 120-12 220-14" fill="none" stroke="#fff" stroke-width="3" opacity="0.32"/>
+  </g>
+</svg>

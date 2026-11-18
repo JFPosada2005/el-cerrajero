@@ -9,15 +9,40 @@ import { runTM } from './core/tm.js';
 import { functionFor } from './game/functions.js';
 import { judge } from './game/judge.js';
 import { thiefReport } from './game/thief.js';
-import { createGraphEditor } from './ui/graphEditor.js';
+import { createGraphEditor, viewBoxForCells } from './ui/graphEditor.js';
 import { createDrumEditor } from './ui/drumEditor.js';
 import { createTapePanel } from './ui/tapePanel.js';
+import { createWorkbenchScene } from './ui/workbenchScene.js';
+import { decorateGraph } from './ui/graphVisuals.js';
+import { createLevelScene as createLevel1Scene } from './ui/levels/level1Scene.js';
+import { createLevelScene as createLevel2Scene } from './ui/levels/level2Scene.js';
+import { createLevelScene as createLevel3Scene } from './ui/levels/level3Scene.js';
+import { createLevelScene as createLevel4Scene } from './ui/levels/level4Scene.js';
+import { createLevelScene as createLevel5Scene } from './ui/levels/level5Scene.js';
+import { loadManifest } from './ui/assets.js';
+import { createAudio } from './ui/audio.js';
+import { LEVEL_BRIEFS } from './ui/levelBriefs.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
+const SOUND_KEY = 'el-cerrajero:sound';
 const app = document.querySelector('#app');
 const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
 let drumEditor = null;
 let tapePanel = null;
+let workbenchView = null;
+let graphVisuals = null;
+let audio = null;
+let manifest = null;
+let soundOn = true;
+if (typeof localStorage !== 'undefined') {
+  try {
+    if (localStorage.getItem(SOUND_KEY) === 'off') {
+      soundOn = false;
+    }
+  } catch {
+    // Sin almacenamiento disponible, el sonido queda encendido.
+  }
+}
 let selectedKey = null;
 let cutMode = false;
 let springMode = false;
@@ -138,6 +163,11 @@ function saveProgress(progress) {
   }
 }
 function appendLog(message, tone = '') {
+  if (workbenchView !== null) {
+    const normalized = tone === 'good' ? 'good' : tone === 'bad' ? 'bad' : 'neutral';
+    workbenchView.addLog(message, normalized);
+    return;
+  }
   const log = document.querySelector('#log');
   if (log === null) {
     return;
@@ -153,6 +183,10 @@ function appendLog(message, tone = '') {
   log.scrollTop = log.scrollHeight;
 }
 function renderTitle() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const progress = loadProgress();
   app.replaceChildren();
   const main = document.createElement('main');
@@ -185,6 +219,10 @@ function renderTitle() {
   app.append(main);
 }
 function renderMap() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const progress = loadProgress();
   app.replaceChildren();
   const main = document.createElement('main');
@@ -234,6 +272,10 @@ function renderPalette() {
     button.type = 'button';
     button.className = `key key-${entry.symbol}`;
     button.dataset.key = entry.symbol;
+    // Tono del carrete: el CSS tiñe por data-tone; data-key queda como fallback 1–4.
+    if (typeof entry.tone === 'string' && entry.tone !== '') {
+      button.setAttribute('data-tone', entry.tone);
+    }
     button.textContent = entry.symbol;
     button.setAttribute('aria-label', `Llave ${entry.symbol}`);
     button.addEventListener('click', () => selectKey(entry.symbol));
@@ -260,10 +302,12 @@ function stackActionWord() {
 }
 function selectStackTop(value) {
   stackTop = value;
+  sfx('chip');
   renderTools();
 }
 function selectStackAction(value) {
   stackAction = value;
+  sfx('chip');
   renderTools();
 }
 function renderStack(stack) {
@@ -297,12 +341,13 @@ function renderTools() {
   if (activeKey === null || scissors === null) {
     return;
   }
+  const short = document.querySelector('.wb-scene.is-immersive') !== null;
   if (cutMode) {
-    activeKey.textContent = 'Herramienta: tijera';
+    activeKey.textContent = short ? 'Tijera' : 'Herramienta: tijera';
   } else if (springMode) {
-    activeKey.textContent = 'Herramienta: resorte';
+    activeKey.textContent = short ? 'Resorte' : 'Herramienta: resorte';
   } else {
-    activeKey.textContent = `Llave activa: ${selectedKey}`;
+    activeKey.textContent = symbolText();
   }
   if (cutMode) {
     scissors.classList.add('is-active');
@@ -310,6 +355,10 @@ function renderTools() {
     scissors.classList.remove('is-active');
   }
   scissors.setAttribute('aria-pressed', String(cutMode));
+  for (const node of document.querySelectorAll('[data-action="cut"]')) {
+    node.classList.toggle('is-active', cutMode);
+    node.setAttribute('aria-pressed', String(cutMode));
+  }
   const spring = document.querySelector('#spring-tool');
   if (spring !== null) {
     if (springMode) {
@@ -329,12 +378,14 @@ function renderTools() {
     button.setAttribute('aria-pressed', String(active));
   }
   const hint = document.querySelector('#tool-hint');
-  if (cutMode) {
-    hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
-  } else if (springMode) {
-    hint.textContent = 'Tocá origen y destino para tender un resorte.';
-  } else {
-    hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
+  if (hint !== null) {
+    if (cutMode) {
+      hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
+    } else if (springMode) {
+      hint.textContent = 'Tocá origen y destino para tender un resorte.';
+    } else {
+      hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
+    }
   }
   if (state.level.machine === 'pda') {
     for (const [id, value] of [['#stack-top-any', 'any'], ['#stack-top-base', 'base'], ['#stack-top-chip', 'chip']]) {
@@ -364,11 +415,23 @@ function renderTools() {
       button.setAttribute('aria-pressed', String(actionActive));
     }
   }
+  // Reflejo genérico: los selectores del escenario marcan su estado igual.
+  for (const node of document.querySelectorAll('[data-stack-top]')) {
+    const topActive = node.getAttribute('data-stack-top') === stackTop;
+    node.classList.toggle('is-active', topActive);
+    node.setAttribute('aria-pressed', String(topActive));
+  }
+  for (const node of document.querySelectorAll('[data-stack-action]')) {
+    const actionActive = node.getAttribute('data-stack-action') === stackAction;
+    node.classList.toggle('is-active', actionActive);
+    node.setAttribute('aria-pressed', String(actionActive));
+  }
 }
 function selectKey(key) {
   cutMode = false;
   springMode = false;
   selectedKey = key;
+  sfx('click');
   if (workshop !== null) {
     workshop.setSelectedKey(key);
   }
@@ -377,6 +440,7 @@ function selectKey(key) {
 function toggleScissors() {
   cutMode = cutMode === false;
   springMode = false;
+  sfx('click');
   if (workshop === null) {
     return;
   }
@@ -390,6 +454,7 @@ function toggleScissors() {
 function toggleSpring() {
   springMode = springMode === false;
   cutMode = false;
+  sfx('click');
   if (workshop === null) {
     return;
   }
@@ -425,6 +490,7 @@ function handleConnect(from, to, tool) {
   }
   const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'connect-wire', from, to, tool: editTool });
   if (result.effect === 'blocked') {
+    sfx('error');
     if (result.reason === 'needs-gear') {
       appendLog('Ese cable necesita un engranaje para cerrar sobre la misma celda.', 'bad');
     } else if (result.reason === 'spring-loop') {
@@ -435,6 +501,7 @@ function handleConnect(from, to, tool) {
     return;
   }
   if (result.effect === 'kept') {
+    sfx('error');
     if (tool.kind === 'spring') {
       appendLog(`Ese resorte ya está puesto: ${from} → ${to}.`);
     } else {
@@ -445,24 +512,29 @@ function handleConnect(from, to, tool) {
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
   if (tool.kind === 'spring') {
+    sfx('spring');
     appendLog(`Tendiste un resorte: ${from} → ${to}.`);
     return;
   }
   if (result.effect === 'moved') {
+    sfx('cable');
     appendLog(`Moviste la llave ${key}: ${before} → ${to}.`);
     return;
   }
+  sfx('cable');
   appendLog(`Conectaste la llave ${key}: ${from} → ${to}.`);
 }
 function handleCut(from, to) {
   const keys = cableKeys(from, to);
   const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'cut-wire', from, to });
   if (result.effect === 'kept') {
+    sfx('error');
     appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
     return;
   }
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
+  sfx('cut');
   if (keys === '') {
     appendLog(`Cortaste el resorte: ${from} → ${to}.`);
     return;
@@ -498,71 +570,92 @@ function firstKey() {
   }
   return state.level.keys[0].symbol;
 }
-function renderWorkshop() {
-  if (state.level.workspace === 'drum') {
-    renderDrumWorkshop();
-    return;
+function selectedEntry() {
+  return state.level.keys.find((entry) => entry.symbol === selectedKey) ?? null;
+}
+function symbolText() {
+  const entry = selectedEntry();
+  const symbol = entry === null ? selectedKey : entry.symbol;
+  if (entry !== null && typeof entry.label === 'string' && entry.label.trim() !== '' && entry.label !== entry.symbol) {
+    return `Símbolo: ${symbol} · ${entry.label}`;
   }
-  app.replaceChildren();
-  const shell = document.createElement('div');
-  shell.className = 'game';
-  const header = document.createElement('header');
-  header.className = 'game-header';
-  const headerText = document.createElement('div');
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'eyebrow';
-  eyebrow.textContent = 'El Cerrajero';
-  const title = document.createElement('h1');
-  title.textContent = `Contrato ${state.level.contract} · ${phaseWord()}`;
-  headerText.append(eyebrow);
-  headerText.append(title);
-  const back = document.createElement('button');
-  back.id = 'back-button';
-  back.type = 'button';
-  back.className = 'ghost';
-  back.textContent = 'Volver';
-  back.addEventListener('click', renderMap);
-  header.append(headerText);
-  header.append(back);
-  const layout = document.createElement('main');
-  layout.className = 'layout';
-  const brief = document.createElement('aside');
-  brief.className = 'panel brief';
-  const contract = document.createElement('section');
-  contract.className = 'contract';
-  contract.setAttribute('aria-label', 'Contrato del cliente');
-  const number = document.createElement('p');
-  number.className = 'contract-number';
-  number.textContent = `Contrato ${state.level.contract}`;
-  const client = document.createElement('h2');
-  client.className = 'contract-client';
-  client.textContent = state.level.client;
-  const rule = document.createElement('p');
-  rule.className = 'contract-rule';
-  rule.textContent = state.puzzle.goal;
-  const note = document.createElement('p');
-  note.className = 'contract-note';
-  note.textContent = 'Cualquier otra combinación deja la alarma encendida.';
-  contract.append(number);
-  contract.append(client);
-  contract.append(rule);
-  contract.append(note);
-  const briefTitle = document.createElement('h2');
-  briefTitle.textContent = 'El encargo';
-  const intro = document.createElement('p');
-  intro.textContent = state.puzzle.intro;
-  const legend = document.createElement('div');
-  legend.className = 'legend';
-  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
-    const entry = document.createElement('span');
-    const icon = document.createElement('i');
-    icon.className = `legend-dot ${dot}`;
-    entry.append(icon);
-    entry.append(word);
-    legend.append(entry);
+  return `Símbolo: ${symbol}`;
+}
+function createLevelSceneFor(level) {
+  const options = { level, puzzle: state.puzzle, phase: state.phase };
+  if (level.id === 5) {
+    return createLevel5Scene(options);
   }
-  const toolsTitle = document.createElement('h2');
-  toolsTitle.textContent = 'Herramientas';
+  if (level.id === 4) {
+    return createLevel4Scene(options);
+  }
+  if (level.id === 3) {
+    return createLevel3Scene(options);
+  }
+  if (level.id === 2) {
+    return createLevel2Scene(options);
+  }
+  return createLevel1Scene(options);
+}
+function renderSceneWorkshop() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
+  const scene = createWorkbenchScene({
+    contract: state.level.contract,
+    title: state.level.title,
+    client: state.level.client,
+    phase: phaseWord(),
+    objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
+    soundEnabled: soundOn,
+    diegeticActions: true,
+    immersive: true,
+    handlers: {
+      onBack: renderMap,
+      onProbe: handleProbe,
+      onAssault: handleAssault,
+      onOpenDoc: openWorkshopDoc,
+      onToggleSound: toggleSound
+    }
+  });
+  workbenchView = scene;
+  const levelScene = createLevelSceneFor(state.level);
+  app.replaceChildren(scene.element);
+  scene.slots.stage.append(levelScene.element);
+
+  const diegeticHandlers = {
+    contract: () => openWorkshopDoc('contract'),
+    hint: () => openWorkshopDoc('hint'),
+    log: () => openWorkshopDoc('log'),
+    probe: handleProbe,
+    assault: handleAssault,
+    cut: toggleScissors,
+  };
+  for (const node of levelScene.element.querySelectorAll('[data-action]')) {
+    const handler = diegeticHandlers[node.getAttribute('data-action')];
+    if (typeof handler === 'function') {
+      node.addEventListener('click', handler);
+    }
+  }
+
+  // Selectores de pila del escenario (N4): la escena decide, el taller obedece.
+  for (const node of levelScene.element.querySelectorAll('[data-stack-top]')) {
+    const value = node.getAttribute('data-stack-top');
+    node.addEventListener('click', () => selectStackTop(value));
+  }
+  for (const node of levelScene.element.querySelectorAll('[data-stack-action]')) {
+    const value = node.getAttribute('data-stack-action');
+    node.addEventListener('click', () => selectStackAction(value));
+  }
+
+  const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  canvas.id = 'canvas';
+  canvas.setAttribute('viewBox', viewBoxForCells(state.puzzle.cells));
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
+  levelScene.editorSlot.append(canvas);
+
   const tools = document.createElement('div');
   tools.className = 'tools';
   const palette = document.createElement('div');
@@ -578,6 +671,10 @@ function renderWorkshop() {
   const scissorsLabel = document.createElement('span');
   scissorsLabel.textContent = 'Cortar';
   scissors.append(scissorsLabel);
+  if (levelScene.element.querySelector('[data-action="cut"]') !== null) {
+    scissors.hidden = true;
+    scissors.style.display = 'none';
+  }
   tools.append(palette);
   tools.append(scissors);
   if (state.level.parts.includes('spring')) {
@@ -629,62 +726,52 @@ function renderWorkshop() {
     }
     stackHelp = document.createElement('p');
     stackHelp.className = 'stack-help';
-    stackHelp.textContent = 'La pila es la memoria del mecanismo. El cable mira la ficha de arriba: cargar apila una ficha, soltar la saca y no tocar la deja igual. Se lee: llave · qué hay arriba · qué hace.';
+    stackHelp.textContent = 'La pila es memoria: cargar apila, soltar saca, no tocar deja igual. Se lee: llave · arriba · acción.';
   }
-  const hint = document.createElement('p');
-  hint.id = 'tool-hint';
-  hint.className = 'hint';
-  const actions = document.createElement('div');
-  actions.className = 'actions';
-  const probe = document.createElement('button');
-  probe.id = 'test-key';
-  probe.type = 'button';
-  probe.className = 'secondary';
-  probe.textContent = 'Probar la llave';
-  const assault = document.createElement('button');
-  assault.id = 'heist';
-  assault.type = 'button';
-  assault.className = 'primary';
-  if (state.phase === 'repair') {
-    assault.textContent = 'Ensayo';
-  } else {
-    assault.textContent = 'Asalto';
+  const toolsTitle = document.createElement('h2');
+  toolsTitle.textContent = 'Herramientas';
+  scene.slots.inventory.append(toolsTitle);
+  // Ranuras de la escena: si el nivel expone `keysSlot`, los carretes y las
+  // herramientas viven en la mesa; si no, queda el inventario del shell.
+  const keysHost = levelScene.keysSlot ?? scene.slots.inventory;
+  keysHost.append(tools);
+  // Si la escena ya trae sus selectores de pila, la fila del shell sobra.
+  const hasDiegeticStack = levelScene.element.querySelector('[data-stack-top]') !== null;
+  if (stackTools !== null && !hasDiegeticStack) {
+    keysHost.append(stackTools);
   }
-  actions.append(probe);
-  actions.append(assault);
-  brief.append(contract);
-  brief.append(briefTitle);
-  brief.append(intro);
-  brief.append(legend);
-  brief.append(toolsTitle);
-  brief.append(tools);
-  brief.append(hint);
-  brief.append(actions);
-  const shop = document.createElement('section');
-  shop.className = 'panel workshop';
-  const shopHead = document.createElement('div');
-  shopHead.className = 'workshop-head';
-  const shopTitle = document.createElement('h2');
-  shopTitle.textContent = 'Taller';
+  if (stackHelp !== null) {
+    scene.slots.status.append(stackHelp);
+  }
+
+  const immersive = scene.element.classList.contains('is-immersive');
   const active = document.createElement('span');
   active.id = 'active-key';
   active.className = 'active-key';
-  active.textContent = `Llave activa: ${selectedKey}`;
-  shopHead.append(shopTitle);
-  shopHead.append(active);
-  const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-  canvas.id = 'canvas';
-  canvas.setAttribute('viewBox', '0 0 820 520');
-  canvas.setAttribute('role', 'img');
-  canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
-  shop.append(shopHead);
-  if (stackTools !== null) {
-    shop.append(stackTools);
+  active.textContent = symbolText();
+  scene.slots.status.append(active);
+
+  const legend = document.createElement('div');
+  legend.className = 'legend';
+  const alarmWord = immersive ? 'Alarma' : 'Alarma implícita';
+  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', alarmWord]]) {
+    const entry = document.createElement('span');
+    const icon = document.createElement('i');
+    icon.className = `legend-dot ${dot}`;
+    entry.append(icon);
+    entry.append(word);
+    legend.append(entry);
   }
-  if (stackHelp !== null) {
-    shop.append(stackHelp);
+  scene.slots.status.append(legend);
+
+  const hint = document.createElement('p');
+  hint.id = 'tool-hint';
+  hint.className = 'hint';
+  // En inmersivo la ayuda vive en contrato/pista; la línea queda en una sola frase.
+  if (!immersive) {
+    scene.slots.status.append(hint);
   }
-  shop.append(canvas);
+
   if (state.level.machine === 'pda') {
     const block = document.createElement('div');
     block.className = 'stack-block';
@@ -697,30 +784,27 @@ function renderWorkshop() {
     stackPanel.setAttribute('aria-label', 'Pila del mecanismo');
     block.append(stackTitle);
     block.append(stackPanel);
-    shop.append(block);
+    const host = levelScene.statusSlot ?? scene.slots.status;
+    host.append(block);
   }
-  const logPanel = document.createElement('aside');
-  logPanel.className = 'panel log-panel';
-  const logTitle = document.createElement('h2');
-  logTitle.textContent = 'Bitácora';
-  const log = document.createElement('ul');
-  log.id = 'log';
-  log.className = 'log';
-  log.setAttribute('aria-live', 'polite');
-  log.setAttribute('aria-label', 'Bitácora del taller');
-  logPanel.append(logTitle);
-  logPanel.append(log);
-  layout.append(brief);
-  layout.append(shop);
-  layout.append(logPanel);
-  shell.append(header);
-  shell.append(layout);
-  app.append(shell);
+
+  // La línea de estado se muda a la mesa cuando la escena expone su ranura.
+  if (levelScene.hudSlot) {
+    levelScene.hudSlot.append(scene.slots.status);
+  }
+  if (levelScene.keysSlot || levelScene.hudSlot) {
+    scene.element.classList.add('is-slotted');
+  }
+
+  const assaultButton = scene.slots.actions.querySelector('[data-action="assault"]');
+  if (assaultButton !== null) {
+    assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
+    assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
+  }
   renderPalette();
-  workshop = createGraphEditor({ svg: document.querySelector('#canvas'), cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, stack: state.puzzle.stack ?? null, onConnect: handleConnect, onCut: handleCut });
-  document.querySelector('#test-key').addEventListener('click', handleProbe);
+  workshop = createGraphEditor({ svg: canvas, cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, stack: state.puzzle.stack ?? null, onConnect: handleConnect, onCut: handleCut });
+  graphVisuals = decorateGraph(canvas, { level: state.level, cells: state.puzzle.cells });
   document.querySelector('#scissors').addEventListener('click', toggleScissors);
-  document.querySelector('#heist').addEventListener('click', handleAssault);
   renderTools();
   if (state.level.machine === 'pda') {
     renderStack(state.puzzle.stack.base);
@@ -731,6 +815,13 @@ function renderWorkshop() {
   } else {
     appendLog('Probá la llave y después lanzá el asalto.');
   }
+}
+function renderWorkshop() {
+  if (state.level.workspace === 'drum') {
+    renderDrumWorkshop();
+    return;
+  }
+  renderSceneWorkshop();
 }
 function sectionLabel(id) {
   const found = state.puzzle.sections.find((section) => section.id === id);
@@ -751,134 +842,81 @@ function readLabel(symbol) {
   }
   return symbol;
 }
-function renderDrumWorkshop() {
-  app.replaceChildren();
-  const shell = document.createElement('div');
-  shell.className = 'game';
-  const header = document.createElement('header');
-  header.className = 'game-header';
-  const headerText = document.createElement('div');
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'eyebrow';
-  eyebrow.textContent = 'El Cerrajero';
-  const title = document.createElement('h1');
-  title.textContent = `Contrato ${state.level.contract} · ${phaseWord()}`;
-  headerText.append(eyebrow);
-  headerText.append(title);
-  const back = document.createElement('button');
-  back.id = 'back-button';
-  back.type = 'button';
-  back.className = 'ghost';
-  back.textContent = 'Volver';
-  back.addEventListener('click', renderMap);
-  header.append(headerText);
-  header.append(back);
-  const layout = document.createElement('main');
-  layout.className = 'layout';
-  const brief = document.createElement('aside');
-  brief.className = 'panel brief';
-  const contract = document.createElement('section');
-  contract.className = 'contract';
-  contract.setAttribute('aria-label', 'Contrato del cliente');
-  const number = document.createElement('p');
-  number.className = 'contract-number';
-  number.textContent = `Contrato ${state.level.contract}`;
-  const client = document.createElement('h2');
-  client.className = 'contract-client';
-  client.textContent = state.level.client;
-  const rule = document.createElement('p');
-  rule.className = 'contract-rule';
-  rule.textContent = state.puzzle.goal;
-  const note = document.createElement('p');
-  note.className = 'contract-note';
-  note.textContent = 'Cualquier otra combinación deja la alarma encendida.';
-  contract.append(number);
-  contract.append(client);
-  contract.append(rule);
-  contract.append(note);
-  const briefTitle = document.createElement('h2');
-  briefTitle.textContent = 'El encargo';
-  const intro = document.createElement('p');
-  intro.textContent = state.puzzle.intro;
-  const legend = document.createElement('div');
-  legend.className = 'legend';
-  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
-    const entry = document.createElement('span');
-    const icon = document.createElement('i');
-    icon.className = `legend-dot ${dot}`;
-    entry.append(icon);
-    entry.append(word);
-    legend.append(entry);
+function renderDrumScene() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
   }
-  const actions = document.createElement('div');
-  actions.className = 'actions';
-  const probe = document.createElement('button');
-  probe.id = 'test-key';
-  probe.type = 'button';
-  probe.className = 'secondary';
-  probe.textContent = 'Probar la cinta';
-  const assault = document.createElement('button');
-  assault.id = 'heist';
-  assault.type = 'button';
-  assault.className = 'primary';
-  if (state.phase === 'repair') {
-    assault.textContent = 'Ensayo';
-  } else {
-    assault.textContent = 'Asalto';
+  const scene = createWorkbenchScene({
+    contract: state.level.contract,
+    title: state.level.title,
+    client: state.level.client,
+    phase: phaseWord(),
+    objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
+    soundEnabled: soundOn,
+    diegeticActions: true,
+    immersive: true,
+    handlers: {
+      onBack: renderMap,
+      onProbe: handleProbe,
+      onAssault: handleAssault,
+      onOpenDoc: openWorkshopDoc,
+      onToggleSound: toggleSound
+    }
+  });
+  workbenchView = scene;
+  const levelScene = createLevel5Scene({ level: state.level, puzzle: state.puzzle, phase: state.phase });
+  app.replaceChildren(scene.element);
+  scene.element.classList.add('is-drum-room');
+  scene.slots.stage.append(levelScene.element);
+  // Enganche diegético genérico: cuando N5 aporte sus props, usan los mismos handlers.
+  for (const node of levelScene.element.querySelectorAll('[data-action]')) {
+    const action = node.getAttribute('data-action');
+    if (action === 'probe') {
+      node.addEventListener('click', handleProbe);
+    } else if (action === 'assault') {
+      node.addEventListener('click', handleAssault);
+    } else if (action === 'contract' || action === 'hint' || action === 'log') {
+      node.addEventListener('click', () => openWorkshopDoc(action));
+    }
   }
-  actions.append(probe);
-  actions.append(assault);
-  brief.append(contract);
-  brief.append(briefTitle);
-  brief.append(intro);
-  brief.append(legend);
-  brief.append(actions);
-  const shop = document.createElement('section');
-  shop.className = 'panel workshop';
-  const shopHead = document.createElement('div');
-  shopHead.className = 'workshop-head';
-  const shopTitle = document.createElement('h2');
-  shopTitle.textContent = 'Tambor';
-  shopHead.append(shopTitle);
+  if (levelScene.hudSlot) {
+    levelScene.hudSlot.append(scene.slots.status);
+    scene.element.classList.add('is-slotted');
+  }
+  scene.slots.inventory.hidden = true;
+  scene.slots.inventory.style.display = 'none';
   const tapeRoot = document.createElement('div');
   tapeRoot.id = 'tape-panel';
   const drumRoot = document.createElement('div');
   drumRoot.id = 'drum';
+  levelScene.editorSlot.append(tapeRoot);
+  levelScene.editorSlot.append(drumRoot);
   const hint = document.createElement('p');
   hint.className = 'hint';
   hint.textContent = 'Tocá una púa para escribir, mover y elegir la sección siguiente.';
-  shop.append(shopHead);
-  shop.append(tapeRoot);
-  shop.append(drumRoot);
-  shop.append(hint);
-  const logPanel = document.createElement('aside');
-  logPanel.className = 'panel log-panel';
-  const logTitle = document.createElement('h2');
-  logTitle.textContent = 'Bitácora';
-  const log = document.createElement('ul');
-  log.id = 'log';
-  log.className = 'log';
-  log.setAttribute('aria-live', 'polite');
-  log.setAttribute('aria-label', 'Bitácora del taller');
-  logPanel.append(logTitle);
-  logPanel.append(log);
-  layout.append(brief);
-  layout.append(shop);
-  layout.append(logPanel);
-  shell.append(header);
-  shell.append(layout);
-  app.append(shell);
+  scene.slots.status.append(hint);
+  const probeButton = scene.slots.actions.querySelector('[data-action="probe"]');
+  if (probeButton !== null) {
+    probeButton.textContent = 'Probar la cinta';
+  }
+  const assaultButton = scene.slots.actions.querySelector('[data-action="assault"]');
+  if (assaultButton !== null) {
+    assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
+    assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
+  }
   workshop = null;
-  drumEditor = createDrumEditor({ root: document.querySelector('#drum'), sections: state.puzzle.sections, symbols: state.puzzle.tape.symbols, labels: state.puzzle.tape.labels, rules: state.blueprint.rules, onEdit: handlePinEdit });
-  tapePanel = createTapePanel({ root: document.querySelector('#tape-panel'), blankLabel: state.puzzle.tape.labels[state.puzzle.tape.blank] ?? '' });
-  document.querySelector('#test-key').addEventListener('click', handleProbe);
-  document.querySelector('#heist').addEventListener('click', handleAssault);
+  drumEditor = createDrumEditor({ root: drumRoot, sections: state.puzzle.sections, symbols: state.puzzle.tape.symbols, labels: state.puzzle.tape.labels, rules: state.blueprint.rules, onEdit: handlePinEdit });
+  tapePanel = createTapePanel({ root: tapeRoot, blankLabel: state.puzzle.tape.labels[state.puzzle.tape.blank] ?? '' });
   appendLog(state.puzzle.intro);
   if (state.phase === 'repair') {
     appendLog('Probá la cinta y después pedí el ensayo.');
   } else {
     appendLog('Probá la cinta y después lanzá el asalto.');
   }
+}
+function renderDrumWorkshop() {
+  renderDrumScene();
 }
 function showTapeFrame(run) {
   if (run.frames.length === 0) {
@@ -889,6 +927,7 @@ function showTapeFrame(run) {
   drumEditor.light(frame.state, frame.read);
 }
 function probeTape() {
+  sfx('tape');
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const input = state.puzzle.examples.runs[0].input;
   const run = runTM(machine, input, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
@@ -915,11 +954,13 @@ function assaultTape(machine, verdict) {
   if (verdict.counterexample === null) {
     return;
   }
+  sfx('tape');
   const run = runTM(machine, verdict.counterexample, { maxSteps: state.puzzle.judge.limits.maxSteps, record: true });
   showTapeFrame(run);
 }
 function handlePinEdit(edit) {
   const rules = structuredClone(state.blueprint.rules);
+  sfx('pin');
   if (rules[edit.section] === undefined) {
     rules[edit.section] = {};
   }
@@ -960,8 +1001,10 @@ function handleProbe() {
   const word = state.puzzle.examples.open[0];
   const result = runMachine(machine, word, { record: true });
   if (result.accepted) {
+    sfx('lock');
     appendLog(`La llave ${word} abrió la caja.`, 'good');
   } else {
+    sfx('error');
     appendLog(`La llave ${word} no abrió la caja.`, 'bad');
   }
   workshop.highlight(frameStates(result.frames));
@@ -970,9 +1013,15 @@ function handleProbe() {
   }
 }
 function handleAssault() {
+  sfx('steps');
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const verdict = judge(state.puzzle, machine);
   const report = thiefReport(verdict, state.level);
+  if (report.tone === 'bad') {
+    sfx('error');
+  } else {
+    sfx('lock');
+  }
   appendLog(report.text, report.tone);
   if (state.level.machine === 'tm') {
     assaultTape(machine, verdict);
@@ -995,11 +1044,74 @@ function handleAssault() {
     }
   }
 }
-function openModal(eyebrow, title, body, actionLabel, onAction) {
+function openWorkshopDoc(kind) {
+  sfx('paper');
+  const brief = LEVEL_BRIEFS[state.level.id] ?? null;
+  if (kind === 'contract') {
+    const body = brief !== null ? `${brief.context}\n\n${state.puzzle.goal}` : state.puzzle.goal;
+    openModal(`Contrato ${state.level.contract}`, state.level.client, body, 'Entendido', () => {}, 'contract');
+    return;
+  }
+  if (kind === 'hint') {
+    const hints = state.puzzle.hints ?? [];
+    const fallback = hints.length > 0 ? hints[0] : 'No hay pistas para este contrato.';
+    const text = brief !== null ? brief.tutorial : fallback;
+    openModal('Pista', 'Pista del taller', text, 'Entendido', () => {}, 'hint');
+    return;
+  }
+  if (kind === 'log') {
+    const entries = workbenchView !== null && workbenchView.slots?.log !== undefined
+      ? [...workbenchView.slots.log.querySelectorAll('.wb-log-entry')].map((item) => item.textContent)
+      : [];
+    const body = entries.length > 0 ? entries.join('\n') : state.puzzle.intro;
+    openModal('Bitácora', 'Notas del caso', body, 'Cerrar', () => {}, 'log');
+  }
+}
+async function toggleSound() {
+  soundOn = soundOn === false;
+  if (workbenchView !== null) {
+    workbenchView.setSound(soundOn);
+  }
+  if (manifest === null) {
+    manifest = await loadManifest();
+  }
+  if (audio === null) {
+    audio = createAudio({ manifest });
+  }
+  audio.setEnabled(soundOn);
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
+    } catch {
+      // Sin almacenamiento, la preferencia vive solo en la sesión.
+    }
+  }
+  if (soundOn) {
+    audio.play('click');
+  }
+}
+function sfx(id) {
+  if (audio !== null) {
+    audio.play(id);
+  }
+}
+async function initAudio() {
+  if (manifest === null) {
+    manifest = await loadManifest();
+  }
+  if (audio === null) {
+    audio = createAudio({ manifest, enabled: soundOn });
+  }
+  audio.setEnabled(soundOn);
+}
+function openModal(eyebrow, title, body, actionLabel, onAction, paper = null) {
   const backdrop = document.createElement('div');
   backdrop.className = 'modal-backdrop';
   const modal = document.createElement('section');
   modal.className = 'modal';
+  if (paper === 'contract' || paper === 'hint' || paper === 'log') {
+    modal.classList.add(`modal--${paper}`);
+  }
   modal.setAttribute('role', 'dialog');
   modal.setAttribute('aria-modal', 'true');
   const brow = document.createElement('p');
@@ -1009,6 +1121,7 @@ function openModal(eyebrow, title, body, actionLabel, onAction) {
   heading.textContent = title;
   const text = document.createElement('p');
   text.textContent = body;
+  text.style.whiteSpace = 'pre-line';
   const button = document.createElement('button');
   button.type = 'button';
   button.className = 'primary';
@@ -1026,6 +1139,26 @@ function openModal(eyebrow, title, body, actionLabel, onAction) {
   backdrop.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       backdrop.remove();
+      return;
+    }
+    // Trampa de foco: el Tab circula dentro del diálogo y no se escapa al taller.
+    if (event.key !== 'Tab') {
+      return;
+    }
+    const focusables = [...modal.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')]
+      .filter((node) => node.disabled !== true);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   });
   document.body.append(backdrop);
@@ -1035,6 +1168,7 @@ function showRepairModal() {
   openModal(`Contrato ${state.level.contract}`, 'Mecanismo reparado', state.level.phases.build.goal, 'Construir el nuevo', startBuild);
 }
 function showWin() {
+  sfx('success');
   const progress = loadProgress();
   if (progress.completed.includes(state.level.id) === false) {
     progress.completed.push(state.level.id);
@@ -1043,3 +1177,4 @@ function showWin() {
   openModal(`Contrato ${state.level.contract}`, 'Bóveda asegurada', state.level.thief.giveUp, 'Volver al mapa', renderMap);
 }
 renderTitle();
+initAudio();

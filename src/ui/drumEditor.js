@@ -151,6 +151,7 @@ export function createDrumEditor({ root, sections, symbols, labels, rules, onEdi
   }
   function emitPin() {
     onEdit({ type: 'set-pin', section: open.section, read: open.read, pin: { write: open.write, move: open.move, to: open.to } });
+    open = null;
     render();
   }
   function emitEmpty() {

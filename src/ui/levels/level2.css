@@ -1,0 +1,790 @@
+/* Escena del nivel 2 — Hotel Mirador, sala de máquinas del ascensor.
+   Alcance estricto: .level-scene[data-level="2"].
+   Precisión noir del mockup (mockups/nivel-1-taller): Cinzel para
+   títulos, Oswald para la interfaz, Special Elite para papeles y
+   sellos; latón, nogal y papel sobre níquel.
+   Escena inmersiva (§9): ocupa toda la ventana (position absolute,
+   inset 0, height 100%), el fondo cubre con cover y la placa de la
+   sala queda centrada sobre la mesa sin superar el 65 % del ancho.
+   Funciona dentro del shell con `.is-immersive` y también sin ella:
+   la raíz ya sale del flujo y cubre su stage.
+   La banda de mesa es una fila flex real (nada de posiciones absolutas
+   que se crucen): papeles a la izquierda, `keysSlot` (paleta y
+   herramientas del parent) al centro, tijera al lado de los carretes
+   y probar + ensayo juntos a la derecha. `hudSlot` (línea de marcha
+   del parent) va como último renglón. Todo con box-sizing border-box
+   y max-width 100 %: nada desborda la ventana.
+   Los seis props (papeles, indicador, palanca y tijera) son los
+   controles reales: botones transparentes sin caja, foco visible teal
+   y área táctil ≥44 px. El parent engancha sus manejadores sobre los
+   `data-action`; la escena no decide nada. La marcha la mueve el
+   parent a `hudSlot`, sin franja de interfaz.
+   Finales: levels.02.background, levels.02.floorIndicator,
+   levels.02.pinion, shared.prop.relay y levels.01.contract|hint|log
+   (papeles de la mesa, ver assets/manifest.json). La palanca y la
+   tijera no tienen asset final (P1 pendiente): se dibujan con CSS
+   y llevan `data-status="placeholder"`, sin texto visible. */
+
+.level-scene[data-level="2"] {
+  --l2-nickel: #232c36;
+  --l2-nickel-deep: #12161c;
+  --l2-brass: #d4a72c;
+  --l2-brass-2: #f0cf6a;
+  --l2-brass-dark: #7a5a12;
+  --l2-ink: #f2ede3;
+  --l2-muted: #c3ccd8;
+  --l2-teal: #38c6b8;
+  --l2-wood: #2b1d16;
+  --l2-wood-2: #3d2a1e;
+  --l2-paper: #f2ede3;
+  --l2-font-display: "Cinzel", "Palatino Linotype", Georgia, serif;
+  --l2-font-ui: "Oswald", "Segoe UI", system-ui, sans-serif;
+  --l2-font-paper: "Special Elite", "Courier New", monospace;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: #0e1218;
+  color: var(--l2-ink);
+  font-family: var(--l2-font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.level-scene[data-level="2"],
+.level-scene[data-level="2"] *,
+.level-scene[data-level="2"] *::before,
+.level-scene[data-level="2"] *::after {
+  box-sizing: border-box;
+}
+
+/* Refuerzo inmersivo: con el shell en modo de escena completa la raíz
+   sigue cubriendo todo el stage sin marcos ni recortes. */
+.wb-scene.is-immersive .level-scene[data-level="2"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Foto final del lobby: cubre toda la escena, centrada, con un velo tenue
+   para que la placa mantenga contraste. Si la foto falta, el fondo de
+   base sostiene la sala. */
+.level-scene[data-level="2"] .l2-background {
+  position: absolute;
+  inset: 0;
+  max-width: 100%;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(10, 13, 17, 0.32), rgba(10, 13, 17, 0.32)),
+    url("../../../assets/levels/02/background.webp");
+  background-size: cover, cover;
+  background-position: center, center;
+  background-repeat: no-repeat, no-repeat;
+}
+
+/* Luz cálida desde arriba a la izquierda y filo teal a la derecha. */
+.level-scene[data-level="2"] .l2-light {
+  position: absolute;
+  inset: 0;
+  max-width: 100%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 6%, rgba(240, 207, 106, 0.16) 0%, transparent 28%),
+    radial-gradient(circle at 82% 72%, rgba(56, 198, 184, 0.08) 0%, transparent 34%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* Mesa de nogal donde descansan la placa y la banda. */
+.level-scene[data-level="2"] .l2-bench {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36%;
+  max-width: 100%;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(240, 207, 106, 0.12) 0%, transparent 6%),
+    repeating-linear-gradient(93deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 26px),
+    linear-gradient(180deg, var(--l2-wood-2) 0%, var(--l2-wood) 60%, #1a110c 100%);
+  border-top: 1px solid rgba(240, 207, 106, 0.28);
+}
+
+/* Placa de níquel y latón: el centro de la composición, sobre la mesa.
+   Crece con la ventana (alto proporcional, misma razón 760/620) sin
+   superar el 65 % del ancho ni chocar con la banda. Los elementos
+   internos los agranda el parent vía viewBox: solo el tablero vive en
+   su flujo; relés, piñón y sello decoran desde posiciones absolutas
+   sin comerle lugar al editor. */
+.level-scene[data-level="2"] .l2-plate {
+  position: absolute;
+  left: 50%;
+  top: 44%;
+  z-index: 2;
+  height: min(64%, 700px);
+  aspect-ratio: 760 / 620;
+  max-width: 65%;
+  transform: translate(-50%, -50%);
+  border: 1px solid rgba(212, 167, 44, 0.55);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%),
+    linear-gradient(180deg, #1a212b 0%, #0e1218 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.5);
+}
+
+.level-scene[data-level="2"] .l2-plate-label {
+  position: absolute;
+  left: 50%;
+  top: 3.5%;
+  transform: translateX(-50%);
+  margin: 0;
+  max-width: 90%;
+  overflow: hidden;
+  color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-plate-serial {
+  position: absolute;
+  left: 5%;
+  top: 3.5%;
+  margin: 0;
+  color: #c99b4a;
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-plate-seal {
+  position: absolute;
+  right: 4%;
+  top: 2.5%;
+  margin: 0;
+  padding: 4px 8px;
+  border: 2px solid #a33a26;
+  border-radius: 3px;
+  color: #d4695a;
+  font-family: var(--l2-font-paper);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Hueco donde el parent monta el tablero real: fondo transparente, sin
+   borde de panel. El tablero manda; la placa solo lo enmarca. */
+.level-scene[data-level="2"] .l2-editor-slot {
+  position: absolute;
+  left: 5%;
+  right: 5%;
+  top: 12%;
+  bottom: 17%;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.level-scene[data-level="2"] .l2-editor-slot svg,
+.level-scene[data-level="2"] .l2-editor-slot #canvas {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.level-scene[data-level="2"] .l2-editor-slot:focus-within {
+  outline: 2px solid var(--l2-teal);
+  outline-offset: 3px;
+}
+
+/* Lámparas de relé sobre la placa: adorno con visor, sin acciones. */
+.level-scene[data-level="2"] .l2-props {
+  position: absolute;
+  left: 5%;
+  bottom: 4%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: 40%;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-relay {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.level-scene[data-level="2"] .l2-relay-img {
+  display: block;
+  width: 20px;
+  height: 20px;
+  flex: none;
+  object-fit: contain;
+}
+
+.level-scene[data-level="2"] .l2-relay-visor {
+  width: 12px;
+  height: 12px;
+  flex: none;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #d6fff9, var(--l2-teal) 60%, #0b6b63);
+  box-shadow: 0 0 0 2px #0a0d11, 0 0 8px rgba(56, 198, 184, 0.5);
+}
+
+.level-scene[data-level="2"] .l2-relay-tag {
+  overflow: hidden;
+  color: var(--l2-muted);
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Piñón fuera del flujo: decora la esquina de la placa sin tapar el tablero. */
+.level-scene[data-level="2"] .l2-pinion {
+  position: absolute;
+  right: 3%;
+  bottom: 2.5%;
+  width: 60px;
+  max-width: 20%;
+  height: 60px;
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-pinion-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+/* --- Banda de mesa: fila flex real con los props y las ranuras del
+   parent. En flujo (margin-top auto la lleva al fondo), sin posiciones
+   absolutas que se crucen y sin anchos que desborden. --- */
+.level-scene[data-level="2"] .l2-band {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: flex-start;
+  gap: 10px 18px;
+  width: 100%;
+  max-width: 100%;
+  margin-top: auto;
+  padding: 10px max(16px, 2%) 6px;
+}
+
+/* --- Props diegéticos: los controles reales sobre la mesa. Sin caja de
+   botón (fondo transparente, sin borde); el foco va con contorno teal y
+   cada prop mide ≥44 px. En la banda son ítems flex que nunca se
+   superponen: si no entran, envuelven a otra fila. --- */
+.level-scene[data-level="2"] .l2-probe,
+.level-scene[data-level="2"] .l2-lever,
+.level-scene[data-level="2"] .l2-paper,
+.level-scene[data-level="2"] .l2-scissors {
+  flex: none;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.level-scene[data-level="2"] .l2-prop-name {
+  display: block;
+  margin: 4px 0 0;
+  color: #c9a45c;
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* Indicador de pisos: tocarlo hace la prueba. Va en la banda a la
+   derecha, junto a la palanca de ensayo, en el mismo grupo. */
+.level-scene[data-level="2"] .l2-probe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.level-scene[data-level="2"] .l2-gauge {
+  margin: 0;
+  padding: 6px;
+  border: 1px solid rgba(212, 167, 44, 0.45);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #313b47 0%, #171c23 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.45);
+  transform-origin: 50% 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-gauge-img {
+  display: block;
+  width: 96px;
+  max-width: 100%;
+  height: auto;
+}
+
+@media (min-width: 1101px) {
+  .level-scene[data-level="2"] .l2-gauge-img {
+    width: 120px;
+  }
+}
+
+.level-scene[data-level="2"] .l2-gauge-caption {
+  margin-top: 2px;
+  color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+/* Papeles sobre la mesa: contrato, pista y bitácora con sus assets
+   finales. Fila con gap; cada rótulo debajo de su imagen, sin solapes. */
+.level-scene[data-level="2"] .l2-papers {
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-scene[data-level="2"] .l2-paper-item {
+  margin: 0;
+  padding: 0;
+}
+
+.level-scene[data-level="2"] .l2-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.level-scene[data-level="2"] .l2-paper-img {
+  display: block;
+  width: 76px;
+  max-width: 100%;
+  height: auto;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.5));
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-paper--hint .l2-paper-img {
+  width: 64px;
+}
+
+.level-scene[data-level="2"] .l2-paper--log .l2-paper-img {
+  width: 72px;
+}
+
+/* Ranura de carretes: el parent monta la paleta y las herramientas.
+   Ocupa todo el lugar libre al centro de la banda y cede sin empujar:
+   crece con flex, se encoge hasta cero y su contenido envuelve dentro.
+   Reserva ~104 px de alto para que el carrete completo y su chapa con
+   el símbolo entren sin recorte: nada de overflow hidden vertical.
+   Fondo transparente para que lo del parent se integre. */
+.level-scene[data-level="2"] .l2-keys {
+  display: flex;
+  flex: 1 1 auto;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+  min-height: 104px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  overflow: visible;
+}
+
+.level-scene[data-level="2"] .l2-keys #palette {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  max-width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+/* Tijera sobre la mesa, dibujada con CSS. `is-active` marca el modo corte. */
+.level-scene[data-level="2"] .l2-scissors {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 60px;
+  max-width: 100%;
+}
+
+.level-scene[data-level="2"] .l2-scissors-visual {
+  position: relative;
+  display: block;
+  width: 56px;
+  max-width: 100%;
+  height: 56px;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-scissors-blade {
+  position: absolute;
+  left: 6px;
+  top: 24px;
+  width: 44px;
+  max-width: 80%;
+  height: 6px;
+  border-radius: 3px;
+  background: linear-gradient(180deg, #e8eef4, #8b98a8 60%, #5c6672);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.level-scene[data-level="2"] .l2-scissors-blade--up {
+  transform: rotate(-24deg);
+}
+
+.level-scene[data-level="2"] .l2-scissors-blade--down {
+  transform: rotate(24deg);
+}
+
+.level-scene[data-level="2"] .l2-scissors-ring {
+  position: absolute;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border: 4px solid var(--l2-brass-dark);
+  border-radius: 50%;
+}
+
+.level-scene[data-level="2"] .l2-scissors-ring--up {
+  top: 2px;
+}
+
+.level-scene[data-level="2"] .l2-scissors-ring--down {
+  bottom: 2px;
+}
+
+.level-scene[data-level="2"] .l2-scissors.is-active {
+  outline: 2px solid var(--l2-brass);
+  outline-offset: 2px;
+  filter: drop-shadow(0 0 6px rgba(212, 167, 44, 0.8));
+}
+
+/* Palanca de llamada del ascensor: tirar de ella pide el ensayo.
+   Cierra la banda a la derecha, dentro del margen. El visual tiene caja
+   propia con el pomo montado arriba; el rótulo va debajo en flujo,
+   sin superponerse con el asset. */
+.level-scene[data-level="2"] .l2-lever {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  max-width: 100%;
+}
+
+.level-scene[data-level="2"] .l2-lever .l2-prop-name {
+  margin-top: 0;
+}
+
+.level-scene[data-level="2"] .l2-lever-visual {
+  position: relative;
+  display: block;
+  width: 30px;
+  max-width: 100%;
+  height: 88px;
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-lever-track {
+  position: relative;
+  display: block;
+  width: 26px;
+  height: 88px;
+  margin-inline: auto;
+  border: 1px solid rgba(212, 167, 44, 0.55);
+  border-radius: 13px;
+  background: linear-gradient(180deg, #10151b 0%, #232c36 100%);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+}
+
+.level-scene[data-level="2"] .l2-lever-track::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  bottom: 8px;
+  width: 4px;
+  transform: translateX(-50%);
+  border-radius: 2px;
+  background: rgba(212, 167, 44, 0.35);
+}
+
+.level-scene[data-level="2"] .l2-lever-knob {
+  position: absolute;
+  left: 50%;
+  top: -14px;
+  transform: translateX(-50%);
+  display: block;
+  width: 30px;
+  max-width: 100%;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f7e3a1, var(--l2-brass) 55%, #6b4e0e);
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6), 0 0 10px rgba(212, 167, 44, 0.45);
+  pointer-events: none;
+}
+
+/* La marcha la mueve el parent a este último renglón de la banda:
+   línea grabada de 14 px, sin franja. En flujo, a lo ancho, con
+   elipsis: nunca empuja la ventana. */
+.level-scene[data-level="2"] .l2-hud {
+  position: relative;
+  z-index: 3;
+  width: 100%;
+  max-width: 100%;
+  margin: 0;
+  padding: 4px 12px 12px;
+  border: 0;
+  background: none;
+  color: var(--l2-ink);
+  font-family: var(--l2-font-ui);
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+/* Foco visible con contorno teal para los props accionables. */
+.level-scene[data-level="2"] .l2-probe:focus-visible,
+.level-scene[data-level="2"] .l2-lever:focus-visible,
+.level-scene[data-level="2"] .l2-paper:focus-visible,
+.level-scene[data-level="2"] .l2-scissors:focus-visible,
+.level-scene[data-level="2"] :focus-visible {
+  outline: 2px solid var(--l2-teal);
+  outline-offset: 3px;
+}
+
+/* Controles que el parent monte dentro de la escena: 44 px y foco visible. */
+.level-scene[data-level="2"] button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+@media (max-width: 700px) {
+  /* En celular la banda envuelve en filas: papeles, prueba, tijera y
+     palanca arriba; carretes en su propia fila; marcha al pie. Nada
+     se superpone y todo sigue ≥44 px; los rótulos largos quedan en el
+     aria-label. */
+  .level-scene[data-level="2"] .l2-plate {
+    width: 94%;
+    height: auto;
+    top: 40%;
+  }
+
+  .level-scene[data-level="2"] .l2-band {
+    flex-wrap: wrap;
+    gap: 8px 10px;
+    padding: 8px 8px 4px;
+  }
+
+  .level-scene[data-level="2"] .l2-gauge-img {
+    width: 72px;
+  }
+
+  .level-scene[data-level="2"] .l2-gauge-caption {
+    font-size: 10px;
+  }
+
+  .level-scene[data-level="2"] .l2-paper-img {
+    width: 52px;
+  }
+
+  .level-scene[data-level="2"] .l2-paper--hint .l2-paper-img {
+    width: 46px;
+  }
+
+  .level-scene[data-level="2"] .l2-paper--log .l2-paper-img {
+    width: 50px;
+  }
+
+  .level-scene[data-level="2"] .l2-prop-name {
+    display: none;
+  }
+
+  .level-scene[data-level="2"] .l2-keys {
+    order: 6;
+    flex-basis: 100%;
+    margin-inline: 0;
+  }
+
+  .level-scene[data-level="2"] .l2-scissors {
+    width: 44px;
+  }
+
+  .level-scene[data-level="2"] .l2-scissors-visual {
+    width: 44px;
+    height: 44px;
+  }
+
+  .level-scene[data-level="2"] .l2-lever-visual {
+    height: 64px;
+  }
+
+  .level-scene[data-level="2"] .l2-lever-track {
+    height: 64px;
+  }
+
+  .level-scene[data-level="2"] .l2-lever-knob {
+    width: 24px;
+    height: 24px;
+  }
+
+  .level-scene[data-level="2"] .l2-pinion {
+    width: 44px;
+    height: 44px;
+  }
+
+  .level-scene[data-level="2"] .l2-relay-tag {
+    display: none;
+  }
+
+  .level-scene[data-level="2"] .l2-hud {
+    padding: 2px 8px 8px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="2"],
+  .level-scene[data-level="2"] *,
+  .level-scene[data-level="2"] *::before,
+  .level-scene[data-level="2"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* --- Ambiente: la sala respira. Solo con movimiento permitido: visor del
+   relé, vaivén mínimo del indicador, brillo del piñón y luz tenue. Nada
+   que distraiga del tablero; la tijera no se anima. --- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes l2-visor-blink {
+    0%,
+    100% {
+      opacity: 1;
+      box-shadow: 0 0 0 2px #0a0d11, 0 0 8px rgba(56, 198, 184, 0.5);
+    }
+    50% {
+      opacity: 0.55;
+      box-shadow: 0 0 0 2px #0a0d11, 0 0 2px rgba(56, 198, 184, 0.2);
+    }
+  }
+
+  @keyframes l2-gauge-sway {
+    0%,
+    100% {
+      transform: rotate(-1deg);
+    }
+    50% {
+      transform: rotate(1deg);
+    }
+  }
+
+  @keyframes l2-pinion-glow {
+    0%,
+    100% {
+      filter: brightness(1);
+    }
+    50% {
+      filter: brightness(1.25) drop-shadow(0 0 6px rgba(240, 207, 106, 0.5));
+    }
+  }
+
+  @keyframes l2-light-drift {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  .level-scene[data-level="2"] .l2-relay-visor {
+    animation: l2-visor-blink 3s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="2"] .l2-gauge {
+    animation: l2-gauge-sway 6s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="2"] .l2-pinion-img {
+    animation: l2-pinion-glow 7s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="2"] .l2-light {
+    animation: l2-light-drift 9s ease-in-out infinite;
+  }
+}

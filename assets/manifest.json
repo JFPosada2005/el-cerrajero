@@ -1,0 +1,573 @@
+{
+  "version": 1,
+  "updated": "2026-11-18",
+  "direction": "precision-noir workbench, Mateo 153ee7d",
+  "budgets": {
+    "imagePerLevelBytes": 1572864,
+    "audioPerLevelBytes": 409600,
+    "fontsBytes": 153600,
+    "cssBytes": 40960,
+    "javascriptBytes": 51200
+  },
+  "fonts": {
+    "display": {
+      "final": "assets/fonts/Cinzel-Variable.woff2",
+      "kind": "font",
+      "priority": "P0",
+      "status": "available",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/OFL-Cinzel.txt"
+    },
+    "ui": {
+      "final": "assets/fonts/Oswald-Variable.woff2",
+      "kind": "font",
+      "priority": "P0",
+      "status": "available",
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/OFL-Oswald.txt"
+    },
+    "paper": {
+      "final": "assets/fonts/SpecialElite-Regular.woff2",
+      "kind": "font",
+      "priority": "P0",
+      "status": "available",
+      "license": "Apache-2.0",
+      "licenseFile": "assets/fonts/LICENSE-SpecialElite.txt"
+    }
+  },
+  "shared": {
+    "ui.sound": {
+      "final": "assets/shared/ui/sound.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.close": {
+      "final": "assets/shared/ui/close.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.lock": {
+      "final": "assets/shared/ui/lock.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.speed": {
+      "final": "assets/shared/ui/speed.svg",
+      "kind": "icon",
+      "priority": "P1",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "paper.contract": {
+      "final": "assets/shared/paper/contract.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "available",
+      "license": "Proyecto — asset IA (Gemini)",
+      "source": "Generado por el owner con Gemini; recortado a 512×704 y exportado a WebP"
+    },
+    "paper.hint": {
+      "final": "assets/shared/paper/hint.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "available",
+      "license": "Proyecto — derivado del papel base",
+      "source": "Derivado del papel base de Gemini; 384×328"
+    },
+    "paper.log": {
+      "final": "assets/shared/paper/log.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "available",
+      "license": "Proyecto — derivado del papel base",
+      "source": "Derivado del papel base de Gemini con líneas; 384×300"
+    },
+    "prop.relay": {
+      "final": "assets/shared/props/relay.webp",
+      "kind": "image",
+      "priority": "P0",
+      "status": "available",
+      "license": "Proyecto — asset IA (Leonardo.ai)",
+      "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256"
+    },
+    "prop.fork": {
+      "final": "assets/shared/props/fork.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "Proyecto — SVG original",
+      "source": "Dibujado a mano para el remaster; 64×64"
+    },
+    "prop.spring": {
+      "final": "assets/shared/props/spring.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "Proyecto — SVG original",
+      "source": "Dibujado a mano para el remaster; 64×64"
+    }
+  },
+  "levels": {
+    "01": {
+      "background": {
+        "final": "assets/levels/01/background.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/fondo-banco.jpg",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "thief": {
+        "final": "assets/levels/01/thief.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/ladron.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "contract": {
+        "final": "assets/levels/01/props/contract.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/contrato.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "hint": {
+        "final": "assets/levels/01/props/hint.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/nota-pista.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "log": {
+        "final": "assets/levels/01/props/log.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/libreta.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "entry": {
+        "final": "assets/levels/01/props/entry.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/bocallave-entrada.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "lock": {
+        "final": "assets/levels/01/props/lock.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/cilindro-cerradura.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "spool": {
+        "final": "assets/levels/01/props/spool.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/carrete-cobre.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "gear": {
+        "final": "assets/levels/01/props/gear.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/rueda-engranaje.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "bell": {
+        "final": "assets/levels/01/props/bell.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/campana-alarma.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "scissors": {
+        "final": "assets/levels/01/props/scissors.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/tijeras.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "key1": {
+        "final": "assets/levels/01/props/key-1.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-1.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "key2": {
+        "final": "assets/levels/01/props/key-2.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-2.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "key3": {
+        "final": "assets/levels/01/props/key-3.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-3.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      },
+      "key4": {
+        "final": "assets/levels/01/props/key-4.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-4.png",
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
+      }
+    },
+    "02": {
+      "background": {
+        "final": "assets/levels/02/background.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
+      },
+      "pinion": {
+        "final": "assets/levels/02/pinion.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 512×512"
+      },
+      "floorIndicator": {
+        "final": "assets/levels/02/floor-indicator.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 160×64"
+      }
+    },
+    "03": {
+      "backgroundDay": {
+        "final": "assets/levels/03/day.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
+      },
+      "backgroundNight": {
+        "final": "assets/levels/03/night.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
+      },
+      "lamp": {
+        "final": "assets/levels/03/lamp.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P2",
+        "status": "missing"
+      }
+    },
+    "04": {
+      "background": {
+        "final": "assets/levels/04/background.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
+      },
+      "stackBase": {
+        "final": "assets/levels/04/stack-base.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 128×40"
+      },
+      "chip": {
+        "final": "assets/levels/04/chip.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 112×64"
+      },
+      "selectors": {
+        "final": "assets/levels/04/selectors.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 240×64"
+      },
+      "leverUp": {
+        "final": "assets/levels/04/lever-up.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 64×64"
+      },
+      "leverDown": {
+        "final": "assets/levels/04/lever-down.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 64×64"
+      }
+    },
+    "05": {
+      "background": {
+        "final": "assets/levels/05/background.webp",
+        "placeholder": "mockups/nivel-1-taller/assets/sprites/fondo-banco.jpg",
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
+      },
+      "tape": {
+        "final": "assets/levels/05/tape.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; celda 80×80, 2× de 40×40"
+      },
+      "head": {
+        "final": "assets/levels/05/head.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256"
+      },
+      "drum": {
+        "final": "assets/levels/05/drum.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 512×512"
+      },
+      "pin": {
+        "final": "assets/levels/05/pin.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P0",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 32×32"
+      },
+      "depositSlip": {
+        "final": "assets/levels/05/deposit-slip.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 1024×676 y exportado a WebP"
+      }
+    }
+  },
+  "sfx": {
+    "click": {
+      "final": "assets/audio/sfx/click.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "Pixabay Content License",
+      "source": "freesound_community — Pixabay 43196 — https://pixabay.com/sound-effects/film-special-effects-ui-click-43196/; recortado y exportado a OGG mono 44,1 kHz"
+    },
+    "cable": {
+      "final": "assets/audio/sfx/cable.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "Proyecto — síntesis original",
+      "source": "Síntesis procedural propia; OGG mono 44,1 kHz"
+    },
+    "cut": {
+      "final": "assets/audio/sfx/cut.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "StarTowerStudio — Freesound 424988 — https://freesound.org/s/424988/"
+    },
+    "gear": {
+      "final": "assets/audio/sfx/gear.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "CC BY 4.0",
+      "source": "Sabacky (Pavel Sabacky) — Freesound 807842 — https://freesound.org/s/807842/"
+    },
+    "lock": {
+      "final": "assets/audio/sfx/lock.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "dster777 — Freesound 344551 — https://freesound.org/s/344551/"
+    },
+    "bell": {
+      "final": "assets/audio/sfx/bell.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "rgjpb — Freesound 686265 — https://freesound.org/s/686265/"
+    },
+    "paper": {
+      "final": "assets/audio/sfx/paper.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "Nicolas4677 — Freesound 446631 — https://freesound.org/s/446631/"
+    },
+    "error": {
+      "final": "assets/audio/sfx/error.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "available",
+      "license": "Pixabay Content License",
+      "source": "Lesiakower — Pixabay 437420 — https://pixabay.com/sound-effects/error-mistake-sound-effect-incorrect-answer-437420/"
+    },
+    "success": {
+      "final": "assets/audio/sfx/success.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "Pendiente de confirmar (archivo del owner)",
+      "source": "assets/incoming/sfx/succes chime.wav; recortado y exportado a OGG mono 44,1 kHz"
+    },
+    "spring": {
+      "final": "assets/audio/sfx/spring.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "magnuswaker — Freesound 540790 — https://freesound.org/s/540790/"
+    },
+    "chip": {
+      "final": "assets/audio/sfx/chip.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "tris6970 — Freesound 350496 — https://freesound.org/s/350496/"
+    },
+    "tape": {
+      "final": "assets/audio/sfx/tape.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "quatricise — Freesound 790841 — https://freesound.org/s/790841/"
+    },
+    "pin": {
+      "final": "assets/audio/sfx/pin.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "Godowan — Freesound 235280 — https://freesound.org/s/235280/"
+    },
+    "steps": {
+      "final": "assets/audio/sfx/steps.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "available",
+      "license": "CC BY 4.0",
+      "source": "Hawkeye_Sprout — Freesound 469080 — https://freesound.org/s/469080/"
+    }
+  },
+  "music": {
+    "n1": {
+      "final": "assets/audio/music/n1.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n2": {
+      "final": "assets/audio/music/n2.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n3": {
+      "final": "assets/audio/music/n3.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n4": {
+      "final": "assets/audio/music/n4.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n5": {
+      "final": "assets/audio/music/n5.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    }
+  }
+}

@@ -1,0 +1,1128 @@
+/* Nivel 5 — Banco Central, sala de recuento. Escena inmersiva y diegética.
+ * La escena ocupa toda la ventana (el shell la monta en el stage y la
+ * amplía con `is-drum-room`; estas reglas también conviven con el shell
+ * en modo `is-immersive`): sin panel de objetivo, sin barra de acciones
+ * y sin franja de estado. La placa del mecanismo es el centro sobre la
+ * mesa; los controles son props accionables (botones reales con
+ * `data-action`) que el parent engancha: papeles sobre la mesa, manivela
+ * del tambor y volante de la bóveda. La boleta de depósito es el estado:
+ * contador y fase se leen ahí y en la línea grabada de la placa.
+ *
+ * Un solo taller: la placa enmarca el editor real (#tape-panel y #drum
+ * que monta el parent). Sin maquetas de cinta ni de tambor: el riel trae
+ * cinta perforada decorativa (orificios sin casillas ni símbolos) como
+ * atmósfera. Si el editor crece, el desplazamiento vive dentro de
+ * .counting-editor.
+ *
+ * Materiales del mockup (precision noir, sala cálida): latón, nogal,
+ * papel ivory con lacre, luz cálida arriba a la izquierda y filo teal a
+ * la derecha. Placeholders CSS, sin imágenes externas salvo los assets
+ * finales del manifiesto.
+ */
+
+.level-scene[data-level="5"] {
+  --counting-ink: var(--ink, #f2ede3);
+  --counting-muted: var(--muted, #a7b0be);
+  --counting-brass: var(--brass, #d4a72c);
+  --counting-brass-2: var(--brass-2, #f0cf6a);
+  --counting-brass-dark: var(--brass-dark, #7a5a12);
+  --counting-teal: var(--teal, #38c6b8);
+  --counting-paper: #f4ecd9;
+  --counting-paper-2: #e4d8c3;
+  --counting-wax: #8e2f2a;
+  --counting-display: var(--font-display, "Cinzel", Georgia, "Times New Roman", serif);
+  --counting-ui: var(--font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  --counting-paper-font: var(--font-paper, "Special Elite", "Courier New", monospace);
+  position: absolute;
+  inset: 0;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 0;
+  border-radius: 0;
+  background:
+    radial-gradient(120% 90% at 16% 0%, rgba(240, 207, 106, 0.16), transparent 55%),
+    radial-gradient(90% 70% at 98% 30%, rgba(56, 198, 184, 0.1), transparent 55%),
+    linear-gradient(165deg, #26222c 0%, #161419 55%, #0b0f14 100%);
+  color: var(--counting-ink);
+  font-family: var(--counting-ui);
+}
+
+/* Compatibilidad con el shell inmersivo: la escena ya cubre todo el
+ * stage por sí misma; esta regla la mantiene a pantalla completa cuando
+ * el shell aplica `is-immersive` (fondo a pantalla completa, sin panel de
+ * objetivo ni barra de acciones). */
+.wb-scene.is-immersive .level-scene[data-level="5"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  border: 0;
+  border-radius: 0;
+  overflow: hidden;
+}
+
+/* El encabezado interno no existe en esta escena (el título lo muestra
+ * el shell); si algún día aparece, en inmersivo queda oculto para no
+ * tapar Volver/Sonido. */
+.wb-scene.is-immersive .level-scene[data-level="5"] .counting-head {
+  display: none;
+}
+
+/* En inmersivo la escena cubre el viewport y el header flota: la placa
+ * empieza debajo de él (84 px) y baja hasta la banda de mesa. */
+.wb-scene.is-immersive .level-scene[data-level="5"] .counting-bench-plate {
+  top: 88px;
+  bottom: 170px;
+}
+
+/* Fondo de sala: foto de la bóveda con oscurecimiento + gradientes como
+ * fallback. Si el webp falta, la sala se sigue viendo con paneles y viñeta. */
+.level-scene[data-level="5"] .counting-backdrop {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(rgba(11, 15, 20, 0.6), rgba(11, 15, 20, 0.6)),
+    url("../../../assets/levels/05/background.webp"),
+    linear-gradient(90deg, transparent 60%, rgba(56, 198, 184, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(242, 237, 227, 0.035) 0 2px, transparent 2px 76px),
+    radial-gradient(120% 100% at 50% 110%, rgba(0, 0, 0, 0.5), transparent 60%);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* Luz cálida de sala: brillo de lámpara arriba a la izquierda. */
+.level-scene[data-level="5"] .counting-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 4%, rgba(240, 207, 106, 0.2) 0%, transparent 30%),
+    radial-gradient(circle at 84% 74%, rgba(56, 198, 184, 0.07) 0%, transparent 32%),
+    radial-gradient(circle at 50% 48%, transparent 46%, rgba(0, 0, 0, 0.42) 100%);
+  pointer-events: none;
+}
+
+/* Mesa de nogal con vetas y filo de latón. */
+.level-scene[data-level="5"] .counting-bench {
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 132px;
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 88px),
+    repeating-linear-gradient(0deg, rgba(255, 235, 190, 0.03) 0 3px, transparent 3px 7px),
+    linear-gradient(180deg, #7a5433 0%, #4a3018 55%, #2c1e0e 100%);
+  border-top: 3px solid rgba(240, 207, 106, 0.55);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.45);
+  pointer-events: none;
+}
+
+/* --- Placa única del taller: el centro sobre la mesa, más grande ---
+ * Marco de latón, interior oscuro; el editor real vive dentro. De base
+ * llena el stage (el shell la monta en banda drum-room con el header en
+ * flujo); cuando el shell aplica `is-immersive` la placa baja debajo del
+ * header flotante. Termina por encima de la boleta y el hud. */
+.level-scene[data-level="5"] .counting-bench-plate {
+  position: absolute;
+  left: 50%;
+  top: 8px;
+  bottom: 140px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: min(880px, 68%);
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid rgba(240, 207, 106, 0.65);
+  border-radius: 12px;
+  padding: 6px 10px;
+  background:
+    linear-gradient(170deg, #221f1a 0%, #121317 70%),
+    #101216;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.25),
+    0 18px 40px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+}
+
+/* Cromo del tambor: solo atmósfera tenue sobre la placa. El mecanismo
+ * real manda; si el editor crece, el cromo queda detrás sin interceptar. */
+.level-scene[data-level="5"] .counting-bench-plate::before {
+  content: "";
+  position: absolute;
+  right: -48px;
+  top: -48px;
+  width: 220px;
+  height: 220px;
+  background: url("../../../assets/levels/05/drum.webp") center / contain no-repeat;
+  opacity: 0.16;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-rivets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-rivet {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6dc92 0%, #c79a32 45%, #4a3412 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(1) {
+  top: 7px;
+  left: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(2) {
+  top: 7px;
+  right: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(3) {
+  bottom: 7px;
+  left: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(4) {
+  right: 7px;
+  bottom: 7px;
+}
+
+.level-scene[data-level="5"] .plate-top {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding: 0 18px 2px;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-label,
+.level-scene[data-level="5"] .plate-serial {
+  color: #c9a24a;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+/* --- Riel del cabezal: carcasa de latón con cinta perforada ---
+ * Atmósfera compacta (38 px). */
+.level-scene[data-level="5"] .plate-rail {
+  position: relative;
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 30px;
+  padding: 2px 10px;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 40%),
+    linear-gradient(180deg, #f0cf6a 0%, #a88032 45%, #4a3412 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .rail-holes {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 8px;
+  min-width: 0;
+}
+
+.level-scene[data-level="5"] .rail-hole {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #000 0%, #1a1408 70%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 240, 200, 0.35);
+}
+
+/* Ventana del cabezal: el ojo teal que lee la cinta real. */
+.level-scene[data-level="5"] .plate-rail-notch {
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 28px;
+  border: 2px solid var(--counting-teal);
+  border-radius: 4px;
+  background: linear-gradient(180deg, #0d141b 0%, #05080c 100%);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.3),
+    0 0 12px rgba(56, 198, 184, 0.35),
+    inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.level-scene[data-level="5"] .plate-rail-notch::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--counting-teal);
+  box-shadow: 0 0 6px rgba(56, 198, 184, 0.9);
+  transform: translateX(-50%);
+}
+
+/* Cromo del cabezal: solo atmósfera tenue sobre el riel decorativo.
+ * El riel ya es aria-hidden y no intercepta nada; el cabezal real
+ * lo pinta el editor con .is-head. */
+.level-scene[data-level="5"] .plate-rail::after {
+  content: "";
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  width: 30px;
+  height: 30px;
+  background: url("../../../assets/levels/05/head.webp") center / contain no-repeat;
+  opacity: 0.3;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-caption {
+  flex: none;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--counting-muted);
+}
+
+/* El editor real vive aquí; su desborde nunca sale de la placa. */
+.level-scene[data-level="5"] .counting-editor {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+  border: 1px dashed rgba(240, 207, 106, 0.4);
+  border-radius: 12px;
+  padding: 4px;
+  background: rgba(11, 15, 20, 0.72);
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.55);
+}
+
+/* Línea grabada en la placa: la fase se lee en el metal, sin franja.
+ * Latón claro sobre placa oscura, 14 px. */
+.level-scene[data-level="5"] .plate-state {
+  flex: none;
+  margin: 2px 0 0;
+  padding-top: 0;
+  border-top: 1px solid rgba(240, 207, 106, 0.4);
+  color: var(--counting-brass-2);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.4;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+/* --- Papeles sobre la mesa: contrato, pista y bitácora ---
+ * Botones reales sin caja: la imagen final es el papel (assets de
+ * `levels.01.*`) y el rótulo va debajo; el parent engancha `data-action`. */
+.level-scene[data-level="5"] .counting-papers {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 5;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-scene[data-level="5"] .counting-paper-item {
+  margin: 0;
+  padding: 0;
+}
+
+.level-scene[data-level="5"] .counting-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.level-scene[data-level="5"] .counting-paper img {
+  display: block;
+  width: 84px;
+  height: auto;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .counting-paper-item:first-child .counting-paper img {
+  width: 100px;
+}
+
+.level-scene[data-level="5"] .counting-paper-name {
+  color: #c9a45c;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* --- Manivela del tambor: el prop que prueba la cinta ---
+ * Botón real sin caja; el dibujo es CSS puro y no intercepta. */
+.level-scene[data-level="5"] .counting-crank {
+  position: absolute;
+  left: 2%;
+  top: 44%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.level-scene[data-level="5"] .crank-arm {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 64px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #f0cf6a 0%, #c79a32 45%, #6b4c0d 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 4px 10px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .crank-arm::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -12px;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6dc92 0%, #c79a32 45%, #4a3412 100%);
+  box-shadow:
+    0 2px 5px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.5);
+  transform: translateX(-50%);
+}
+
+.level-scene[data-level="5"] .crank-name {
+  color: #c9a45c;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* --- Volante de la bóveda: el prop del ensayo ---
+ * Botón real sin caja; el aro gira lento bajo movimiento permitido. */
+.level-scene[data-level="5"] .counting-wheel {
+  position: absolute;
+  right: 2%;
+  top: 32%;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 4px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transform: translateY(-50%);
+}
+
+.level-scene[data-level="5"] .wheel-ring {
+  position: relative;
+  display: block;
+  width: 96px;
+  height: 96px;
+  border: 10px solid #6b4c0d;
+  border-radius: 50%;
+  background: repeating-conic-gradient(from 0deg, rgba(240, 207, 106, 0.55) 0deg 8deg, rgba(20, 16, 8, 0.9) 8deg 60deg);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.6),
+    0 6px 16px rgba(0, 0, 0, 0.55),
+    0 0 0 2px rgba(240, 207, 106, 0.35);
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .wheel-ring::after {
+  content: "";
+  position: absolute;
+  inset: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6dc92 0%, #c79a32 45%, #4a3412 100%);
+  box-shadow:
+    0 1px 3px rgba(0, 0, 0, 0.6),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.5);
+}
+
+.level-scene[data-level="5"] .wheel-name {
+  color: #c9a45c;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+/* --- Boleta de depósito: el asset final como fondo del papel ---
+ * El formulario trae la casilla del cuño vacía y ningún sello dibujado,
+ * así el lacre CSS y el cuño en texto no duplican nada; los gradientes
+ * quedan debajo como fallback si el webp falta. El contador del
+ * mecanismo (statusSlot) vive justo debajo, como línea grabada sobre la
+ * mesa, sin franja de panel. */
+.level-scene[data-level="5"] .counting-slip {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 5;
+  flex: none;
+  width: 266px;
+  max-width: 100%;
+  max-height: 52%;
+  overflow-y: auto;
+  padding: 20px 18px 16px;
+  border: 1px solid #c9b78e;
+  border-radius: 5px;
+  background:
+    url("../../../assets/levels/05/deposit-slip.webp"),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(122, 90, 18, 0.04) 0 1px, transparent 1px 5px),
+    linear-gradient(160deg, #faf4e6 0%, var(--counting-paper) 55%, var(--counting-paper-2) 100%);
+  background-size: 100% 100%, auto, auto, auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #17130a;
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.level-scene[data-level="5"] .counting-slip::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(122, 90, 18, 0.14);
+  border-radius: 3px;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .slip-kicker {
+  margin: 0 0 3px;
+  color: var(--counting-brass-dark);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="5"] .slip-client {
+  margin: 0 0 10px;
+  font-family: var(--counting-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  overflow-wrap: break-word;
+}
+
+.level-scene[data-level="5"] .slip-rule,
+.level-scene[data-level="5"] .slip-sample {
+  margin: 8px 0;
+  font-family: var(--counting-paper-font);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.level-scene[data-level="5"] .slip-note {
+  margin: 8px 0 12px;
+  color: #5a5348;
+  font-family: var(--counting-paper-font);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.level-scene[data-level="5"] .slip-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding-top: 8px;
+  padding-right: 58px;
+  border-top: 1px dashed rgba(122, 90, 18, 0.35);
+  color: var(--counting-brass-dark);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="5"] .slip-seal {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #b34a3c 0%, var(--counting-wax) 55%, #5a1b17 100%);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.22),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.level-scene[data-level="5"] .slip-seal::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5a1b17;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+/* Cuño de fase: vive en flujo entre la nota y el pie, así nunca tapa
+ * el título ni ningún texto; el lacre absoluto queda a la derecha. */
+.level-scene[data-level="5"] .slip-stamp {
+  display: inline-block;
+  max-width: calc(100% - 70px);
+  margin: 2px 0 10px;
+  padding: 4px 7px 3px;
+  border: 2px solid #a33a26;
+  border-radius: 3px;
+  color: #a33a26;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transform: rotate(-2deg);
+}
+
+/* Contador del mecanismo: vive en la boleta, donde se lee la cuenta.
+ * 14 px en tinta sobre ivory (contraste AA); si el parent aún no montó
+ * nada, la ranura colapsa sin dejar hueco. */
+.level-scene[data-level="5"] .counting-status {
+  margin: 8px 0 12px;
+  color: #3a332a;
+  font-family: var(--counting-paper-font);
+  font-size: 14px;
+  line-height: 1.55;
+}
+
+.level-scene[data-level="5"] .counting-status:empty {
+  display: none;
+}
+
+/* Ranura de herramientas del shell: N5 no usa carretes, así que queda
+ * vacía y oculta sobre la mesa, sin tapar papeles ni boleta. */
+.level-scene[data-level="5"] .counting-keys {
+  position: absolute;
+  left: 18px;
+  bottom: 16px;
+  z-index: 4;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="5"] .counting-keys[hidden] {
+  display: none;
+}
+
+/* Línea del shell: la última línea de la mesa, sin franja.
+ * 14 px con sombra para contraste AA sobre el fondo real; acotada al
+ * centro para no solaparse con los papeles ni con la boleta. Si el shell
+ * aún no movió su línea, la ranura colapsa sin dejar marca. */
+.level-scene[data-level="5"] .counting-hud {
+  position: absolute;
+  left: 50%;
+  bottom: 16px;
+  z-index: 5;
+  max-width: 34%;
+  padding: 6px 14px 4px;
+  overflow: hidden;
+  border: 0;
+  border-top: 1px solid rgba(240, 207, 106, 0.65);
+  background: transparent;
+  color: var(--counting-ink);
+  font-size: 14px;
+  line-height: 1.4;
+  text-align: center;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  white-space: nowrap;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .counting-hud:empty {
+  display: none;
+}
+
+/* --- Integración del editor real en la placa (solo presentación) ---
+ * Marco compacto: a 1440×900 las tres secciones entran sin scroll. */
+.level-scene[data-level="5"] #tape-panel {
+  flex: none;
+  min-width: 0;
+  margin-bottom: 2px;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-section {
+  margin: 0 0 4px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--counting-brass-2);
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cell,
+.level-scene[data-level="5"] .tape-cell {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Casillas como tarjetas perforadas de papel sobre la placa oscura.
+ * El dibujo de la celda vive en tape.svg; el papel CSS queda debajo como
+ * fallback y los estados (.is-head, foco) no se tocan. */
+.level-scene[data-level="5"] #tape-panel .tape-cell {
+  border: 1px solid rgba(240, 207, 106, 0.6);
+  border-radius: 6px;
+  background:
+    url("../../../assets/levels/05/tape.svg"),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 45%),
+    linear-gradient(160deg, #faf4e6 0%, var(--counting-paper) 60%, var(--counting-paper-2) 100%);
+  background-size: contain, auto, auto;
+  background-position: center;
+  background-repeat: no-repeat;
+  color: #17130a;
+  font-size: 15px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: box-shadow 120ms ease-out, border-color 120ms ease-out;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cell.is-head {
+  border: 2px solid var(--counting-teal);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.35),
+    0 0 12px rgba(56, 198, 184, 0.35);
+}
+
+/* Marca del cabezal sobre la casilla activa: renglón propio para no
+ * mover el símbolo. */
+.level-scene[data-level="5"] #tape-panel .tape-marker {
+  display: block;
+  font-size: 12px;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] #drum {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.level-scene[data-level="5"] #drum .drum {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* Las secciones se reparten el alto libre del editor: cuando el stage
+ * crece, el aire sobrante se distribuye entre las tres en vez de quedar
+ * abajo del tambor. Las púas no crecen: quedan arriba con sus 44 px. */
+.level-scene[data-level="5"] #drum .drum-section {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Anillos del tambor: aros oscuros con filo de latón, compactos para
+ * que las tres secciones entren sin scroll interno. */
+.level-scene[data-level="5"] #drum .drum-section,
+.level-scene[data-level="5"] .drum-section {
+  border: 1px solid rgba(240, 207, 106, 0.5);
+  border-radius: 10px;
+  margin: 0;
+  padding: 6px 10px;
+  background:
+    linear-gradient(170deg, rgba(255, 255, 255, 0.06), transparent 40%),
+    linear-gradient(170deg, #1d1b18 0%, #101216 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 14px rgba(0, 0, 0, 0.45);
+}
+
+.level-scene[data-level="5"] #drum .drum-section.is-lit {
+  border-color: var(--counting-teal);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.35),
+    0 0 14px rgba(56, 198, 184, 0.3);
+}
+
+/* Cabecera de sección compacta: título y marca en una línea. */
+.level-scene[data-level="5"] #drum .drum-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0 0 2px;
+}
+
+.level-scene[data-level="5"] #drum .drum-title {
+  margin: 0;
+  color: var(--counting-brass-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="5"] #drum .drum-badge {
+  color: var(--counting-muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+}
+
+/* Las tres púas comparten la fila sin envolverse: cada una toma el
+ * mismo ancho y el texto nunca se corta por el borde. La fila crece con
+ * la sección, pero las púas quedan arriba con sus 44 px. */
+.level-scene[data-level="5"] #drum .drum-pins {
+  flex: 1 0 auto;
+  display: flex;
+  align-items: flex-start;
+  align-content: flex-start;
+  gap: 6px;
+}
+
+.level-scene[data-level="5"] #drum .drum-pin,
+.level-scene[data-level="5"] .drum-pin {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+}
+
+/* Púas como teclas de latón del tambor: icono a la izquierda y texto a
+ * la derecha con gap, para que las palabras nunca se superpongan con el
+ * dibujo. El latón CSS queda como fallback del dibujo de la púa. */
+.level-scene[data-level="5"] #drum .drum-pin {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(240, 207, 106, 0.55);
+  border-radius: 8px;
+  padding: 4px 10px 4px 6px;
+  background: linear-gradient(180deg, #f0cf6a 0%, #c79a32 45%, #6b4c0d 100%);
+  color: #17130a;
+  white-space: normal;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out;
+}
+
+/* Icono de la púa reservado a la izquierda: el dibujo vive acá y el
+ * texto fluye a la derecha con gap, sin superposiciones. */
+.level-scene[data-level="5"] #drum .drum-pin::before {
+  content: "";
+  flex: none;
+  width: 28px;
+  height: 28px;
+  background: url("../../../assets/levels/05/pin.svg") center / contain no-repeat;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] #drum .drum-pin:hover {
+  border-color: var(--counting-brass-2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 10px rgba(240, 207, 106, 0.4);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin:active {
+  transform: scale(0.98);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin.is-lit {
+  border-color: var(--counting-teal);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.45),
+    0 0 12px rgba(56, 198, 184, 0.4);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin.is-final {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+/* Contenido de púa en bloque a la derecha del icono: símbolo + regla
+ * sin recorte ni superposición. Cada línea envuelve en vez de truncarse. */
+.level-scene[data-level="5"] #drum .drum-read,
+.level-scene[data-level="5"] #drum .drum-rule {
+  display: block;
+  font-size: 12px;
+  line-height: 1.3;
+  overflow: visible;
+  overflow-wrap: break-word;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.level-scene[data-level="5"] #drum .pin-editor {
+  border: 1px solid rgba(240, 207, 106, 0.55);
+  border-radius: 10px;
+  background: rgba(11, 15, 20, 0.92);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
+}
+
+.level-scene[data-level="5"] #drum .pin-choice {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="5"] #drum .pin-choice.is-selected {
+  border-color: var(--counting-teal);
+  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.4);
+}
+
+.level-scene[data-level="5"] button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Foco visible con contorno teal para los props y el editor real. */
+.level-scene[data-level="5"] .counting-paper:focus-visible,
+.level-scene[data-level="5"] .counting-crank:focus-visible,
+.level-scene[data-level="5"] .counting-wheel:focus-visible,
+.level-scene[data-level="5"] :focus-visible {
+  outline: 2px solid var(--counting-teal);
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .level-scene[data-level="5"] .counting-bench {
+    height: 40%;
+  }
+
+  .level-scene[data-level="5"] .counting-bench-plate {
+    left: 50%;
+    top: 120px;
+    bottom: auto;
+    width: 94%;
+    max-height: 44%;
+    padding: 10px 12px;
+    transform: translateX(-50%);
+  }
+
+  .level-scene[data-level="5"] .plate-top {
+    padding: 2px 12px 6px;
+  }
+
+  /* La boleta baja a la mesa como tira con scroll propio. */
+  .level-scene[data-level="5"] .counting-slip {
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    width: auto;
+    max-height: 30%;
+  }
+
+  .level-scene[data-level="5"] .counting-hud {
+    left: 8px;
+    right: 8px;
+    bottom: calc(30% + 10px);
+    max-width: none;
+    transform: none;
+  }
+
+  /* Papeles, manivela y volante comparten la fila sobre la boleta;
+   * los rótulos largos quedan en el aria-label. */
+  .level-scene[data-level="5"] .counting-papers {
+    left: 8px;
+    bottom: calc(30% + 40px);
+    gap: 8px;
+  }
+
+  .level-scene[data-level="5"] .counting-paper img {
+    width: 56px;
+  }
+
+  .level-scene[data-level="5"] .counting-paper-item:first-child .counting-paper img {
+    width: 64px;
+  }
+
+  .level-scene[data-level="5"] .counting-paper-name,
+  .level-scene[data-level="5"] .crank-name,
+  .level-scene[data-level="5"] .wheel-name {
+    display: none;
+  }
+
+  .level-scene[data-level="5"] .counting-crank {
+    left: auto;
+    right: 84px;
+    top: auto;
+    bottom: calc(30% + 40px);
+    transform: none;
+  }
+
+  .level-scene[data-level="5"] .crank-arm {
+    height: 44px;
+  }
+
+  .level-scene[data-level="5"] .counting-wheel {
+    right: 8px;
+    top: auto;
+    bottom: calc(30% + 32px);
+    transform: none;
+  }
+
+  .level-scene[data-level="5"] .wheel-ring {
+    width: 56px;
+    height: 56px;
+    border-width: 7px;
+  }
+
+  .level-scene[data-level="5"] .wheel-ring::after {
+    inset: 12px;
+  }
+}
+
+/* --- Ambiente: la sala respira. Solo con movimiento permitido.
+ * La manivela no se anima para no distraer del toque; el tambor y la
+ * cinta reales (editores) nunca se animan desde esta hoja. --- */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes counting-wheel-spin {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  @keyframes counting-head-blink {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.35;
+    }
+  }
+
+  @keyframes counting-seal-glow {
+    0%,
+    100% {
+      box-shadow:
+        0 4px 8px rgba(0, 0, 0, 0.35),
+        inset 0 1px 2px rgba(255, 255, 255, 0.22),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+    }
+    50% {
+      box-shadow:
+        0 4px 14px rgba(179, 74, 60, 0.65),
+        inset 0 1px 2px rgba(255, 255, 255, 0.35),
+        inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  .level-scene[data-level="5"] .wheel-ring {
+    animation: counting-wheel-spin 24s linear infinite;
+  }
+
+  .level-scene[data-level="5"] .plate-rail-notch::after {
+    animation: counting-head-blink 3.2s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="5"] .slip-seal {
+    animation: counting-seal-glow 4.6s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="5"] *,
+  .level-scene[data-level="5"] *::before,
+  .level-scene[data-level="5"] *::after {
+    animation: none;
+    transition: none;
+  }
+
+  .level-scene[data-level="5"] .slip-stamp,
+  .level-scene[data-level="5"] .counting-paper {
+    transform: none;
+  }
+}
