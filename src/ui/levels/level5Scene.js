@@ -1,14 +1,25 @@
 /**
  * Escena del nivel 5 — Banco Central, sala de recuento.
  *
- * Un solo taller: fondo de sala, mesa y una placa con riel de cabezal que
- * enmarca el editor real. El tambor y la cinta reales los monta el parent
- * en `editorSlot`; esta escena no crea editor, púas, juicio ni lógica, y
- * no toca la protección de la sección "Listo".
+ * Escena inmersiva y diegética: ocupa toda la ventana, sin panel de
+ * objetivo ni barra de acciones. La placa del mecanismo es el centro
+ * sobre la mesa y los controles son props accionables (botones reales
+ * con `data-action`) que el parent engancha con sus handlers de siempre:
+ * papeles sobre la mesa (contrato/pista/bitácora), manivela del tambor
+ * (probar) y volante de la bóveda (ensayo). La boleta de depósito
+ * concentra la lectura: ahí se ven el contador y la fase, sin franja
+ * aparte. El shell, en modo inmersivo, mueve su línea a `hudSlot` y
+ * reserva `keysSlot` para sus herramientas (N5 no usa carretes: la
+ * ranura queda vacía y oculta, pero existe para el contrato).
  *
- * La atmósfera trae luz cálida, remaches y rótulo de caja en la placa, más
- * un riel de cabezal con cinta perforada decorativa (orificios sin casillas
- * ni símbolos) que marca el lugar del mecanismo real sin duplicarlo.
+ * El tambor y la cinta reales los monta el parent en `editorSlot`; esta
+ * escena no crea editor, púas, juicio ni lógica, y no toca la protección
+ * de la sección "Listo".
+ *
+ * La atmósfera trae luz cálida, remaches y rótulo de caja en la placa,
+ * más un riel de cabezal con cinta perforada decorativa (orificios sin
+ * casillas ni símbolos) que marca el lugar del mecanismo real sin
+ * duplicarlo.
  *
  * Placeholders CSS/DOM (ver `docs/ASSET-MANIFEST.md`):
  * fondo, cinta, cabezal, tambor y púa en `final`; la boleta sigue
@@ -54,6 +65,47 @@ function markFinal(node, asset, src) {
 }
 
 /**
+ * Un prop accionable: un botón real sin caja de botón moderna. El parent
+ * engancha su handler sobre `data-action`; la escena no decide nada.
+ */
+function propButton(className, action, label, visualClass, name, nameClass) {
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = className;
+  button.setAttribute('data-action', action);
+  button.setAttribute('aria-label', label);
+  const visual = make('span', visualClass);
+  visual.setAttribute('aria-hidden', 'true');
+  const caption = make('span', nameClass, name);
+  caption.setAttribute('aria-hidden', 'true');
+  button.append(visual, caption);
+  return button;
+}
+
+/**
+ * Un papel sobre la mesa con su asset final: la imagen nombra el slot
+ * del manifiesto y el rótulo va debajo. El nombre accesible lo da el
+ * aria-label del botón, así el alt queda vacío.
+ */
+function paperProp(src, asset, action, label, name) {
+  const item = make('li', 'counting-paper-item');
+  const button = document.createElement('button');
+  button.type = 'button';
+  button.className = 'counting-paper';
+  button.setAttribute('data-action', action);
+  button.setAttribute('aria-label', label);
+  const image = document.createElement('img');
+  image.setAttribute('src', src);
+  image.setAttribute('alt', '');
+  image.setAttribute('data-asset', asset);
+  image.setAttribute('data-status', 'final');
+  image.setAttribute('data-src', src);
+  button.append(image, make('span', 'counting-paper-name', name));
+  item.append(button);
+  return item;
+}
+
+/**
  * @param {object} options
  * @param {object} options.level Nivel 5 (contrato, título, cliente).
  * @param {object} options.puzzle Puzzle de la fase (goal, intro, examples).
@@ -76,15 +128,6 @@ export function createLevelScene(options = {}) {
   const bench = make('div', 'counting-bench');
   bench.setAttribute('aria-hidden', 'true');
 
-  const head = make('header', 'counting-head');
-  const kicker = make('p', 'counting-kicker', `Contrato ${contract} · ${client}`);
-  const title = make('h2', 'counting-title', 'Sala de recuento');
-  const phaseBadge = make('p', 'counting-phase', PHASE_WORDS[phase] ?? phaseWord(phase, puzzle));
-  const plate = make('p', 'counting-plate', 'Caja 05 · N.º 0501');
-  head.append(kicker, title, phaseBadge, plate);
-
-  const body = make('div', 'counting-body');
-
   const benchPlate = make('div', 'counting-bench-plate');
   markFinal(
     benchPlate,
@@ -99,7 +142,7 @@ export function createLevelScene(options = {}) {
   const plateTop = make('div', 'plate-top');
   plateTop.setAttribute('aria-hidden', 'true');
   plateTop.append(
-    make('span', 'plate-label', 'Banco Central · Caja 05'),
+    make('span', 'plate-label', 'Caja 05'),
     make('span', 'plate-serial', 'N.º 0501'),
   );
   const rail = make('div', 'plate-rail');
@@ -122,9 +165,34 @@ export function createLevelScene(options = {}) {
   editorSlot.setAttribute('data-slot', 'editor');
   editorSlot.setAttribute('aria-label', 'Tambor y cinta del taller');
 
-  benchPlate.append(rivets, plateTop, rail, plateCaption, editorSlot);
+  const stateLine = make('p', 'plate-state', `Caja ${contract} · ${STAMP_WORDS[phase] ?? PHASE_WORDS[phase] ?? phaseWord(phase, puzzle)}`);
 
-  const side = make('div', 'counting-side');
+  benchPlate.append(rivets, plateTop, rail, plateCaption, editorSlot, stateLine);
+
+  const papers = make('ul', 'counting-papers');
+  papers.setAttribute('aria-label', 'Papeles sobre la mesa');
+  papers.append(
+    paperProp('assets/levels/01/props/contract.webp', 'levels.01.contract', 'contract', 'Abrir el contrato', 'Contrato'),
+    paperProp('assets/levels/01/props/hint.webp', 'levels.01.hint', 'hint', 'Pedir una pista', 'Pista'),
+    paperProp('assets/levels/01/props/log.webp', 'levels.01.log', 'log', 'Abrir la bitácora', 'Bitácora'),
+  );
+
+  const crank = propButton(
+    'counting-crank',
+    'probe',
+    'Probar la cinta en el tambor',
+    'crank-arm',
+    'Manivela',
+    'crank-name',
+  );
+  const wheel = propButton(
+    'counting-wheel',
+    'assault',
+    'Pedir el ensayo de la bóveda',
+    'wheel-ring',
+    'Volante',
+    'wheel-name',
+  );
 
   const slip = make('aside', 'counting-slip');
   slip.setAttribute('aria-label', 'Boleta de depósito');
@@ -144,27 +212,43 @@ export function createLevelScene(options = {}) {
     slip.append(make('p', 'slip-sample', `La cinta ${sample.input} debe dejar ${sample.output}.`));
   }
   slip.append(make('p', 'slip-note', 'Si el contador marca otra cuenta, la alarma queda encendida.'));
+  const statusSlot = make('div', 'counting-status');
+  statusSlot.setAttribute('data-slot', 'status');
+  statusSlot.setAttribute('aria-label', 'Contador del mecanismo');
+  slip.append(statusSlot);
   slip.append(stamp);
   slip.append(make('p', 'slip-foot', 'Caja 05 · N.º 0501'));
   slip.append(seal);
 
-  const statusSlot = make('div', 'counting-status');
-  statusSlot.setAttribute('data-slot', 'status');
-  statusSlot.setAttribute('aria-label', 'Contador del mecanismo');
+  const keysSlot = make('div', 'counting-keys');
+  keysSlot.setAttribute('data-slot', 'keys');
+  keysSlot.setAttribute('aria-label', 'Herramientas del taller');
+  keysSlot.setAttribute('hidden', '');
 
-  side.append(slip, statusSlot);
-  body.append(benchPlate, side);
+  const hudSlot = make('div', 'counting-hud');
+  hudSlot.setAttribute('data-slot', 'hud');
+  hudSlot.setAttribute('aria-label', 'Lectura del mecanismo');
 
-  element.append(backdrop, light, bench, head, body);
+  element.append(backdrop, light, bench, benchPlate, papers, crank, wheel, slip, keysSlot, hudSlot);
 
   function setPhase(next) {
-    phaseBadge.textContent = PHASE_WORDS[next] ?? String(next);
-    stamp.textContent = STAMP_WORDS[next] ?? PHASE_WORDS[next] ?? String(next);
+    const word = STAMP_WORDS[next] ?? PHASE_WORDS[next] ?? String(next);
+    stateLine.textContent = `Caja ${contract} · ${word}`;
+    stamp.textContent = word;
   }
 
   function dispose() {
     element.remove();
   }
 
-  return { element, editorSlot, statusSlot, setPhase, dispose };
+  return {
+    element,
+    editorSlot,
+    statusSlot,
+    keysSlot,
+    hudSlot,
+    actions: ['contract', 'hint', 'log', 'probe', 'assault'],
+    setPhase,
+    dispose,
+  };
 }
