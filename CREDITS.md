@@ -59,6 +59,15 @@ Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del
 | Fondo | N4 · Teatro Municipal | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
 | Fondo | N5 · Banco Central | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
 
+## Papel P1
+
+| Asset | Uso | Origen | Licencia |
+|---|---|---|---|
+| Contrato | Ficha de contrato N2–N5 | Generado por el owner con Gemini; recortado a 512×704 y exportado a WebP | Proyecto |
+| Pista | Nota de pista N2–N5 | Derivado del papel base de Gemini; 384×328 | Proyecto |
+| Bitácora | Bitácora N2–N5 | Derivado del papel base de Gemini con líneas; 384×300 | Proyecto |
+| Boleta | Boleta de depósito N5 | Generado por el owner con Gemini; recortado a 1024×676 y exportado a WebP | Proyecto |
+
 ## Audio
 
 | SFX | Archivo | Origen | Licencia |
