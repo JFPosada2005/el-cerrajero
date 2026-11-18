@@ -7,7 +7,7 @@ import { createLevelScene } from '../src/ui/levels/level4Scene.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 const sceneSource = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level4Scene.js'), 'utf8');
-const cssSource = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level4.css'), 'utf8');
+const cssSource = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level4.css'), 'utf8').replace(/\r\n/g, '\n');
 
 // --- DOM falso mínimo (solo document.createElement + textContent) ---
 function element(tag) {
