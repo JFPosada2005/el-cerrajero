@@ -72,19 +72,25 @@
       "final": "assets/shared/paper/contract.webp",
       "kind": "image",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — asset IA (Gemini)",
+      "source": "Generado por el owner con Gemini; recortado a 512×704 y exportado a WebP"
     },
     "paper.hint": {
       "final": "assets/shared/paper/hint.webp",
       "kind": "image",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — derivado del papel base",
+      "source": "Derivado del papel base de Gemini; 384×328"
     },
     "paper.log": {
       "final": "assets/shared/paper/log.webp",
       "kind": "image",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — derivado del papel base",
+      "source": "Derivado del papel base de Gemini con líneas; 384×300"
     },
     "prop.relay": {
       "final": "assets/shared/props/relay.webp",
@@ -412,7 +418,9 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 1024×676 y exportado a WebP"
       }
     }
   },
@@ -485,37 +493,49 @@
       "final": "assets/audio/sfx/success.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "Pendiente de confirmar (archivo del owner)",
+      "source": "assets/incoming/sfx/succes chime.wav; recortado y exportado a OGG mono 44,1 kHz"
     },
     "spring": {
       "final": "assets/audio/sfx/spring.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "magnuswaker — Freesound 540790 — https://freesound.org/s/540790/"
     },
     "chip": {
       "final": "assets/audio/sfx/chip.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "tris6970 — Freesound 350496 — https://freesound.org/s/350496/"
     },
     "tape": {
       "final": "assets/audio/sfx/tape.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "quatricise — Freesound 790841 — https://freesound.org/s/790841/"
     },
     "pin": {
       "final": "assets/audio/sfx/pin.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "Godowan — Freesound 235280 — https://freesound.org/s/235280/"
     },
     "steps": {
       "final": "assets/audio/sfx/steps.ogg",
       "kind": "audio",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "CC BY 4.0",
+      "source": "Hawkeye_Sprout — Freesound 469080 — https://freesound.org/s/469080/"
     }
   },
   "music": {
