@@ -12,12 +12,19 @@ import { thiefReport } from './game/thief.js';
 import { createGraphEditor } from './ui/graphEditor.js';
 import { createDrumEditor } from './ui/drumEditor.js';
 import { createTapePanel } from './ui/tapePanel.js';
+import { createWorkbenchView } from './ui/workbenchView.js';
+import { loadManifest } from './ui/assets.js';
+import { createAudio } from './ui/audio.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
 const app = document.querySelector('#app');
 const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
 let drumEditor = null;
 let tapePanel = null;
+let workbenchView = null;
+let audio = null;
+let manifest = null;
+let soundOn = false;
 let selectedKey = null;
 let cutMode = false;
 let springMode = false;
@@ -138,6 +145,11 @@ function saveProgress(progress) {
   }
 }
 function appendLog(message, tone = '') {
+  if (workbenchView !== null) {
+    const normalized = tone === 'good' ? 'good' : tone === 'bad' ? 'bad' : 'neutral';
+    workbenchView.addLog(message, normalized);
+    return;
+  }
   const log = document.querySelector('#log');
   if (log === null) {
     return;
@@ -710,17 +722,36 @@ function renderWorkshop() {
   log.setAttribute('aria-label', 'Bitácora del taller');
   logPanel.append(logTitle);
   logPanel.append(log);
-  layout.append(brief);
-  layout.append(shop);
-  layout.append(logPanel);
-  shell.append(header);
-  shell.append(layout);
-  app.append(shell);
+  const workbench = createWorkbenchView({
+    contract: state.level.contract,
+    title: state.level.title,
+    client: state.level.client,
+    phase: phaseWord(),
+    objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
+    soundEnabled: soundOn,
+    handlers: {
+      onBack: renderMap,
+      onProbe: handleProbe,
+      onAssault: handleAssault,
+      onOpenDoc: openWorkshopDoc,
+      onToggleSound: toggleSound
+    }
+  });
+  workbenchView = workbench;
+  workbench.slots.stage.append(shop);
+  workbench.slots.inventory.append(toolsTitle);
+  workbench.slots.inventory.append(tools);
+  workbench.slots.status.append(legend);
+  workbench.slots.status.append(hint);
+  app.replaceChildren(workbench.element);
+  const assaultButton = workbench.element.querySelector('[data-action="assault"]');
+  if (assaultButton !== null) {
+    assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
+    assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
+  }
   renderPalette();
   workshop = createGraphEditor({ svg: document.querySelector('#canvas'), cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, stack: state.puzzle.stack ?? null, onConnect: handleConnect, onCut: handleCut });
-  document.querySelector('#test-key').addEventListener('click', handleProbe);
   document.querySelector('#scissors').addEventListener('click', toggleScissors);
-  document.querySelector('#heist').addEventListener('click', handleAssault);
   renderTools();
   if (state.level.machine === 'pda') {
     renderStack(state.puzzle.stack.base);
@@ -752,6 +783,7 @@ function readLabel(symbol) {
   return symbol;
 }
 function renderDrumWorkshop() {
+  workbenchView = null;
   app.replaceChildren();
   const shell = document.createElement('div');
   shell.className = 'game';
@@ -993,6 +1025,37 @@ function handleAssault() {
     if (state.level.machine === 'pda' && replay.frames.length > 0) {
       renderStack(replay.frames[replay.frames.length - 1].stack);
     }
+  }
+}
+function openWorkshopDoc(kind) {
+  if (kind === 'contract') {
+    openModal(`Contrato ${state.level.contract}`, state.level.client, state.puzzle.goal, 'Entendido', () => {});
+    return;
+  }
+  if (kind === 'hint') {
+    const hints = state.puzzle.hints ?? [];
+    const text = hints.length > 0 ? hints[0] : 'No hay pistas para este contrato.';
+    openModal('Pista', 'Pista del taller', text, 'Entendido', () => {});
+    return;
+  }
+  if (kind === 'log') {
+    openModal('Bitácora', 'Notas del caso', state.puzzle.intro, 'Cerrar', () => {});
+  }
+}
+async function toggleSound() {
+  soundOn = soundOn === false;
+  if (workbenchView !== null) {
+    workbenchView.setSound(soundOn);
+  }
+  if (manifest === null) {
+    manifest = await loadManifest();
+  }
+  if (audio === null) {
+    audio = createAudio({ manifest });
+  }
+  audio.setEnabled(soundOn);
+  if (soundOn) {
+    audio.play('click');
   }
 }
 function openModal(eyebrow, title, body, actionLabel, onAction) {
