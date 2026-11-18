@@ -111,7 +111,7 @@ test('fase repair/build en placa y raíz', () => {
 test('no crea editor, cables, llaves, juicio ni lógica', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
-  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 6, 'glifos SVG propios (Y, resorte, 2 lámparas, tijera, interruptor)');
+  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 4, 'glifos SVG propios (2 lámparas, tijera, interruptor; bifurcador y resorte usan solo la foto final)');
   const imgs = nodes.filter((node) => node.tag === 'img');
   assert.equal(imgs.length, 5, 'fotos finales: bifurcador, resorte y papeles del conservador');
   const paperSrcs = [
@@ -228,7 +228,7 @@ test('las alas usan la foto final visible: respaldo, velo y luz translúcidos', 
   assert.ok(/text-shadow/.test(sceneCss), 'la etiqueta de sala se lee sobre la foto');
 });
 
-test('bifurcador y resorte: placas grabadas con glifo, tamaño, nombre y tooltip', () => {
+test('bifurcador y resorte: placas grabadas con la foto final, sin duplicar símbolo', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
   for (const [slot, label] of [['shared.prop.fork', 'Bifurcador'], ['shared.prop.spring', 'Resorte']]) {
@@ -238,7 +238,8 @@ test('bifurcador y resorte: placas grabadas con glifo, tamaño, nombre y tooltip
     assert.ok(holder.getAttribute('title'), `${slot} explica en title, sin párrafo visible`);
     const tags = holder.children.map((child) => child.tag);
     assert.ok(tags.includes('img'), `${slot} usa <img> final`);
-    assert.ok(tags.includes('svg'), `${slot} conserva el glifo con topes/bocas`);
+    assert.ok(!tags.includes('svg'), `${slot} muestra un solo símbolo: sin glifo inline duplicado`);
+    assert.deepEqual(tags, ['img', 'span'], `${slot} es foto + placa, nada más`);
     const img = holder.children.find((child) => child.tag === 'img');
     assert.ok(classes(img).includes('museum-glyph-art'), `${slot} conserva el tamaño del glifo`);
     const plate = holder.children.find(
@@ -603,7 +604,8 @@ test('banda inferior ordenada sin solapes declarados', () => {
   assert.ok(!/grid-area/.test(assaultBody), 'ENSAYO sale de la banda: vive en el grupo de alarma');
   assert.ok(!/position\s*:\s*absolute/.test(assaultBody), 'ENSAYO no flota solo: lo posiciona el grupo');
   const keys = bodyFor('.level-scene[data-level="3"] .museum-keys');
-  assert.ok(/justify-self\s*:\s*end/.test(keys), 'keysSlot al centro-derecha');
+  assert.ok(/justify-self\s*:\s*stretch/.test(keys), 'keysSlot ocupa el lugar libre al centro (criterio N2), con la tijera al lado');
+  assert.ok(/justify-content\s*:\s*center/.test(keys), 'los carretes van centrados horizontalmente');
   assert.ok(/min-width\s*:\s*0/.test(keys), 'keysSlot puede encogerse sin empujar');
   assert.ok(
     /\.museum-keys button\s*\{[^}]*min-width\s*:\s*44px[^}]*min-height\s*:\s*44px/.test(sceneCss),
@@ -615,7 +617,10 @@ test('banda inferior ordenada sin solapes declarados', () => {
   );
   const keysMin = keys.match(/min-height\s*:\s*(\d+)px/);
   assert.ok(keysMin && Number(keysMin[1]) >= 104, 'keysSlot reserva el alto del carrete + chapa (≈104 px)');
-  assert.ok(!/overflow\s*:\s*hidden/.test(keys), 'keysSlot no recorta en vertical');
+  const keysPadTop = keys.match(/padding-top\s*:\s*(\d+)px/);
+  assert.ok(keysPadTop && Number(keysPadTop[1]) >= 10, 'keysSlot deja aire superior para la elevación del carrete activo');
+  assert.ok(/overflow\s*:\s*visible/.test(keys), 'keysSlot nunca recorta: ni el símbolo ni el brillo del activo');
+  assert.ok(!/overflow\s*:\s*hidden/.test(keys), 'sin recorte vertical en keysSlot');
   assert.ok(!/overflow-y\s*:\s*hidden/.test(keys), 'la chapa del símbolo nunca se corta');
   assert.ok(!/overflow\s*:\s*hidden/.test(dock), 'ningún contenedor intermedio corta la chapa');
   const hud = bodyFor('.level-scene[data-level="3"] .museum-hud');
@@ -703,6 +708,9 @@ test('keysSlot: alto para la chapa del carrete y sin recorte vertical', () => {
   const keys = bodyFor('.level-scene[data-level="3"] .museum-keys');
   const min = keys.match(/min-height\s*:\s*(\d+)px/);
   assert.ok(min && Number(min[1]) >= 104, 'la ranura contiene el carrete completo + chapa (≈104 px)');
+  const padTop = keys.match(/padding-top\s*:\s*(\d+)px/);
+  assert.ok(padTop && Number(padTop[1]) >= 10, 'aire superior para la elevación y el brillo del activo');
+  assert.ok(/overflow\s*:\s*visible/.test(keys), 'la ranura nunca recorta el símbolo ni el brillo');
   assert.ok(!/overflow\s*:\s*hidden/.test(keys), 'la ranura no recorta');
   assert.ok(!/overflow-y\s*:\s*hidden/.test(keys), 'el eje vertical no corta el símbolo');
   const dock = bodyFor('.level-scene[data-level="3"] .museum-dock');

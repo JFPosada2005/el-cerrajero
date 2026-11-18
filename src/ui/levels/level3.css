@@ -662,14 +662,17 @@
 }
 
 /* Ranura de carretes y herramientas: el parent monta aquí `#palette`.
-   Reserva el alto del carrete completo + chapa del símbolo (≈104 px) y
-   nunca recorta en vertical: el número debe leerse. Los hijos no se
-   encogen (flex none): si el rack sobra a lo ancho, la ranura desplaza
-   en horizontal en vez de aplastar los carretes a círculos. */
+   Mismo criterio que N2: ocupa el lugar libre al centro de la banda con
+   el contenido centrado, reserva el alto del carrete completo + chapa del
+   símbolo (≈104 px) más aire superior para la elevación del carrete
+   activo (translateY −6 px + brillo), y nunca recorta en vertical: el
+   número debe leerse. Los hijos no se encogen (flex none): si el rack
+   sobra a lo ancho, la ranura desplaza en horizontal en vez de aplastar
+   los carretes. */
 .level-scene[data-level="3"] .museum-keys {
   grid-area: keys;
   align-self: end;
-  justify-self: end;
+  justify-self: stretch;
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -678,8 +681,8 @@
   min-width: 0;
   min-height: 104px;
   max-width: 100%;
-  overflow-x: auto;
-  overflow-y: visible;
+  padding-top: 12px;
+  overflow: visible;
   scrollbar-width: thin;
   scrollbar-color: #4a3614 #0b0f14;
 }

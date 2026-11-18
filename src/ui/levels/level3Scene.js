@@ -68,53 +68,6 @@ function phaseId(phase) {
   return 'repair';
 }
 
-// Glifo del bifurcador: derivación en "Y" de latón con bocas de contacto.
-function forkGlyph() {
-  const svg = svgNode('svg', {
-    viewBox: '0 0 24 28',
-    class: 'museum-glyph-art',
-    'aria-hidden': 'true',
-    focusable: 'false',
-  });
-  svg.append(svgNode('path', {
-    d: 'M12 4 L12 14 M12 14 L5 24 M12 14 L19 24',
-    fill: 'none',
-    stroke: 'currentColor',
-    'stroke-width': '2.4',
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-  }));
-  svg.append(svgNode('circle', { cx: '12', cy: '14', r: '2.2', fill: 'currentColor' }));
-  for (const [cx, cy] of [['12', '4'], ['5', '24'], ['19', '24']]) {
-    svg.append(svgNode('circle', {
-      cx, cy, r: '2.6', fill: 'none', stroke: 'currentColor', 'stroke-width': '1.6',
-    }));
-  }
-  return svg;
-}
-
-// Glifo del resorte: muelle en zigzag punteado con topes, sin llave.
-function springGlyph() {
-  const svg = svgNode('svg', {
-    viewBox: '0 0 48 16',
-    class: 'museum-glyph-art',
-    'aria-hidden': 'true',
-    focusable: 'false',
-  });
-  svg.append(svgNode('path', {
-    d: 'M6 8 L11 2 L17 14 L23 2 L29 14 L35 2 L41 8',
-    fill: 'none',
-    stroke: 'currentColor',
-    'stroke-width': '2',
-    'stroke-linecap': 'round',
-    'stroke-linejoin': 'round',
-    'stroke-dasharray': '3 2',
-  }));
-  svg.append(svgNode('circle', { cx: '4', cy: '8', r: '2.2', fill: 'currentColor' }));
-  svg.append(svgNode('circle', { cx: '44', cy: '8', r: '2.2', fill: 'currentColor' }));
-  return svg;
-}
-
 // Tijera del conservador: dos anillas y hojas cruzadas.
 function scissorsGlyph() {
   const svg = svgNode('svg', {
@@ -298,7 +251,6 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   forkImg.setAttribute('alt', '');
   forkImg.setAttribute('aria-hidden', 'true');
   fork.append(forkImg);
-  fork.append(forkGlyph());
   fork.append(node('span', 'museum-glyph-plate', 'Bifurcador'));
 
   const spring = node('div', 'museum-glyph museum-glyph--spring');
@@ -310,7 +262,6 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   springImg.setAttribute('alt', '');
   springImg.setAttribute('aria-hidden', 'true');
   spring.append(springImg);
-  spring.append(springGlyph());
   spring.append(node('span', 'museum-glyph-plate', 'Resorte'));
 
   glyphs.append(fork);
