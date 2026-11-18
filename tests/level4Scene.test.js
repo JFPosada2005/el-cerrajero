@@ -87,6 +87,15 @@ function findOne(root, predicate) {
   return found[0];
 }
 
+function spokenText(root) {
+  return findAll(
+    root,
+    (n) => typeof n.textContent === 'string' && n.textContent !== '' && n.children.length === 0,
+  )
+    .map((n) => n.textContent)
+    .join(' · ');
+}
+
 function cssBlocks(selector) {
   const out = [];
   const needle = `${selector} {`;
@@ -95,6 +104,13 @@ function cssBlocks(selector) {
     const start = cssSource.indexOf(needle, from);
     if (start === -1) {
       return out;
+    }
+    // Solo reglas propias: la línea no trae otro selector delante
+    // (así `.wb-scene.is-immersive .level-scene…` no cuenta como raíz base).
+    const lineStart = cssSource.lastIndexOf('\n', start - 1) + 1;
+    from = start + 1;
+    if (cssSource.slice(lineStart, start).trim() !== '') {
+      continue;
     }
     const end = cssSource.indexOf('}', start);
     assert.ok(end !== -1, `bloque sin cerrar para ${selector}`);
@@ -121,6 +137,26 @@ test('raíz con data-level="4" y slots expuestos', () => {
     findOne(scene.element, (n) => n.attributes['data-slot'] === 'status'),
     scene.statusSlot,
   );
+  assert.strictEqual(
+    findOne(scene.element, (n) => n.attributes['data-slot'] === 'keys'),
+    scene.keysSlot,
+  );
+  assert.strictEqual(
+    findOne(scene.element, (n) => n.attributes['data-slot'] === 'hud'),
+    scene.hudSlot,
+  );
+});
+
+test('keysSlot y hudSlot para lo que monta el parent en la banda de mesa', () => {
+  const scene = setup();
+  assert.equal(scene.keysSlot.getAttribute('aria-label'), 'Carretes y herramientas');
+  assert.equal(scene.hudSlot.getAttribute('aria-label'), 'Estado del taller');
+  assert.equal(scene.hudSlot.getAttribute('aria-live'), 'polite');
+  const dock = findOne(scene.element, (n) => classes(n).includes('l4-dock'));
+  const row = findOne(dock, (n) => classes(n).includes('l4-dock-row'));
+  assert.ok(row.children.includes(scene.keysSlot), 'los carretes van al centro-derecha de la banda');
+  assert.ok(dock.children.includes(scene.hudSlot), 'el estado es el último renglón');
+  assert.equal(dock.children.indexOf(scene.hudSlot), dock.children.length - 1, 'nada debajo del estado');
 });
 
 test('editorSlot reserva la placa y statusSlot la pila', () => {
@@ -138,20 +174,139 @@ test('la escena no crea editor, cables, llaves ni lógica', () => {
   const tags = new Set(findAll(scene.element, () => true).map((node) => node.tag));
   assert.ok(!tags.has('svg'), 'sin nodos svg');
   assert.ok(!tags.has('canvas'), 'sin canvas');
-  assert.equal(findAll(scene.element, (n) => n.tag === 'button').length, 0, 'sin botones: no hay controles reales');
-  assert.equal(findAll(scene.element, (n) => n.listenerTypes().length > 0).length, 0, 'sin listeners: decorado puro');
+  const buttons = findAll(scene.element, (n) => n.tag === 'button');
+  const diegetic = buttons.filter((n) => n.getAttribute('data-action') !== null);
+  const dials = buttons.filter((n) => n.getAttribute('data-action') === null);
+  assert.equal(diegetic.length, 6, `los seis props diegéticos son botones, hay ${diegetic.length}`);
+  assert.deepEqual(
+    diegetic.map((node) => node.getAttribute('data-action')).sort(),
+    ['assault', 'contract', 'cut', 'hint', 'log', 'probe'],
+    'cada botón emite su intención con data-action',
+  );
+  assert.equal(dials.length, 6, `los seis diales de la pila son botones, hay ${dials.length}`);
+  for (const button of buttons) {
+    assert.equal(button.type, 'button', 'botones reales');
+    assert.ok(button.getAttribute('aria-label'), 'todo prop accionable tiene nombre accesible');
+  }
+  assert.equal(findAll(scene.element, (n) => n.listenerTypes().length > 0).length, 0, 'sin listeners: la escena no decide nada');
+  assert.deepEqual(scene.actions, ['contract', 'hint', 'log', 'probe', 'assault', 'cut']);
+});
+
+test('props diegéticos: papeles, cuerda, palanca y tijera', () => {
+  const scene = setup();
+  const byAction = {};
+  for (const button of findAll(scene.element, (n) => n.tag === 'button')) {
+    byAction[button.getAttribute('data-action')] = button;
+  }
+  assert.equal(byAction.contract.getAttribute('aria-label'), 'Abrir contrato');
+  assert.equal(byAction.hint.getAttribute('aria-label'), 'Pedir una pista');
+  assert.equal(byAction.log.getAttribute('aria-label'), 'Abrir la bitácora');
+  assert.equal(byAction.probe.getAttribute('aria-label'), 'Probar la llave');
+  assert.equal(byAction.assault.getAttribute('aria-label'), 'Ejecutar el ensayo');
+  assert.equal(byAction.cut.getAttribute('aria-label'), 'Cortar un cable');
+  for (const action of ['contract', 'hint', 'log']) {
+    assert.ok(classes(byAction[action]).includes('l4-paper'), `el prop ${action} es un papel de la mesa`);
+  }
+  assert.deepEqual(
+    findAll(byAction.contract, (n) => classes(n).includes('l4-paper-name')).map((n) => n.textContent),
+    ['Contrato'],
+    'el papel conserva su rótulo visible',
+  );
+  assert.ok(classes(byAction.probe).includes('l4-probe'), 'la cuerda prueba');
+  assert.deepEqual(
+    findAll(byAction.probe, (n) => classes(n).includes('l4-probe-tag')).map((n) => n.textContent),
+    ['Probar'],
+    'la cuerda dice qué hace',
+  );
+  assert.ok(classes(byAction.assault).includes('l4-assault'), 'la palanca grande es el ensayo');
+  assert.deepEqual(
+    findAll(byAction.assault, (n) => classes(n).includes('l4-assault-tag')).map((n) => n.textContent),
+    ['Ensayo'],
+    'la palanca lleva el nombre de la fase',
+  );
+  assert.ok(classes(byAction.cut).includes('l4-cut'), 'la tijera corta');
+  assert.deepEqual(
+    findAll(byAction.cut, (n) => classes(n).includes('l4-cut-name')).map((n) => n.textContent),
+    ['Tijera'],
+    'la tijera lleva su nombre',
+  );
+  const build = setup({ phase: 'Construcción' });
+  const buildAssault = findOne(build.element, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'assault');
+  assert.equal(
+    findOne(buildAssault, (n) => classes(n).includes('l4-assault-tag')).textContent,
+    'Asalto',
+    'en construcción la palanca dice asalto',
+  );
+});
+
+test('la palanca del ensayo usa las láminas finales de subir y bajar', () => {
+  const scene = setup();
+  const assault = findOne(scene.element, (n) => classes(n).includes('l4-assault'));
+  assert.equal(assault.attributes['data-asset'], 'n4.levers');
+  assert.equal(assault.attributes['data-status'], 'final', 'la palanca ya usa asset final');
+  assert.ok(
+    String(assault.attributes['data-src']).includes('assets/levels/04/lever-up.svg'),
+    'data-src con la palanca de subir',
+  );
+  assert.ok(
+    String(assault.attributes['data-src']).includes('assets/levels/04/lever-down.svg'),
+    'data-src con la palanca de bajar',
+  );
+  const icons = findAll(assault, (n) => n.tag === 'img');
+  assert.equal(icons.length, 2, 'una lámina por posición');
+  assert.deepEqual(
+    icons.map((icon) => icon.getAttribute('src')),
+    ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
+  );
+  for (const icon of icons) {
+    assert.equal(icon.getAttribute('alt'), '', 'imagen decorativa sin texto alternativo');
+    assert.ok(
+      existsSync(join(here, '..', String(icon.getAttribute('src')))),
+      `${icon.getAttribute('src')} existe en disco`,
+    );
+  }
+});
+
+test('sello de fase siempre en español', () => {
+  assert.equal(findOne(setup().element, (n) => classes(n).includes('l4-seal')).textContent, 'Reparación');
+  assert.equal(findOne(setup({ phase: 'repair' }).element, (n) => classes(n).includes('l4-seal')).textContent, 'Reparación');
+  assert.equal(findOne(setup({ phase: 'Construcción' }).element, (n) => classes(n).includes('l4-seal')).textContent, 'Construcción');
+  assert.equal(findOne(setup({ phase: 'build' }).element, (n) => classes(n).includes('l4-seal')).textContent, 'Construcción');
+});
+
+test('fuera los textos de producción y el duplicado de fichas', () => {
+  const scene = setup();
+  const copy = spokenText(scene.element);
+  for (const banned of ['a producir', 'Decorado de tramoya', 'repair', 'AQUÍ EL TALLER', 'Aquí va']) {
+    assert.ok(!copy.includes(banned), `ningún aviso visible de ${banned}`);
+  }
+  for (const banned of ['a-producir', 'a producir', 'l4-note', 'l4-counterweights', 'l4-chip', 'l4-base']) {
+    assert.ok(!sceneSource.includes(banned), `la escena no debe mencionar ${banned}`);
+  }
+  assert.ok(!cssSource.includes('Aquí va'), 'el css no deja huecos con texto de producción');
+  assert.equal(
+    findAll(scene.element, (n) => n.attributes['data-status'] === 'a producir').length,
+    0,
+    'nada pendiente: solo queda la pila real del parent',
+  );
+  for (const gone of ['l4-note', 'l4-counterweights', 'l4-chip', 'l4-base', 'l4-cord']) {
+    assert.equal(findAll(scene.element, (n) => classes(n).includes(gone)).length, 0, `sin ${gone}`);
+  }
 });
 
 test('slots finales con data-src y archivo en disco', () => {
   const scene = setup();
   const final = findAll(scene.element, (n) => n.attributes['data-status'] === 'final');
-  assert.ok(final.length >= 3, 'fondo, selectores y palancas marcados como final');
+  assert.ok(final.length >= 6, 'fondo, selectores, palancas y los tres papeles marcados como final');
   const assets = final.map((n) => n.attributes['data-asset']).join(' ');
   const srcs = final.map((n) => n.attributes['data-src']).join(' ');
   const expected = {
     'n4.background': ['assets/levels/04/background.webp'],
     'n4.selectors': ['assets/levels/04/selectors.svg'],
     'n4.levers': ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
+    'levels.01.contract': ['assets/levels/01/props/contract.webp'],
+    'levels.01.hint': ['assets/levels/01/props/hint.webp'],
+    'levels.01.log': ['assets/levels/01/props/log.webp'],
   };
   for (const [slot, files] of Object.entries(expected)) {
     assert.ok(assets.includes(slot), `slot final ${slot}`);
@@ -164,98 +319,128 @@ test('slots finales con data-src y archivo en disco', () => {
     !final.some((n) => n.attributes['data-placeholder'] === 'a-producir'),
     'lo final ya no lleva marca a-producir',
   );
-  const spoken = findAll(
-    scene.element,
-    (n) => typeof n.textContent === 'string' && n.textContent !== '' && n.children.length === 0,
-  )
-    .map((n) => n.textContent)
-    .join(' ');
-  assert.ok(!spoken.includes('final'), 'el aviso vive en atributos, no en texto visible');
+  assert.ok(!spokenText(scene.element).includes('final'), 'el aviso vive en atributos, no en texto visible');
 });
 
-test('fichas y base de muestra siguen a producir', () => {
+test('papeles con los assets finales del taller, rótulo debajo', () => {
   const scene = setup();
-  const pending = findAll(scene.element, (n) => n.attributes['data-status'] === 'a producir');
-  assert.equal(pending.length, 4, 'solo las 3 fichas y la base de muestra siguen sin asset');
-  const assets = pending.map((n) => n.attributes['data-asset']);
-  assert.equal(assets.filter((a) => a === 'n4.chip').length, 3, 'la columna trae fichas de muestra');
-  assert.ok(assets.includes('n4.stackBase'), 'la base de muestra sigue pendiente');
-  for (const node of pending) {
-    assert.equal(node.attributes['data-placeholder'], 'a-producir', 'cada pendiente avisa su estado');
-  }
-  const decor = findAll(scene.element, (n) => n.attributes['aria-hidden'] === 'true');
-  assert.ok(decor.length > 0, 'el decorado visual queda fuera de lectores');
-});
-
-test('mesa de trabajo y luz cálida como decorado estructural', () => {
-  const scene = setup();
-  const bench = findOne(scene.element, (n) => classes(n).includes('l4-bench'));
-  const light = findOne(scene.element, (n) => classes(n).includes('l4-light'));
-  assert.equal(bench.getAttribute('aria-hidden'), 'true');
-  assert.equal(light.getAttribute('aria-hidden'), 'true');
-  assert.equal(bench.getAttribute('data-placeholder'), null, 'la mesa es CSS, no un asset pendiente');
-});
-
-test('palancas decorativas con las etiquetas de las llaves y svg finales', () => {
-  const scene = setup();
-  const levers = findOne(scene.element, (n) => classes(n).includes('l4-levers'));
-  assert.equal(levers.attributes['data-asset'], 'n4.levers');
-  assert.equal(levers.attributes['data-status'], 'final', 'las palancas ya usan asset final');
-  assert.equal(levers.attributes['aria-hidden'], 'true', 'las palancas quedan fuera de lectores');
-  assert.ok(
-    String(levers.attributes['data-src']).includes('assets/levels/04/lever-up.svg'),
-    'data-src con la palanca de subir',
-  );
-  assert.ok(
-    String(levers.attributes['data-src']).includes('assets/levels/04/lever-down.svg'),
-    'data-src con la palanca de bajar',
-  );
-  const tags = findAll(levers, (n) => classes(n).includes('l4-lever-tag'));
-  assert.deepEqual(tags.map((n) => n.textContent), ['▲ Subir', '▼ Bajar']);
-  const icons = findAll(levers, (n) => classes(n).includes('l4-lever-icon'));
-  assert.equal(icons.length, 2, 'una palanca por llave');
-  assert.deepEqual(
-    icons.map((icon) => icon.getAttribute('src')),
-    ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
-  );
-  for (const icon of icons) {
-    assert.equal(icon.tag, 'img', 'las palancas usan imagen, no botones');
-    assert.equal(icon.getAttribute('alt'), '', 'imagen decorativa sin texto alternativo');
-    assert.ok(
-      existsSync(join(here, '..', String(icon.getAttribute('src')))),
-      `${icon.getAttribute('src')} existe en disco`,
+  const defs = {
+    contract: ['assets/levels/01/props/contract.webp', 'levels.01.contract', 'Contrato'],
+    hint: ['assets/levels/01/props/hint.webp', 'levels.01.hint', 'Pista'],
+    log: ['assets/levels/01/props/log.webp', 'levels.01.log', 'Bitácora'],
+  };
+  for (const [action, [src, asset, name]] of Object.entries(defs)) {
+    const paper = findOne(scene.element, (n) => n.tag === 'button' && n.getAttribute('data-action') === action);
+    const image = findOne(paper, (n) => n.tag === 'img' && classes(n).includes('l4-paper-sheet'));
+    assert.equal(image.getAttribute('src'), src, `el papel ${action} viste su asset`);
+    assert.equal(image.getAttribute('alt'), '', 'imagen de papel sin texto alternativo');
+    assert.equal(image.getAttribute('data-asset'), asset, 'slot del manifiesto');
+    assert.equal(image.getAttribute('data-status'), 'final', 'asset final, no pendiente');
+    assert.ok(existsSync(join(here, '..', src)), `${src} existe en disco`);
+    assert.deepEqual(
+      findAll(paper, (n) => classes(n).includes('l4-paper-name')).map((n) => n.textContent),
+      [name],
+      `el rótulo ${name} va debajo del papel`,
     );
   }
-  const fallback = setup({ level: {} });
-  const fallbackTags = findAll(fallback.element, (n) => classes(n).includes('l4-lever-tag'));
-  assert.deepEqual(fallbackTags.map((n) => n.textContent), ['▲ Subir', '▼ Bajar']);
-  const fallbackIcons = findAll(fallback.element, (n) => classes(n).includes('l4-lever-icon'));
-  assert.deepEqual(
-    fallbackIcons.map((icon) => icon.getAttribute('src')),
-    ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
-  );
 });
 
-test('selectores en lámina final fuera del lector', () => {
+test('mesa de trabajo, luz y polvo como decorado estructural', () => {
+  const scene = setup();
+  for (const name of ['l4-bench', 'l4-light', 'l4-dust']) {
+    const node = findOne(scene.element, (n) => classes(n).includes(name));
+    assert.equal(node.getAttribute('aria-hidden'), 'true');
+    assert.equal(node.getAttribute('data-placeholder'), null, `${name} es CSS, no un asset pendiente`);
+  }
+});
+
+test('selectores de la pila: placa final con seis posiciones diegéticas', () => {
   const scene = setup();
   const selectors = findOne(scene.element, (n) => classes(n).includes('l4-selectors'));
-  assert.equal(selectors.attributes['aria-hidden'], 'true', 'los selectores quedan fuera de lectores');
+  assert.equal(selectors.getAttribute('aria-hidden'), null, 'los selectores se tocan: nada de aria-hidden');
   assert.equal(selectors.attributes['data-asset'], 'n4.selectors');
   assert.equal(selectors.attributes['data-status'], 'final');
   assert.equal(selectors.attributes['data-src'], 'assets/levels/04/selectors.svg');
   assert.ok(
     existsSync(join(here, '..', 'assets/levels/04/selectors.svg')),
-    'la lámina existe en disco',
+    'la placa existe en disco',
   );
-  const image = findOne(selectors, (n) => classes(n).includes('l4-selectors-img'));
-  assert.equal(image.tag, 'img');
-  assert.equal(image.getAttribute('src'), 'assets/levels/04/selectors.svg');
-  assert.equal(image.getAttribute('alt'), '', 'lámina decorativa sin texto alternativo');
-  assert.equal(
-    findAll(selectors, (n) => classes(n).includes('l4-dial')).length,
-    0,
-    'los diales decorativos ya no se dibujan',
+  assert.ok(
+    cssSource.includes('url("../../../assets/levels/04/selectors.svg")'),
+    'la placa viste los diales por css',
   );
+  const dialPlate = findOne(selectors, (n) => classes(n).includes('l4-dial-plate'));
+  assert.equal(dialPlate.getAttribute('aria-hidden'), 'true', 'la placa es decorado');
+  const groups = findAll(selectors, (n) => classes(n).includes('l4-dial-group'));
+  assert.equal(groups.length, 2, 'arriba y acción');
+  assert.equal(groups[0].getAttribute('role'), 'group');
+  assert.equal(groups[0].getAttribute('aria-label'), 'Arriba de la pila');
+  assert.equal(groups[1].getAttribute('aria-label'), 'Acción de la pila');
+  for (const group of groups) {
+    const title = findOne(group, (n) => classes(n).includes('l4-dial-title'));
+    assert.equal(title.textContent, group.getAttribute('aria-label'), 'rótulo visible igual al nombre del grupo');
+    assert.ok(findOne(group, (n) => classes(n).includes('l4-dial-row')), 'las posiciones comparten renglón');
+  }
+  const tops = findAll(scene.element, (n) => n.attributes['data-stack-top'] !== undefined);
+  assert.deepEqual(
+    tops.map((n) => n.attributes['data-stack-top']),
+    ['any', 'base', 'chip'],
+    'arriba: da igual, base, ficha',
+  );
+  const actions = findAll(scene.element, (n) => n.attributes['data-stack-action'] !== undefined);
+  assert.deepEqual(
+    actions.map((n) => n.attributes['data-stack-action']),
+    ['keep', 'push', 'pop'],
+    'acción: no tocar, cargar, soltar',
+  );
+  const dials = [...tops, ...actions];
+  assert.equal(findAll(scene.element, (n) => classes(n).includes('l4-dial')).length, 6);
+  for (const dial of dials) {
+    assert.equal(dial.tag, 'button', 'posiciones clicables reales');
+    assert.equal(dial.type, 'button');
+    assert.ok(dial.getAttribute('aria-label'), 'cada posición dice qué hace');
+    assert.equal(dial.getAttribute('data-action'), null, 'los diales no pisan data-action');
+    assert.equal(findAll(dial, (n) => classes(n).includes('l4-dial-light')).length, 1, 'luz de latón por dial');
+  }
+  assert.deepEqual(
+    dials.map((d) => findOne(d, (n) => classes(n).includes('l4-dial-name')).textContent),
+    ['Da igual', 'Base', 'Ficha', 'No tocar', 'Cargar', 'Soltar'],
+  );
+  assert.equal(findAll(scene.element, (n) => n.listenerTypes().length > 0).length, 0, 'los diales no deciden: el parent los engancha');
+});
+
+test('diales como controles: borde, hover, luz y seleccionado inconfundible', () => {
+  const [dial] = cssBlocks('.level-scene[data-level="4"] .l4-dial');
+  assert.ok(dial, 'existe la regla del dial');
+  assert.ok(cssHas(dial, 'min-width: 44px'), 'posición tocable');
+  assert.ok(cssHas(dial, 'min-height: 44px'), 'posición tocable en alto');
+  assert.ok(cssHas(dial, 'cursor: pointer'), 'se ve accionable');
+  assert.ok(cssHas(dial, 'border: 1px solid var(--l4-brass)'), 'borde de latón');
+  const [hover] = cssBlocks('.level-scene[data-level="4"] .l4-dial:hover');
+  assert.ok(hover, 'el hover da brillo');
+  const [title] = cssBlocks('.level-scene[data-level="4"] .l4-dial-title');
+  assert.ok(title && cssHas(title, 'font-size: 12px'), 'rótulo de grupo a 12 px');
+  assert.ok(cssHas(title, 'var(--l4-brass-2)'), 'rótulo con contraste sobre el fondo');
+  const [name] = cssBlocks('.level-scene[data-level="4"] .l4-dial-name');
+  assert.ok(name && cssHas(name, 'font-size: 14px'), 'la posición se lee a 14 px');
+  const [light] = cssBlocks('.level-scene[data-level="4"] .l4-dial-light');
+  assert.ok(light, 'existe la luz apagada');
+  const [active] = cssBlocks('.level-scene[data-level="4"] .l4-dial.is-active');
+  assert.ok(active, 'el parent puede marcar la posición activa');
+  assert.ok(cssHas(active, 'inset'), 'placa hundida al seleccionar');
+  assert.ok(cssHas(active, 'var(--l4-brass-2)'), 'borde dorado al seleccionar');
+  const [lit] = cssBlocks('.level-scene[data-level="4"] .l4-dial.is-active .l4-dial-light');
+  assert.ok(lit && cssHas(lit, 'box-shadow'), 'luz de latón encendida al seleccionar');
+  assert.ok(cssSource.includes('.level-scene[data-level="4"] .l4-dial:focus-visible'), 'foco teal en el dial');
+});
+
+test('en inmersivo el título es del shell: sin encabezado interno y debajo del header', () => {
+  const [head] = cssBlocks('.wb-scene.is-immersive .level-scene[data-level="4"] .l4-head');
+  assert.ok(head, 'el shell retira el encabezado en inmersivo');
+  assert.ok(cssHas(head, 'display: none'), 'sin título duplicado ni botones tapados');
+  const immersive = cssBlocks('.wb-scene.is-immersive .level-scene[data-level="4"]');
+  assert.equal(immersive.length, 2, 'reserva en desktop y en celular');
+  assert.ok(immersive.some((block) => cssHas(block, 'padding-top: 84px')), 'la placa empieza debajo del header');
 });
 
 test('fondo final con cover, oscurecimiento y terciopelo de fallback', () => {
@@ -283,6 +468,8 @@ test('leyenda de una línea con el texto completo en el title', () => {
   const scene = setup();
   const legend = findOne(scene.element, (n) => classes(n).includes('l4-legend'));
   assert.equal(legend.children.length, 2, 'solo título y una línea, fuera del camino del editor');
+  const [rule] = cssBlocks('.level-scene[data-level="4"] .l4-legend');
+  assert.ok(rule && cssHas(rule, 'margin:'), 'la franja respira: no queda pegada a la placa');
   assert.equal(findOne(legend, (n) => classes(n).includes('l4-legend-title')).textContent, 'Cómo se lee un cable');
   assert.equal(findOne(legend, (n) => classes(n).includes('l4-legend-keys')).textContent, '▲ Subir · ▼ Bajar');
   const full = legend.getAttribute('title');
@@ -294,11 +481,8 @@ test('leyenda de una línea con el texto completo en el title', () => {
   const keysNode = findOne(injected.element, (n) => classes(n).includes('l4-legend-keys'));
   assert.equal(keysNode.textContent, evil);
   assert.equal(keysNode.children.length, 0, 'la etiqueta con marcas no se parsea como nodos');
-  const spoken = findAll(scene.element, (n) => typeof n.textContent === 'string' && n.textContent !== '' && n.children.length === 0)
-    .map((n) => n.textContent)
-    .join(' · ');
   for (const banned of ['autómata', 'AFD', 'AFND', 'transición', 'lenguaje']) {
-    assert.ok(!spoken.includes(banned), `vocabulario de taller, sin ${banned}`);
+    assert.ok(!spokenText(scene.element).includes(banned), `vocabulario de taller, sin ${banned}`);
   }
 });
 
@@ -306,31 +490,78 @@ test('rig contenido con cabecera compacta y slots en su lugar', () => {
   const scene = setup();
   const rig = findOne(scene.element, (n) => classes(n).includes('l4-rig'));
   assert.ok(findOne(rig, (n) => classes(n).includes('l4-body')), 'el cuerpo vive en el rig');
-  assert.ok(findOne(rig, (n) => classes(n).includes('l4-note')), 'la nota vive en el rig');
   const head = findOne(scene.element, (n) => classes(n).includes('l4-head'));
   assert.ok(findOne(head, (n) => classes(n).includes('l4-titles')), 'títulos en la cabecera');
-  assert.ok(findOne(head, (n) => classes(n).includes('l4-levers')), 'palancas en la cabecera');
   assert.ok(
     findOne(scene.element, (n) => classes(n).includes('l4-plate')).children.includes(scene.editorSlot),
     'el editor vive en la placa',
   );
+  const column = findOne(scene.element, (n) => classes(n).includes('l4-column'));
+  assert.ok(column.children.includes(scene.statusSlot), 'la pila vive en la tramoya lateral');
+  const leverRow = findOne(column, (n) => classes(n).includes('l4-lever-row'));
+  assert.equal(leverRow.children.length, 2, 'PROBAR y ENSAYO comparten botonera');
+  assert.ok(
+    findOne(leverRow, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'probe'),
+    'la cuerda va en la fila',
+  );
+  assert.ok(
+    findOne(leverRow, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'assault'),
+    'la palanca va en la fila',
+  );
+  assert.equal(
+    findAll(column, (n) => classes(n).includes('l4-selectors')).length,
+    0,
+    'los diales viven en la banda, no en la columna',
+  );
+  const dock = findOne(scene.element, (n) => classes(n).includes('l4-dock'));
+  const row = findOne(dock, (n) => classes(n).includes('l4-dock-row'));
+  for (const action of ['contract', 'hint', 'log']) {
+    assert.ok(
+      findOne(row, (n) => n.tag === 'button' && n.getAttribute('data-action') === action),
+      `el papel ${action} vive en la banda`,
+    );
+  }
+  assert.ok(
+    findOne(row, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'cut'),
+    'la tijera vive en la banda',
+  );
+  const panel = findOne(row, (n) => classes(n).includes('l4-selectors'));
+  assert.ok(findOne(panel, (n) => classes(n).includes('l4-dial-groups')), 'los diales viven en la banda');
 });
 
-test('sello de fase y dispose', () => {
+test('columna sin scroll y botonera en fila horizontal', () => {
+  const [column] = cssBlocks('.level-scene[data-level="4"] .l4-column');
+  assert.ok(column, 'existe la regla de la columna');
+  assert.ok(cssHas(column, 'overflow: visible'), 'la columna no recorta: sin barra');
+  assert.ok(!cssHas(column, 'overflow: auto'), 'nada de scroll interno en la columna');
+  const [leverRow] = cssBlocks('.level-scene[data-level="4"] .l4-lever-row');
+  assert.ok(leverRow, 'existe la botonera PROBAR/ENSAYO');
+  assert.ok(cssHas(leverRow, 'display: flex'), 'los dos controles comparten fila');
+  assert.ok(!cssHas(leverRow, 'flex-direction: column'), 'lado a lado, no apilados');
+});
+
+test('sello de fase como línea grabada y dispose', () => {
   const scene = setup({ phase: 'Construcción' });
   assert.equal(findOne(scene.element, (n) => classes(n).includes('l4-seal')).textContent, 'Construcción');
+  const [seal] = cssBlocks('.level-scene[data-level="4"] .l4-seal');
+  assert.ok(seal, 'existe la regla del sello');
+  assert.ok(cssHas(seal, 'font-size: 14px'), 'el estado se lee a 14 px');
   scene.dispose();
   assert.equal(scene.element.removed, true);
 });
 
 test('css con alcance del nivel, foco y movimiento reducido', () => {
+  const allowed = new Set(['@media', '@keyframes', '0%,', '100%', '50%', '0%', 'from', 'to']);
   for (const line of cssSource.split('\n')) {
     const brace = line.indexOf('{');
     if (brace === -1) {
       continue;
     }
     const selector = line.slice(0, brace).trim();
-    if (selector === '' || selector.startsWith('@media')) {
+    if (selector === '' || [...allowed].some((prefix) => selector.startsWith(prefix))) {
+      continue;
+    }
+    if (selector.startsWith('.wb-scene.is-immersive .level-scene[data-level="4"]')) {
       continue;
     }
     assert.ok(
@@ -338,7 +569,8 @@ test('css con alcance del nivel, foco y movimiento reducido', () => {
       `regla fuera del alcance del nivel 4: ${selector}`,
     );
   }
-  assert.ok(cssSource.includes(':focus-visible'), 'foco visible para lo que monte el parent');
+  assert.ok(cssSource.includes(':focus-visible'), 'foco visible para los props y lo que monte el parent');
+  assert.ok(cssSource.includes('#38c6b8'), 'foco teal');
   assert.ok(cssSource.includes('prefers-reduced-motion'), 'respeta movimiento reducido');
 });
 
@@ -348,11 +580,72 @@ test('css usa las tipografías del mockup', () => {
   }
 });
 
-test('raíz contenida al alto del stage, sin empujar la página ni el dock', () => {
+test('la escena ocupa toda la pantalla, sin recuadro', () => {
   const roots = cssBlocks('.level-scene[data-level="4"]');
   assert.equal(roots.length, 2, 'regla de raíz en desktop y en celular');
-  for (const prop of ['display: grid', 'grid-template-rows: minmax(0, 1fr)', 'height: 100%', 'max-height: 100%', 'min-height: 0', 'overflow: hidden', 'box-sizing: border-box']) {
+  for (const prop of ['position: absolute', 'inset: 0', 'height: 100%', 'grid-template-rows: minmax(0, 1fr) auto', 'max-height: 100%', 'min-height: 0', 'overflow: hidden', 'border-radius: 0']) {
     assert.ok(cssHas(roots[0], prop), `la raíz fija ${prop}`);
+  }
+  assert.ok(!cssHas(roots[0], 'border-radius: 12px'), 'la raíz no es una tarjeta');
+  assert.ok(cssHas(roots[0], 'border: 0'), 'sin marcos en la raíz');
+});
+
+test('banda de mesa ordenada sin solapes: papeles y tijera a la izquierda, carretes al centro-derecha, estado al final', () => {
+  const [dock] = cssBlocks('.level-scene[data-level="4"] .l4-dock');
+  assert.ok(dock, 'existe la regla de la banda');
+  assert.ok(cssHas(dock, 'flex-direction: column'), 'la banda apila renglones');
+  assert.ok(!cssHas(dock, 'absolute'), 'la banda va en flujo, no superpuesta');
+  const [row] = cssBlocks('.level-scene[data-level="4"] .l4-dock-row');
+  assert.ok(row, 'existe el renglón de la banda');
+  assert.ok(cssHas(row, 'display: flex'), 'papeles, tijera y carretes comparten renglón');
+  const [keys] = cssBlocks('.level-scene[data-level="4"] .l4-keys-slot');
+  assert.ok(keys, 'existe la ranura de carretes');
+  assert.ok(cssHas(keys, 'justify-content: center'), 'los carretes van al centro-derecha');
+  assert.ok(cssHas(keys, 'min-height: 104px'), 'la ranura reserva alto de carrete + chapa');
+  const [hud] = cssBlocks('.level-scene[data-level="4"] .l4-hud-slot');
+  assert.ok(hud, 'existe la ranura del estado');
+  assert.ok(cssHas(hud, 'font-size: 14px'), 'el estado se lee a 14 px');
+  assert.ok(cssHas(hud, 'text-align: center'), 'el estado cierra la banda centrado');
+  for (const sel of ['.level-scene[data-level="4"] .l4-papers', '.level-scene[data-level="4"] .l4-cut']) {
+    const [block] = cssBlocks(sel);
+    assert.ok(block, `existe ${sel}`);
+    assert.ok(!cssHas(block, 'absolute'), `${sel} va en flujo, sin superponerse`);
+  }
+});
+
+test('la placa no pasa del 65% del ancho', () => {
+  const [body] = cssBlocks('.level-scene[data-level="4"] .l4-body');
+  assert.ok(body, 'existe la regla del cuerpo');
+  assert.ok(cssHas(body, '65%'), 'la placa queda en el 65% y la tramoya lateral respira');
+});
+
+test('la placa es el centro, más grande sobre la mesa', () => {
+  const [plate] = cssBlocks('.level-scene[data-level="4"] .l4-plate');
+  assert.ok(plate, 'existe la regla de la placa');
+  const [kicker] = cssBlocks('.level-scene[data-level="4"] .l4-kicker');
+  assert.ok(cssHas(kicker, 'font-size: 24px'), 'título de placa más grande');
+  const [head] = cssBlocks('.level-scene[data-level="4"] .l4-head');
+  assert.ok(cssHas(head, 'justify-content: center'), 'cabecera centrada');
+});
+
+test('props sin caja, con foco teal y área de 44 px', () => {
+  for (const selector of ['.l4-paper', '.l4-cut', '.l4-probe', '.l4-assault']) {
+    assert.ok(cssSource.includes(`.level-scene[data-level="4"] ${selector}`), `el prop ${selector} tiene reglas propias`);
+  }
+  assert.ok(cssSource.includes('background: transparent'), 'los props no tienen caja de botón');
+  assert.ok(cssSource.includes('min-height: 44px'), 'área táctil ≥44 px');
+  assert.ok(cssSource.includes('.l4-cut.is-active'), 'el modo corte se ve en la tijera');
+  assert.ok(cssSource.includes('.l4-paper-sheet'), 'los papeles visten su asset final');
+});
+
+test('la ranura de carretes no recorta: símbolo A/B siempre visible', () => {
+  const [keys] = cssBlocks('.level-scene[data-level="4"] .l4-keys-slot');
+  assert.ok(keys, 'existe la ranura de carretes');
+  assert.ok(cssHas(keys, 'min-height: 104px'), 'alto de carrete + chapa con letra');
+  for (const sel of ['.level-scene[data-level="4"] .l4-keys-slot', '.level-scene[data-level="4"] .l4-dock-row', '.level-scene[data-level="4"] .l4-dock']) {
+    const [block] = cssBlocks(sel);
+    assert.ok(block, `existe ${sel}`);
+    assert.ok(!cssHas(block, 'overflow'), `${sel} sin recorte vertical`);
   }
 });
 
@@ -398,12 +691,29 @@ test('pila con techo y scroll interno, targets de 44 px y sprites finales', () =
   }
 });
 
-test('cabecera compacta y lámina de selectores: el editor manda', () => {
-  const [head] = cssBlocks('.level-scene[data-level="4"] .l4-head');
-  assert.ok(cssHas(head, 'flex: 0 0 auto'), 'la cabecera no crece');
-  const [image] = cssBlocks('.level-scene[data-level="4"] .l4-selectors-img');
-  assert.ok(image, 'existe la regla de la lámina de selectores');
-  assert.ok(cssHas(image, 'width: 100%'), 'la lámina llena la columna');
+test('placa de selectores: la pila manda y el editor queda libre', () => {
+  const [plate] = cssBlocks('.level-scene[data-level="4"] .l4-dial-plate');
+  assert.ok(plate, 'existe la regla de la placa de diales');
+  assert.ok(cssHas(plate, 'selectors.svg'), 'la placa viste los diales');
+  const [group] = cssBlocks('.level-scene[data-level="4"] .l4-dial-group');
+  assert.ok(group && cssHas(group, 'display: flex'), 'las posiciones comparten renglón');
+  const [groups] = cssBlocks('.level-scene[data-level="4"] .l4-dial-groups');
+  assert.ok(groups && cssHas(groups, 'display: flex'), 'los dos grupos van lado a lado en la banda');
+});
+
+test('ambiente animado solo con movimiento permitido', () => {
+  const motionAt = cssSource.indexOf('prefers-reduced-motion: no-preference');
+  assert.ok(motionAt > 0, 'las animaciones viven bajo no-preference');
+  const motion = cssSource.slice(motionAt);
+  for (const name of ['l4-drift', 'l4-sway', 'l4-glow', 'l4-touch', 'l4-rise']) {
+    assert.ok(motion.includes(`@keyframes ${name}`), `existe ${name}`);
+  }
+  assert.ok(motion.includes('.l4-curtain'), 'el terciopelo tiene vaivén mínimo');
+  assert.ok(motion.includes('.l4-assault'), 'la palanca tiene brillo');
+  assert.ok(motion.includes('.l4-dust'), 'hay polvo de escenario');
+  assert.ok(motion.includes('.l4-paper'), 'los papeles tienen roce');
+  assert.ok(motion.includes('.l4-probe'), 'la cuerda se mece');
+  assert.ok(motion.includes('infinite'), 'en bucle lento sin distraer');
 });
 
 test('en celular la escena queda contenida al stage, sin scroll horizontal', () => {
@@ -417,6 +727,9 @@ test('en celular la escena queda contenida al stage, sin scroll horizontal', () 
     cssSource.indexOf('@media (prefers-reduced-motion)'),
   );
   assert.ok(mobile.includes('.l4-legend'), 'la media móvil toca la leyenda');
+  assert.ok(mobile.includes('.l4-dial-groups'), 'los grupos se apilan en móvil');
+  assert.ok(mobile.includes('.l4-lever-row'), 'la botonera también envuelve en móvil');
+  assert.ok(mobile.includes('.wb-scene.is-immersive'), 'el header flotante también reserva en móvil');
   assert.ok(mobile.includes('display: none'), 'la leyenda se esconde en móvil');
   assert.ok(mobile.includes('min-height: 240px'), 'el editor móvil reserva alto');
   const canvases = cssBlocks('.level-scene[data-level="4"] .l4-editor-slot #canvas');
