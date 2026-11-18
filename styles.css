@@ -1,3 +1,27 @@
+@font-face {
+  font-family: "Cinzel";
+  src: url("assets/fonts/Cinzel-Variable.woff2") format("woff2");
+  font-weight: 400 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Oswald";
+  src: url("assets/fonts/Oswald-Variable.woff2") format("woff2");
+  font-weight: 200 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Special Elite";
+  src: url("assets/fonts/SpecialElite-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   color-scheme: dark;
   --bg: #0b0f14;
@@ -17,8 +41,9 @@
   --success: #7ccb6a;
   --danger: #f06a4a;
   --shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-  --font-display: "Fraunces", "Palatino Linotype", "Book Antiqua", Georgia, serif;
-  --font-ui: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-display: "Cinzel", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+  --font-ui: "Oswald", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-paper: "Special Elite", "Courier New", monospace;
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
