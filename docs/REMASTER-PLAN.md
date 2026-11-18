@@ -16,6 +16,18 @@ La dirección visual del mockup funciona y vale la pena continuarla. El problema
 
 Además, para montar la mesa del mockup dentro del juego hay que tocar `renderWorkshop` y `renderDrumWorkshop`. `docs/LOGIC.md` §10 los marca como congelados, mientras que `AGENTS.md` permite tocar la capa visual de `main.js`. Esa contradicción la tiene que resolver el owner antes de integrar (ver Aut-1).
 
+### Actualización 2026-11-17 — mockup de Mateo (`153ee7d`)
+
+Mateo actualizó el mockup y esa versión se adopta como base visual:
+
+- **Fuentes:** Cinzel (títulos), Oswald (interfaz) y Special Elite (papeles), en lugar de Bodoni/Jost/Plex.
+- **Cables:** SVG procedurales, color de llave, sin etiquetas ni cursor propio.
+- **Tablero:** fijo 16:9 (1600×900) escalado; scroll horizontal en pantallas angostas.
+- **Probar/Ensayo:** la llave sobre una pieza solo explica; el perno se abre con un recorrido válido; un fallo de ensayo no consume el nivel.
+- Se mantienen M1 (objetivo visible), M2 (dirección), M3 (modelo de cables), M5 (número de llave), M6 (peso), M9 (contenido de datos) y los P1/P2 que sigan aplicando.
+- Quedan resueltos por esta versión: M8 (acciones falsas), M21 (cursor propio) y M22 (grosor del cable), salvo regresión.
+- El owner autorizó Aut-1 y Aut-2 (ver §8); esta actualización manda sobre las decisiones de fuentes, cables y tablero.
+
 ### Cómo se verificó
 
 - Edge headless con perfil temporal, a 320, 360, 390, 768, 1024, 1280×600, 1366 y 1440 px. Capturas, medición de DOM y red, y gestos táctiles.
