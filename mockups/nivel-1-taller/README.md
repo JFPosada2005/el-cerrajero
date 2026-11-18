@@ -10,17 +10,18 @@ Servir la carpeta desde la raíz del proyecto:
 http://localhost:8000/mockups/nivel-1-taller/
 ```
 
-Abrir `index.html` directamente también carga la escena, pero los navegadores basados en Chromium bloquean las fuentes self-hosted por CORS cuando el origen es `file://`. Para ver la tipografía prevista, usar el servidor.
+Abrir `index.html` directamente también funciona: las fuentes `@font-face` cargan. En Chromium, los dos `<link rel="preload" ... crossorigin>` pueden fallar por CORS bajo `file://` y dejar errores/warnings en consola; no impiden ver la tipografía. Para una consola limpia, usar el servidor.
 
 ## Interacciones del prototipo
 
 - **Llaves:** hacer clic en una llave del llavero para seleccionarla. El cursor cambia a esa llave.
-- **Herramientas:** hacer clic en el carrete de cobre, las tijeras o el engranaje. El cursor cambia a la herramienta.
+- **Herramientas:** hacer clic en el carrete de cobre o en las tijeras. El cursor cambia a la herramienta. El engranaje está bloqueado hasta el contrato 02 y muestra un aviso.
 - **Arrastrar:** mantener presionado un objeto del inventario y soltarlo sobre una pieza de la cerradura.
 - **Llave sobre rueda:** hace girar la rueda.
 - **Llave sobre cerrojo:** retrae o cierra el perno.
 - **Carrete de cobre:** hacer clic en dos piezas para tender un cable. El cable se estira desde el origen hasta el destino y la etiqueta toma el color de la llave activa.
 - **Tijeras:** hacer clic sobre un cable para cortarlo. El cursor hace el gesto de corte, el cable salta y deja una chispa.
+- **Teclado:** Tab recorre llaves, herramientas, cables y botones; Enter o Espacio activa. Con las tijeras, Enter sobre un cable enfocado también lo corta.
 - **Campana:** hacer clic para hacerla sonar.
 - **Contrato, pista y bitácora:** son objetos sobre la mesa. Al hacer clic se abren como documentos. `Esc`, el botón de cerrar o el fondo los cierran.
 - **Probar:** demostración visual del recorrido y del perno.

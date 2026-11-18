@@ -3,6 +3,7 @@ const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
 const NS = 'http://www.w3.org/2000/svg';
 
 const stage = $('#stage');
+const gameShell = $('.game-shell');
 const mechanism = $('#mechanism');
 const wireGroup = $('#wire-group');
 const wires = $('#wires');
@@ -297,6 +298,10 @@ function ringBell(element) {
 function applyToPart(element) {
   const id = element.dataset.part;
   if (id === 'bell') {
+    if (state.source !== null) {
+      clearSource();
+      hideCablePreview();
+    }
     ringBell(element);
     return;
   }
@@ -362,6 +367,18 @@ function registerCable(element) {
       return;
     }
     event.stopPropagation();
+    cutCable(element, event);
+  });
+  element.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') {
+      return;
+    }
+    event.preventDefault();
+    if (state.tool !== 'scissors') {
+      showToast('Elegí las tijeras para cortar el cable.');
+      sounds.error();
+      return;
+    }
     cutCable(element, event);
   });
   const hit = $('.cable-hit', element);
@@ -518,6 +535,9 @@ function createCable({ from, to, key, bow, animate = false }) {
     'data-key': key,
     'data-from': from,
     'data-to': to,
+    role: 'button',
+    tabindex: '0',
+    'aria-label': `Cable de la llave ${key}: ${PARTS[from].label} a ${PARTS[to].label}`,
   });
   cable.append(svgElement('path', { class: 'cable-hit', d: geometry.path, fill: 'none' }));
   const arc = svgElement('g', { class: 'cable-arc', transform: geometry.wrapperTransform });
@@ -770,6 +790,7 @@ function openOverlay(kind) {
   toastEl.hidden = true;
   dossierContent.replaceChildren(template.content.cloneNode(true));
   overlay.hidden = false;
+  gameShell.inert = true;
   document.body.classList.add('has-overlay');
   hideCursor();
   if (kind === 'hint') {
@@ -790,6 +811,7 @@ function closeOverlay() {
   overlay.hidden = true;
   document.body.classList.remove('has-overlay');
   dossierContent.replaceChildren();
+  gameShell.inert = false;
   if (state.lastFocus !== null && document.contains(state.lastFocus)) {
     state.lastFocus.focus();
   }
@@ -805,12 +827,17 @@ function renderHint() {
   index.textContent = String(state.hintIndex + 1);
   text.textContent = HINTS[state.hintIndex];
   next.textContent = state.hintIndex < HINTS.length - 1 ? 'Siguiente pista' : 'Volver a la primera';
-  next.addEventListener('click', () => {
-    state.hintIndex = (state.hintIndex + 1) % HINTS.length;
-    renderHint();
-    sounds.paper();
-  });
 }
+
+dossierContent.addEventListener('click', (event) => {
+  const next = event.target.closest('#next-hint');
+  if (next === null) {
+    return;
+  }
+  state.hintIndex = (state.hintIndex + 1) % HINTS.length;
+  renderHint();
+  sounds.paper();
+});
 
 overlay.addEventListener('click', (event) => {
   if (event.target.matches('[data-close]')) {
@@ -820,7 +847,10 @@ overlay.addEventListener('click', (event) => {
 
 overlayClose.addEventListener('click', closeOverlay);
 
-overlay.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', (event) => {
+  if (overlay.hidden === true) {
+    return;
+  }
   if (event.key === 'Escape') {
     closeOverlay();
     return;
@@ -915,6 +945,16 @@ document.addEventListener('pointerup', (event) => {
   if (stage.contains(target) === false) {
     hideCursor();
   }
+});
+
+document.addEventListener('pointercancel', () => {
+  if (state.dragging === false) {
+    return;
+  }
+  state.dragging = false;
+  document.body.classList.remove('is-dragging');
+  toolCursor.classList.remove('is-pressed');
+  hideCursor();
 });
 
 stage.addEventListener('pointermove', (event) => {

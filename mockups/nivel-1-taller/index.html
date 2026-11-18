@@ -75,16 +75,16 @@
         <span class="plate-label">Banco del Llano · Caja 01</span>
         <span class="plate-serial">N.º 0147</span>
 
-        <svg class="wires" id="wires" viewBox="0 0 900 560" aria-hidden="true">
+        <svg class="wires" id="wires" viewBox="0 0 900 560" role="group" aria-label="Cables del mecanismo">
           <defs>
             <filter id="tag-shadow" x="-50%" y="-50%" width="200%" height="200%">
               <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.7"/>
             </filter>
           </defs>
 
-          <g id="wire-group"></g>
+          <g id="wire-group" role="group" aria-label="Cables"></g>
 
-          <g id="alarm-layer">
+          <g id="alarm-layer" aria-hidden="true">
             <path class="alarm-shadow" d="M80 500C280 520 600 520 800 500" fill="none"></path>
             <path class="alarm-bus" d="M80 500C280 520 600 520 800 500" fill="none"></path>
             <circle class="alarm-node" cx="300" cy="512" r="4"></circle>
@@ -94,8 +94,8 @@
             <circle class="open-socket" cx="503" cy="248" r="4.5"></circle>
           </g>
 
-          <g id="pulse-layer"></g>
-          <g id="preview-layer"></g>
+          <g id="pulse-layer" aria-hidden="true"></g>
+          <g id="preview-layer" aria-hidden="true"></g>
         </svg>
 
         <span class="plate-alarm-label">Alarma</span>

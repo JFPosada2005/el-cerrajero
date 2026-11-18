@@ -413,6 +413,7 @@ body.has-custom-cursor[data-tool="scissors"] .cable-hit {
 }
 
 .thief.is-leaning {
+  animation: none;
   transform: translateX(-18px) rotate(-1.4deg) scale(1.02);
   filter: drop-shadow(0 18px 30px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 18px rgba(56, 198, 184, 0.12));
 }
@@ -797,6 +798,18 @@ body[data-tool="scissors"] .cable.is-targeted .cable-tag {
   transition: opacity 200ms var(--ease-out) 280ms;
 }
 
+.cable:focus-visible {
+  outline: none;
+}
+
+.cable:focus-visible .cable-image {
+  filter: drop-shadow(0 0 8px rgba(56, 198, 184, 0.8)) brightness(1.12);
+}
+
+.cable:focus-visible .cable-tag {
+  filter: url(#tag-shadow) drop-shadow(0 0 6px rgba(56, 198, 184, 0.75));
+}
+
 .alarm-shadow {
   stroke: #240c0a;
   stroke-width: 9;
@@ -1140,6 +1153,7 @@ body[data-tool="gear"] .tool-cursor {
 
 .inventory-item {
   position: relative;
+  touch-action: none;
   padding: 0;
   border: 0;
   background: none;
@@ -1750,7 +1764,7 @@ body[data-tool="gear"] .tool-cursor {
 @media (max-width: 600px) {
   .overlay-close {
     top: -12px;
-    right: -8px;
+    right: 0px;
     width: 44px;
     height: 44px;
   }
@@ -1834,8 +1848,12 @@ body[data-tool="gear"] .tool-cursor {
     padding-left: 2px;
   }
 
+  .key-row {
+    gap: 14px;
+  }
+
   .inventory-key {
-    width: 32px;
+    width: 44px;
     height: 64px;
   }
 
