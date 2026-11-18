@@ -1,6 +1,6 @@
 # Plan de assets P0 — remaster
 
-**Estado:** P0 completo en `feat/remaster-assets` y pusheado (N1, fuentes, iconos, props, N2–N5 y SFX). PR a `feat/remaster-integration` pendiente de abrir. Queda confirmar la licencia exacta de `click.mp3` y las dos dudas de layout con Felipe.
+**Estado:** P0 completo en `feat/remaster-assets` y pusheado (N1, fuentes, iconos, props, N2–N5 y SFX). PR abierto a `feat/remaster-integration`. Queda confirmar la licencia exacta de `click.mp3` y las dos dudas de layout con Felipe.
 **Rama de trabajo:** `feat/remaster-assets`, creada desde `origin/feat/remaster-integration` (`53339d3`).
 **Alcance:** `assets/`, `docs/` y `CREDITS.md`. No se toca `src/`, `src/game`, `tests/`, `index.html` ni `styles.css` del juego.
 **Contrato:** [`docs/ASSET-MANIFEST.md`](ASSET-MANIFEST.md) y [`assets/manifest.json`](../assets/manifest.json).
@@ -318,7 +318,7 @@ Actualizar `updated` al final de cada lote. No cambiar los `final` ya acordados.
 - `src/` intacto.
 - Commits: `84493df`, `6aa1d7d`, `0d2a400`, `649ab57`.
 - Pendiente: confirmar la página exacta de Freesound del `click.mp3`; confirmar con Felipe el tamaño final de los props y `n1.gear` vs. celda-relé.
-- PR a `feat/remaster-integration` pendiente de abrir.
+- PR abierto a `feat/remaster-integration`.
 
 ### Pendiente
 
