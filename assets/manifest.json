@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "updated": "2026-11-17",
+  "updated": "2026-11-18",
   "direction": "precision-noir workbench, Mateo 153ee7d",
   "budgets": {
     "imagePerLevelBytes": 1572864,
@@ -387,49 +387,65 @@
       "final": "assets/audio/sfx/click.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "Proyecto — archivo provisto por el owner (fuente pendiente de confirmar)",
+      "source": "assets/incoming/click.mp3; recortado y exportado a OGG mono 44,1 kHz"
     },
     "cable": {
       "final": "assets/audio/sfx/cable.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "Proyecto — síntesis original",
+      "source": "Síntesis procedural propia; OGG mono 44,1 kHz"
     },
     "cut": {
       "final": "assets/audio/sfx/cut.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "StarTowerStudio — Freesound 424988 — https://freesound.org/s/424988/"
     },
     "gear": {
       "final": "assets/audio/sfx/gear.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "CC BY 4.0",
+      "source": "Sabacky (Pavel Sabacky) — Freesound 807842 — https://freesound.org/s/807842/"
     },
     "lock": {
       "final": "assets/audio/sfx/lock.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "dster777 — Freesound 344551 — https://freesound.org/s/344551/"
     },
     "bell": {
       "final": "assets/audio/sfx/bell.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "rgjpb — Freesound 686265 — https://freesound.org/s/686265/"
     },
     "paper": {
       "final": "assets/audio/sfx/paper.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "CC0 1.0",
+      "source": "Nicolas4677 — Freesound 446631 — https://freesound.org/s/446631/"
     },
     "error": {
       "final": "assets/audio/sfx/error.ogg",
       "kind": "audio",
       "priority": "P0",
-      "status": "synthetic"
+      "status": "available",
+      "license": "Pixabay Content License",
+      "source": "Lesiakower — Pixabay 437420 — https://pixabay.com/sound-effects/error-mistake-sound-effect-incorrect-answer-437420/"
     },
     "success": {
       "final": "assets/audio/sfx/success.ogg",

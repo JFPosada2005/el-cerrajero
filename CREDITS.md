@@ -42,4 +42,15 @@ Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del
 
 ## Audio
 
-Pendiente de la entrega P0-3. Los SFX actuales son síntesis Web Audio dentro del mockup; los archivos finales se registrarán aquí cuando se rendericen.
+| SFX | Archivo | Origen | Licencia |
+|---|---|---|---|
+| Clic | `assets/audio/sfx/click.ogg` | Archivo provisto por el owner; fuente pendiente de confirmar | Proyecto / pendiente |
+| Cable | `assets/audio/sfx/cable.ogg` | Síntesis procedural propia | Proyecto |
+| Corte | `assets/audio/sfx/cut.ogg` | [StarTowerStudio — Freesound 424988](https://freesound.org/s/424988/) | CC0 1.0 |
+| Engranaje | `assets/audio/sfx/gear.ogg` | [Sabacky (Pavel Sabacky) — Freesound 807842](https://freesound.org/s/807842/) | CC BY 4.0 — atribución requerida |
+| Cerrojo | `assets/audio/sfx/lock.ogg` | [dster777 — Freesound 344551](https://freesound.org/s/344551/) | CC0 1.0 |
+| Campana | `assets/audio/sfx/bell.ogg` | [rgjpb — Freesound 686265](https://freesound.org/s/686265/) | CC0 1.0 |
+| Papel | `assets/audio/sfx/paper.ogg` | [Nicolas4677 — Freesound 446631](https://freesound.org/s/446631/) | CC0 1.0 |
+| Error | `assets/audio/sfx/error.ogg` | [Lesiakower — Pixabay 437420](https://pixabay.com/sound-effects/error-mistake-sound-effect-incorrect-answer-437420/) | Pixabay Content License |
+
+Los SFX se recortaron, normalizaron y convirtieron a OGG Vorbis mono 44,1 kHz. El engranaje exige atribución por CC BY 4.0: «Complex Mechanism Short» de Sabacky (Pavel Sabacky), Freesound 807842.
