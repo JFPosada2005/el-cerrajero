@@ -971,8 +971,59 @@ function readLabel(symbol) {
   }
   return symbol;
 }
+function renderDrumScene() {
+  const scene = createWorkbenchScene({
+    contract: state.level.contract,
+    title: state.level.title,
+    client: state.level.client,
+    phase: phaseWord(),
+    objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
+    soundEnabled: soundOn,
+    handlers: {
+      onBack: renderMap,
+      onProbe: handleProbe,
+      onAssault: handleAssault,
+      onOpenDoc: openWorkshopDoc,
+      onToggleSound: toggleSound
+    }
+  });
+  workbenchView = scene;
+  const levelScene = createLevel5Scene({ level: state.level, puzzle: state.puzzle, phase: state.phase });
+  app.replaceChildren(scene.element);
+  scene.slots.stage.append(levelScene.element);
+  const tapeRoot = document.createElement('div');
+  tapeRoot.id = 'tape-panel';
+  const drumRoot = document.createElement('div');
+  drumRoot.id = 'drum';
+  levelScene.editorSlot.append(tapeRoot);
+  levelScene.editorSlot.append(drumRoot);
+  const hint = document.createElement('p');
+  hint.className = 'hint';
+  hint.textContent = 'Tocá una púa para escribir, mover y elegir la sección siguiente.';
+  scene.slots.status.append(hint);
+  const probeButton = scene.element.querySelector('[data-action="probe"]');
+  if (probeButton !== null) {
+    probeButton.textContent = 'Probar la cinta';
+  }
+  const assaultButton = scene.element.querySelector('[data-action="assault"]');
+  if (assaultButton !== null) {
+    assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
+    assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
+  }
+  workshop = null;
+  drumEditor = createDrumEditor({ root: drumRoot, sections: state.puzzle.sections, symbols: state.puzzle.tape.symbols, labels: state.puzzle.tape.labels, rules: state.blueprint.rules, onEdit: handlePinEdit });
+  tapePanel = createTapePanel({ root: tapeRoot, blankLabel: state.puzzle.tape.labels[state.puzzle.tape.blank] ?? '' });
+  appendLog(state.puzzle.intro);
+  if (state.phase === 'repair') {
+    appendLog('Probá la cinta y después pedí el ensayo.');
+  } else {
+    appendLog('Probá la cinta y después lanzá el asalto.');
+  }
+}
 function renderDrumWorkshop() {
   workbenchView = null;
+  renderDrumScene();
+  return;
   app.replaceChildren();
   const shell = document.createElement('div');
   shell.className = 'game';
