@@ -1,0 +1,293 @@
+/* Escena del nivel 2 — Hotel Mirador, sala de máquinas del ascensor.
+   Alcance estricto: .level-scene[data-level="2"].
+   Placeholders en CSS/SVG; finales a producir: n2.background,
+   n2.pinion, n2.floorIndicator (ver docs/ASSET-MANIFEST.md). */
+
+.level-scene[data-level="2"] {
+  --l2-nickel: #232c36;
+  --l2-nickel-deep: #12161c;
+  --l2-brass: #d4a72c;
+  --l2-brass-2: #f0cf6a;
+  --l2-ink: #f2ede3;
+  --l2-muted: #a7b0be;
+  --l2-teal: #38c6b8;
+  position: relative;
+  display: block;
+  overflow: hidden;
+  border: 1px solid rgba(212, 167, 44, 0.35);
+  border-radius: 12px;
+  background:
+    radial-gradient(circle at 22% 4%, rgba(240, 207, 106, 0.14) 0%, transparent 30%),
+    radial-gradient(circle at 85% 70%, rgba(56, 198, 184, 0.07) 0%, transparent 32%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px),
+    linear-gradient(165deg, #2b333e 0%, var(--l2-nickel) 45%, var(--l2-nickel-deep) 100%);
+  color: var(--l2-ink);
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.level-scene[data-level="2"] .l2-background {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    linear-gradient(rgba(212, 167, 44, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(212, 167, 44, 0.05) 1px, transparent 1px);
+  background-size: 48px 48px;
+  mask-image: radial-gradient(circle at 50% 38%, #000 0%, transparent 78%);
+}
+
+.level-scene[data-level="2"] .l2-room {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 16px;
+  padding: 24px;
+}
+
+.level-scene[data-level="2"] .l2-top {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex-wrap: wrap;
+}
+
+.level-scene[data-level="2"] .l2-gauge {
+  margin: 0;
+  padding: 12px 16px 8px;
+  border: 1px solid rgba(212, 167, 44, 0.45);
+  border-radius: 120px 120px 12px 12px;
+  background: linear-gradient(180deg, #313b47 0%, #171c23 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.45);
+}
+
+.level-scene[data-level="2"] .l2-gauge-svg {
+  display: block;
+  width: 200px;
+  max-width: 100%;
+  height: auto;
+}
+
+.level-scene[data-level="2"] .l2-gauge-arc {
+  stroke: var(--l2-brass);
+  stroke-width: 3;
+}
+
+.level-scene[data-level="2"] .l2-gauge-tick {
+  stroke: var(--l2-muted);
+  stroke-width: 2;
+}
+
+.level-scene[data-level="2"] .l2-gauge-label {
+  fill: var(--l2-ink);
+  font-size: 13px;
+  letter-spacing: 0.08em;
+}
+
+.level-scene[data-level="2"] .l2-gauge-needle {
+  stroke: var(--l2-teal);
+  stroke-width: 3;
+  stroke-linecap: round;
+}
+
+.level-scene[data-level="2"] .l2-gauge-hub {
+  fill: var(--l2-brass-2);
+  stroke: #2b1c0b;
+  stroke-width: 1.5;
+}
+
+.level-scene[data-level="2"] .l2-gauge-caption {
+  margin-top: 4px;
+  color: var(--l2-brass-2);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="2"] .l2-kicker {
+  margin: 0 0 4px;
+  color: var(--l2-brass-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="2"] .l2-title {
+  margin: 0 0 8px;
+  font-size: 28px;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+.level-scene[data-level="2"] .l2-phase {
+  display: inline-block;
+  margin: 0;
+  padding: 4px 12px;
+  border: 1px solid rgba(212, 167, 44, 0.5);
+  border-radius: 999px;
+  color: var(--l2-brass-2);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="2"] .l2-plate {
+  border: 1px solid rgba(212, 167, 44, 0.55);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%), linear-gradient(180deg, #1a212b 0%, #0e1218 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.5);
+  padding: 20px;
+}
+
+.level-scene[data-level="2"] .l2-plate-title {
+  margin: 0;
+  color: var(--l2-brass-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="2"] .l2-plate-sub {
+  margin: 4px 0 12px;
+  color: var(--l2-muted);
+  font-size: 14px;
+}
+
+.level-scene[data-level="2"] .l2-editor-slot {
+  min-height: 200px;
+  border: 1px dashed rgba(212, 167, 44, 0.4);
+  border-radius: 8px;
+  background: rgba(7, 11, 16, 0.55);
+  padding: 8px;
+}
+
+.level-scene[data-level="2"] .l2-editor-slot svg,
+.level-scene[data-level="2"] .l2-editor-slot #canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.level-scene[data-level="2"] .l2-editor-slot:focus-within {
+  border-style: solid;
+  border-color: var(--l2-teal);
+}
+
+.level-scene[data-level="2"] .l2-props {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.level-scene[data-level="2"] .l2-relay {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border: 1px solid #3a4656;
+  border-radius: 8px;
+  background: linear-gradient(180deg, #232c36, #12161c);
+}
+
+.level-scene[data-level="2"] .l2-relay-visor {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #d6fff9, var(--l2-teal) 60%, #0b6b63);
+  box-shadow: 0 0 0 2px #0a0d11, 0 0 8px rgba(56, 198, 184, 0.5);
+}
+
+.level-scene[data-level="2"] .l2-relay-tag {
+  color: var(--l2-muted);
+  font-size: 13px;
+  letter-spacing: 0.06em;
+}
+
+.level-scene[data-level="2"] .l2-pinion {
+  margin-left: auto;
+  width: 96px;
+  height: 96px;
+}
+
+.level-scene[data-level="2"] .l2-pinion-svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.level-scene[data-level="2"] .l2-pinion-tooth {
+  fill: #8a651f;
+  stroke: #2b1c0b;
+  stroke-width: 1;
+}
+
+.level-scene[data-level="2"] .l2-pinion-body {
+  fill: #3a2a12;
+  stroke: var(--l2-brass-2);
+  stroke-width: 2;
+}
+
+.level-scene[data-level="2"] .l2-pinion-hub {
+  fill: var(--l2-brass-2);
+  stroke: #2b1c0b;
+  stroke-width: 1.5;
+}
+
+.level-scene[data-level="2"] .l2-caption {
+  margin: 12px 0 0;
+  color: var(--l2-muted);
+  font-size: 13px;
+}
+
+.level-scene[data-level="2"] .l2-status {
+  border-top: 1px dashed rgba(212, 167, 44, 0.3);
+  padding-top: 12px;
+}
+
+.level-scene[data-level="2"] .l2-status-text {
+  margin: 0;
+  color: var(--l2-muted);
+  font-size: 14px;
+  letter-spacing: 0.04em;
+}
+
+/* Controles que el parent monte dentro de la escena: 44 px y foco visible. */
+.level-scene[data-level="2"] button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="2"] :focus-visible {
+  outline: 2px solid var(--l2-teal);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .level-scene[data-level="2"] .l2-room {
+    padding: 16px;
+  }
+
+  .level-scene[data-level="2"] .l2-gauge-svg {
+    width: 160px;
+  }
+
+  .level-scene[data-level="2"] .l2-pinion {
+    width: 72px;
+    height: 72px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="2"],
+  .level-scene[data-level="2"] *,
+  .level-scene[data-level="2"] *::before,
+  .level-scene[data-level="2"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

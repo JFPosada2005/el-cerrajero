@@ -1,0 +1,398 @@
+/* El Cerrajero — shell compartido del taller.
+ * Alcance: solo clases `.wb-*`. No hay resets globales ni selectores de
+ * elemento sueltos: todo vive bajo `.wb-scene`.
+ * Materiales del mockup (papel ivory, latón, nogal, luz cálida, borde teal)
+ * con nombres propios; la escena del nivel la aporta el parent en `.wb-stage`.
+ */
+
+@font-face {
+  font-family: "Cinzel";
+  src: url("../../assets/fonts/Cinzel-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400 900;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Oswald";
+  src: url("../../assets/fonts/Oswald-Variable.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 300 700;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Special Elite";
+  src: url("../../assets/fonts/SpecialElite-Regular.woff2") format("woff2");
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+}
+
+.wb-scene {
+  --wb-bg: #0b0f14;
+  --wb-ink: #f2ede3;
+  --wb-muted: #c9bfae;
+  --wb-brass: #d4a72c;
+  --wb-brass-2: #f0cf6a;
+  --wb-brass-dark: #7a5a12;
+  --wb-teal: #38c6b8;
+  --wb-coral: #f06a4a;
+  --wb-wood: #2b1d16;
+  --wb-paper: #f2ede3;
+  --wb-paper-2: #e4d8c3;
+  --wb-paper-ink: #2a2118;
+  --wb-paper-muted: #5a5348;
+  --wb-font-display: "Cinzel", "Palatino Linotype", Georgia, serif;
+  --wb-font-ui: "Oswald", "Segoe UI", system-ui, sans-serif;
+  --wb-font-paper: "Special Elite", "Courier New", monospace;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 100%;
+  padding: 12px 16px 16px;
+  color: var(--wb-ink);
+  font-family: var(--wb-font-ui);
+  font-size: 16px;
+  line-height: 1.5;
+  background:
+    linear-gradient(180deg, rgba(240, 207, 106, 0.07) 0%, transparent 32%),
+    linear-gradient(90deg, rgba(43, 29, 22, 0.9) 0%, rgba(24, 18, 16, 0.95) 82%, rgba(56, 198, 184, 0.12) 100%),
+    var(--wb-bg);
+  border-right: 3px solid rgba(56, 198, 184, 0.55);
+}
+
+/* --- Header --- */
+.wb-scene .wb-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto auto;
+  align-items: center;
+  gap: 12px;
+  min-height: 56px;
+  padding: 4px;
+}
+
+.wb-scene .wb-brand {
+  margin: 0;
+  font-family: var(--wb-font-display);
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  color: var(--wb-brass-2);
+  white-space: nowrap;
+}
+
+.wb-scene .wb-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.wb-scene .wb-contract {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wb-brass-2);
+  white-space: nowrap;
+}
+
+.wb-scene .wb-title {
+  margin: 0;
+  font-family: var(--wb-font-display);
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--wb-ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-scene .wb-phase {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--wb-brass-2);
+  border: 1px solid var(--wb-brass-dark);
+  border-radius: 999px;
+  padding: 8px 14px;
+  white-space: nowrap;
+}
+
+/* --- Botones --- */
+.wb-scene .wb-btn {
+  min-height: 44px;
+  min-width: 44px;
+  padding: 10px 18px;
+  font-family: var(--wb-font-ui);
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--wb-ink);
+  background: linear-gradient(180deg, #33405200, #00000033), #1b2430;
+  border: 1px solid #3a4a5e;
+  border-radius: 10px;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: transform 120ms ease-out, border-color 120ms ease-out;
+}
+
+.wb-scene .wb-btn:hover {
+  border-color: var(--wb-brass);
+}
+
+.wb-scene .wb-btn:active {
+  transform: scale(0.98);
+}
+
+.wb-scene .wb-btn-primary {
+  color: #17130a;
+  background: linear-gradient(180deg, var(--wb-brass-2) 0%, var(--wb-brass) 60%, #a37f22 100%);
+  border-color: var(--wb-brass-dark);
+  font-weight: 600;
+}
+
+.wb-scene .wb-btn:focus-visible {
+  outline: 2px solid var(--wb-teal);
+  outline-offset: 2px;
+}
+
+/* --- Body --- */
+.wb-scene .wb-body {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr) 280px;
+  gap: 16px;
+  align-items: start;
+}
+
+/* --- Ficha de objetivo (papel fijo) --- */
+.wb-scene .wb-objective {
+  margin: 0;
+  padding: 16px;
+  color: var(--wb-paper-ink);
+  background: linear-gradient(180deg, var(--wb-paper) 0%, var(--wb-paper-2) 100%);
+  border: 1px solid #b9a888;
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.wb-scene .wb-kicker {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wb-brass-dark);
+}
+
+.wb-scene .wb-rule {
+  margin: 0 0 8px;
+  font-family: var(--wb-font-paper);
+  font-size: 16px;
+  line-height: 1.45;
+}
+
+.wb-scene .wb-intro {
+  margin: 0 0 8px;
+  font-family: var(--wb-font-paper);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.wb-scene .wb-note {
+  margin: 0 0 12px;
+  font-family: var(--wb-font-paper);
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--wb-paper-muted);
+}
+
+.wb-scene .wb-open-contract {
+  width: 100%;
+  color: var(--wb-paper-ink);
+  background: transparent;
+  border: 1px solid var(--wb-brass-dark);
+}
+
+/* --- Escenario (lo llena el parent con la escena del nivel) --- */
+.wb-scene .wb-stage {
+  min-height: 320px;
+  padding: 0;
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(240, 207, 106, 0.1) 0%, transparent 55%),
+    linear-gradient(180deg, #3a2a20 0%, var(--wb-wood) 100%);
+  border: 1px solid var(--wb-brass-dark);
+  border-radius: 12px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+}
+
+.wb-scene .wb-stage:empty::after {
+  content: "El mecanismo se monta aquí";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 320px;
+  font-size: 14px;
+  letter-spacing: 0.06em;
+  color: var(--wb-muted);
+}
+
+/* --- Bitácora --- */
+.wb-scene .wb-log {
+  margin: 0;
+  padding: 16px;
+  color: var(--wb-paper-ink);
+  background: linear-gradient(180deg, var(--wb-paper) 0%, var(--wb-paper-2) 100%);
+  border: 1px solid #b9a888;
+  border-radius: 12px;
+}
+
+.wb-scene .wb-log[hidden] {
+  display: none;
+}
+
+.wb-scene .wb-log-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--wb-brass-dark);
+}
+
+.wb-scene .wb-log-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wb-scene .wb-log-entry {
+  margin: 0;
+  padding-left: 20px;
+  position: relative;
+  font-family: var(--wb-font-paper);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.wb-scene .wb-log-entry::before {
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--wb-font-ui);
+  font-weight: 600;
+}
+
+.wb-scene .wb-log-entry[data-tone="neutral"]::before {
+  content: "·";
+  color: var(--wb-paper-muted);
+}
+
+.wb-scene .wb-log-entry[data-tone="good"]::before {
+  content: "✓";
+  color: #2f7a2f;
+}
+
+.wb-scene .wb-log-entry[data-tone="bad"]::before {
+  content: "!";
+  color: #a33327;
+}
+
+.wb-scene .wb-log-entry[data-tone="bad"] {
+  font-weight: 700;
+}
+
+/* --- Estado / inventario / acciones (slots del parent) --- */
+.wb-scene .wb-status {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  font-size: 14px;
+  letter-spacing: 0.04em;
+  color: var(--wb-ink);
+  background: linear-gradient(180deg, rgba(212, 167, 44, 0.16) 0%, rgba(212, 167, 44, 0.06) 100%);
+  border: 1px solid rgba(212, 167, 44, 0.45);
+  border-radius: 10px;
+}
+
+.wb-scene .wb-status:empty::after {
+  content: "Estado del mecanismo";
+  color: var(--wb-muted);
+  font-size: 13px;
+}
+
+.wb-scene .wb-inventory {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  min-height: 64px;
+  padding: 8px 12px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid #3a4a5e;
+  border-radius: 12px;
+}
+
+.wb-scene .wb-inventory:empty::after {
+  content: "El inventario lo monta el taller";
+  color: var(--wb-muted);
+  font-size: 13px;
+}
+
+.wb-scene .wb-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+/* --- Foco visible global del shell --- */
+.wb-scene button:focus-visible,
+.wb-scene [tabindex]:focus-visible {
+  outline: 2px solid var(--wb-teal);
+  outline-offset: 2px;
+}
+
+/* --- Móvil: una columna, taller primero --- */
+@media (max-width: 1100px) {
+  .wb-scene .wb-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .wb-scene .wb-header {
+    grid-template-columns: minmax(0, 1fr) auto auto;
+  }
+
+  .wb-scene .wb-brand {
+    display: none;
+  }
+}
+
+/* --- Movimiento reducido --- */
+@media (prefers-reduced-motion: reduce) {
+  .wb-scene .wb-btn {
+    transition: none;
+  }
+
+  .wb-scene .wb-btn:active {
+    transform: none;
+  }
+}
+
+@media (min-width: 900px) {
+  .wb-scene .wb-body {
+    grid-template-columns: 300px minmax(0, 1fr);
+  }
+
+  .wb-scene .wb-log {
+    display: none !important;
+  }
+
+  .wb-scene .wb-stage {
+    height: clamp(380px, calc(100vh - 320px), 580px);
+    min-height: 0;
+  }
+}
+

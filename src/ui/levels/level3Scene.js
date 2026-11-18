@@ -1,0 +1,248 @@
+// El Cerrajero — escena del nivel 3 (Museo del Llano).
+//
+// Aporta fondo, mesa, placa, utilería y decoración. No crea el editor
+// real (el parent monta el #canvas en `editorSlot`), ni cables, llaves,
+// juicio o lógica. Todo asset final figura como "a producir" con
+// `data-asset` + `data-status="placeholder"`; el dibujo es CSS/SVG propio.
+
+const SVG_NS = 'http://www.w3.org/2000/svg';
+
+function node(tag, className, text) {
+  const element = document.createElement(tag);
+  if (className) {
+    element.className = className;
+  }
+  if (text !== undefined && text !== null) {
+    element.textContent = text;
+  }
+  return element;
+}
+
+function svgNode(tag, attributes = {}) {
+  const element = document.createElementNS(SVG_NS, tag);
+  for (const [name, value] of Object.entries(attributes)) {
+    element.setAttribute(name, value);
+  }
+  return element;
+}
+
+function markPlaceholder(element, asset) {
+  element.setAttribute('data-asset', asset);
+  element.setAttribute('data-status', 'placeholder');
+  element.setAttribute('data-todo', 'a producir');
+}
+
+function phaseWord(phase) {
+  if (phase === 'build' || phase === 'Construcción' || phase === 'construccion') {
+    return 'Construcción';
+  }
+  return 'Reparación';
+}
+
+function phaseId(phase) {
+  if (phase === 'build' || phase === 'Construcción' || phase === 'construccion') {
+    return 'build';
+  }
+  return 'repair';
+}
+
+// Glifo del bifurcador: derivación en "Y" de latón.
+function forkGlyph() {
+  const svg = svgNode('svg', {
+    viewBox: '0 0 24 28',
+    class: 'museum-glyph-art',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.append(svgNode('path', {
+    d: 'M12 3 L12 14 M12 14 L5 24 M12 14 L19 24',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2.4',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+  }));
+  svg.append(svgNode('circle', { cx: '12', cy: '14', r: '2.2', fill: 'currentColor' }));
+  return svg;
+}
+
+// Glifo del resorte: muelle en zigzag punteado, sin llave.
+function springGlyph() {
+  const svg = svgNode('svg', {
+    viewBox: '0 0 48 16',
+    class: 'museum-glyph-art',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.append(svgNode('path', {
+    d: 'M3 8 L9 2 L15 14 L21 2 L27 14 L33 2 L39 14 L45 8',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linecap': 'round',
+    'stroke-linejoin': 'round',
+    'stroke-dasharray': '3 2',
+  }));
+  return svg;
+}
+
+// Lámpara de sala: campana + halo. Placeholder del asset final.
+function lampFigure(variant) {
+  const figure = node('div', `museum-lamp museum-lamp--${variant}`);
+  const svg = svgNode('svg', {
+    viewBox: '0 0 40 52',
+    class: 'museum-lamp-art',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.append(svgNode('line', {
+    x1: '20', y1: '0', x2: '20', y2: '10',
+    stroke: 'currentColor', 'stroke-width': '2',
+  }));
+  svg.append(svgNode('path', {
+    d: 'M10 26 L20 10 L30 26 Z',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+    'stroke-linejoin': 'round',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '20', cy: '34', r: '6',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2',
+  }));
+  svg.append(svgNode('line', {
+    x1: '8', y1: '48', x2: '32', y2: '48',
+    stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round',
+  }));
+  figure.append(svg);
+  markPlaceholder(figure, 'n3.lamp');
+  return figure;
+}
+
+export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } = {}) {
+  const contract = level.contract ?? '03';
+  const client = level.client ?? 'Museo del Llano';
+  const title = level.title ?? 'El museo';
+  const word = phaseWord(phase);
+  void puzzle;
+
+  const element = node('section', 'level-scene level-scene--museum');
+  element.setAttribute('data-level', '3');
+  element.setAttribute('data-phase', phaseId(phase));
+  element.setAttribute('aria-label', `${client} · ${title} · ${word}`);
+
+  // Fondo: ala de día (luz cálida de claraboya, arriba) y ala de noche
+  // (luz teal de luna, abajo). La luz va pintada en el fondo CSS.
+  const backdrop = node('div', 'museum-backdrop');
+  backdrop.setAttribute('aria-hidden', 'true');
+  markPlaceholder(backdrop, 'n3.background.day + n3.background.night');
+
+  const dayWing = node('div', 'museum-wing museum-wing--day');
+  markPlaceholder(dayWing, 'n3.background.day');
+  dayWing.append(node('span', 'museum-wing-name', 'Sala de día'));
+  dayWing.append(node('span', 'museum-skylight'));
+
+  const nightWing = node('div', 'museum-wing museum-wing--night');
+  markPlaceholder(nightWing, 'n3.background.night');
+  nightWing.append(node('span', 'museum-wing-name', 'Sala de noche'));
+  nightWing.append(node('span', 'museum-moon'));
+
+  const lamps = node('div', 'museum-lamps');
+  lamps.append(lampFigure('day'));
+  lamps.append(lampFigure('night'));
+
+  backdrop.append(dayWing);
+  backdrop.append(nightWing);
+  backdrop.append(lamps);
+
+  // Mesa de nogal del taller.
+  const bench = node('div', 'museum-bench');
+  bench.setAttribute('aria-hidden', 'true');
+
+  // Placa de la sala de seguridad: aquí se monta el editor real.
+  const plate = node('div', 'museum-plate');
+  markPlaceholder(plate, 'n3.plate');
+
+  const head = node('div', 'museum-plate-head');
+  head.append(node('p', 'museum-plate-kicker', `Contrato ${contract} · ${client}`));
+  head.append(node('p', 'museum-plate-title', title));
+  head.append(node('span', 'museum-phase', word));
+
+  const tags = node('div', 'museum-wing-tags');
+  const dayTag = node('span', 'museum-wing-tag museum-wing-tag--day', 'Sala de día');
+  const nightTag = node('span', 'museum-wing-tag museum-wing-tag--night', 'Sala de noche');
+  tags.append(dayTag);
+  tags.append(nightTag);
+
+  const editorSlot = node('div', 'museum-editor-slot');
+  editorSlot.setAttribute('data-slot', 'editor');
+  editorSlot.setAttribute('data-cells', '5-8');
+  editorSlot.setAttribute('role', 'group');
+  editorSlot.setAttribute(
+    'aria-label',
+    'Mecanismo del museo: aquí se monta el editor real de 5 a 8 casillas',
+  );
+  editorSlot.append(
+    node('p', 'museum-editor-note', 'La placa aloja el editor real de 5 a 8 casillas.'),
+  );
+
+  const glyphs = node('div', 'museum-glyphs');
+
+  const fork = node('div', 'museum-glyph museum-glyph--fork');
+  markPlaceholder(fork, 'n3.fork');
+  fork.append(forkGlyph());
+  fork.append(
+    node(
+      'p',
+      'museum-glyph-caption',
+      'Bifurcador: una misma llave puede salir dos veces de la misma casilla.',
+    ),
+  );
+
+  const spring = node('div', 'museum-glyph museum-glyph--spring');
+  markPlaceholder(spring, 'n3.spring');
+  spring.append(springGlyph());
+  spring.append(
+    node('p', 'museum-glyph-caption', 'Resorte: une dos salas sin pedir llave.'),
+  );
+
+  glyphs.append(fork);
+  glyphs.append(spring);
+
+  plate.append(head);
+  plate.append(tags);
+  plate.append(editorSlot);
+  plate.append(glyphs);
+
+  // Estado de la prueba: el parent muestra aquí el paso de la llave.
+  const statusSlot = node('aside', 'museum-status');
+  statusSlot.setAttribute('data-slot', 'status');
+  statusSlot.setAttribute('aria-live', 'polite');
+  statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
+  statusSlot.append(
+    node('p', 'museum-status-note', 'Aquí el taller muestra la marcha de la prueba.'),
+  );
+
+  element.append(backdrop);
+  element.append(bench);
+  element.append(plate);
+  element.append(statusSlot);
+
+  let disposed = false;
+  function dispose() {
+    if (disposed) {
+      return;
+    }
+    disposed = true;
+    const parent = element.parentNode;
+    if (parent && typeof parent.removeChild === 'function') {
+      parent.removeChild(element);
+    } else if (typeof element.remove === 'function') {
+      element.remove();
+    }
+  }
+
+  return { element, editorSlot, statusSlot, dispose };
+}

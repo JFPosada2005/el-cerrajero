@@ -1,0 +1,286 @@
+/* Escena del nivel 1 — Banco del Llano.
+ *
+ * Todo el alcance vive bajo `.level-scene[data-level="1"]`: nada de lo de
+ * acá toca el taller real ni el `styles.css` del juego. La escena solo
+ * aporta fondo, mesa, placa, ladrón, papeles y campana; el `#canvas` real
+ * lo monta el parent dentro de `.level-editor` y acá solo se integra
+ * (fondo transparente, sin borde de panel).
+ *
+ * Sin botones ni focos propios: el decorado no es interactivo y lleva
+ * `pointer-events: none` para no tapar el mecanismo. El `:focus-visible`
+ * queda para lo que monte el parent (celdas y cables del `#canvas`).
+ */
+
+.level-scene[data-level="1"] {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: #05080c;
+  color: #f2ede3;
+  font-size: 16px;
+  line-height: 1.5;
+}
+
+.level-scene[data-level="1"] .level-backdrop {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.78;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 6%, rgba(240, 207, 106, 0.16) 0%, transparent 28%),
+    radial-gradient(circle at 82% 72%, rgba(56, 198, 184, 0.08) 0%, transparent 34%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+.level-scene[data-level="1"] .level-bench {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 31%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-thief {
+  position: absolute;
+  right: 0.4%;
+  bottom: 7%;
+  height: 59%;
+  width: auto;
+  opacity: 0.96;
+  pointer-events: none;
+}
+
+/* Placa: reserva el centro para el mecanismo real. */
+.level-scene[data-level="1"] .level-plate {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 72%;
+  aspect-ratio: 900 / 560;
+  transform: translate(-50%, -52%);
+}
+
+.level-scene[data-level="1"] .level-plate-texture,
+.level-scene[data-level="1"] .level-plate-frame {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-plate-label {
+  position: absolute;
+  left: 50%;
+  top: 6.1%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  color: #b08a44;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-plate-serial {
+  position: absolute;
+  left: 7.5%;
+  bottom: 7.4%;
+  margin: 0;
+  color: #a88032;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-alarm-label {
+  position: absolute;
+  left: 89.5%;
+  top: 89%;
+  transform: translate(-50%, -50%);
+  margin: 0;
+  color: #a88032;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-phase-seal {
+  position: absolute;
+  right: 4%;
+  top: 5%;
+  margin: 0;
+  padding: 4px 8px;
+  border: 2px solid #a33a26;
+  border-radius: 3px;
+  color: #a33a26;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+/* Slot donde el parent monta el `#canvas` real. */
+.level-scene[data-level="1"] .level-editor {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  top: 13%;
+  bottom: 17%;
+  min-height: 0;
+}
+
+.level-scene[data-level="1"] .level-editor #canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* Papeles y campana: decorado sobre la mesa, sin acciones. */
+.level-scene[data-level="1"] .level-papers {
+  position: absolute;
+  left: 1.6%;
+  bottom: 2.6%;
+  display: flex;
+  align-items: flex-end;
+  gap: 15px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.level-scene[data-level="1"] .level-paper-item {
+  margin: 0;
+  padding: 0;
+}
+
+.level-scene[data-level="1"] .level-paper {
+  margin: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-paper img {
+  display: block;
+  width: 84px;
+  height: auto;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-paper-item:first-child .level-paper img {
+  width: 100px;
+}
+
+.level-scene[data-level="1"] .level-paper-name,
+.level-scene[data-level="1"] .level-bell-name {
+  margin: 4px 0 0;
+  color: #c9a45c;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  text-transform: uppercase;
+  text-align: center;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-bell {
+  position: absolute;
+  right: 11%;
+  bottom: 4%;
+  width: 72px;
+  margin: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="1"] .level-bell img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+/* Foco visible para lo que monte el parent dentro de la escena. */
+.level-scene[data-level="1"] :focus-visible {
+  outline: 2px solid #38c6b8;
+  outline-offset: 3px;
+}
+
+@media (max-width: 900px) {
+  .level-scene[data-level="1"] .level-plate {
+    width: 94%;
+  }
+
+  .level-scene[data-level="1"] .level-thief {
+    height: 44%;
+  }
+
+  .level-scene[data-level="1"] .level-bell {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="1"] *,
+  .level-scene[data-level="1"] *::before,
+  .level-scene[data-level="1"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+@media (min-width: 900px) {
+  .level-scene[data-level="1"] {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    aspect-ratio: auto;
+  }
+
+  .level-scene[data-level="1"] .level-plate {
+    width: auto;
+    height: 82%;
+    aspect-ratio: 900 / 560;
+  }
+
+  .level-scene[data-level="1"] .level-editor {
+    left: 4%;
+    right: 4%;
+    top: 12%;
+    bottom: 16%;
+  }
+}

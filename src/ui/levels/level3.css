@@ -1,0 +1,311 @@
+/* El Cerrajero — escena del nivel 3 (Museo del Llano).
+   Alcance estricto: .level-scene[data-level="3"]. No toca el shell.
+   Placeholders CSS/SVG; los assets finales están en docs/ASSET-MANIFEST.md. */
+
+.level-scene[data-level="3"] {
+  --museum-brass: #d4a72c;
+  --museum-brass-2: #f0cf6a;
+  --museum-teal: #38c6b8;
+  --museum-ink: #f2ede3;
+  --museum-muted: #a7b0be;
+  --museum-night: #0a2027;
+  --museum-day: #3a2c14;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid #2a3646;
+  border-radius: 16px;
+  background: #05080c;
+  color: var(--museum-ink);
+  font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
+}
+
+/* Fondo: ala de día arriba (luz cálida de claraboya), ala de noche abajo (teal de luna). */
+.level-scene[data-level="3"] .museum-backdrop {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr 1fr;
+  pointer-events: none;
+}
+
+.level-scene[data-level="3"] .museum-wing {
+  position: relative;
+  overflow: hidden;
+}
+
+.level-scene[data-level="3"] .museum-wing--day {
+  background:
+    radial-gradient(ellipse 60% 90% at 50% 0%, rgba(240, 207, 106, 0.28) 0%, transparent 70%),
+    linear-gradient(180deg, #4a3a1c 0%, #2b2113 60%, #171208 100%);
+}
+
+.level-scene[data-level="3"] .museum-wing--night {
+  background:
+    radial-gradient(ellipse 50% 80% at 78% 20%, rgba(56, 198, 184, 0.16) 0%, transparent 65%),
+    linear-gradient(180deg, #0d1b21 0%, #0a2027 55%, #060f13 100%);
+}
+
+.level-scene[data-level="3"] .museum-wing-name {
+  position: absolute;
+  left: 16px;
+  top: 12px;
+  color: var(--museum-brass-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="3"] .museum-wing--night .museum-wing-name {
+  color: var(--museum-teal);
+}
+
+.level-scene[data-level="3"] .museum-skylight {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: min(42%, 340px);
+  height: 26px;
+  border-radius: 0 0 60px 60px;
+  background: linear-gradient(180deg, rgba(240, 207, 106, 0.55), rgba(240, 207, 106, 0.06));
+  transform: translateX(-50%);
+}
+
+.level-scene[data-level="3"] .museum-moon {
+  position: absolute;
+  right: 12%;
+  top: 14px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 38% 34%, #d8fff9 0%, var(--museum-teal) 55%, #0b6b63 100%);
+  box-shadow: 0 0 18px rgba(56, 198, 184, 0.45);
+}
+
+.level-scene[data-level="3"] .museum-lamps {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="3"] .museum-lamp {
+  position: absolute;
+  top: 6%;
+  width: 44px;
+  color: var(--museum-brass-2);
+}
+
+.level-scene[data-level="3"] .museum-lamp--day {
+  left: 6%;
+}
+
+.level-scene[data-level="3"] .museum-lamp--night {
+  right: 6%;
+  top: auto;
+  bottom: 30%;
+  color: var(--museum-teal);
+}
+
+.level-scene[data-level="3"] .museum-lamp-art {
+  display: block;
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 0 10px currentColor);
+}
+
+/* Mesa de nogal del taller. */
+.level-scene[data-level="3"] .museum-bench {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 22%;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px),
+    linear-gradient(180deg, #31221a 0%, #1c130e 55%, #0d0907 100%);
+  border-top: 1px solid rgba(212, 167, 44, 0.35);
+  pointer-events: none;
+}
+
+/* Placa de la sala de seguridad: aloja el editor real de 5 a 8 casillas. */
+.level-scene[data-level="3"] .museum-plate {
+  position: relative;
+  z-index: 1;
+  margin: 48px auto 12px;
+  width: min(94%, 860px);
+  padding: 20px 20px 16px;
+  border: 1px solid rgba(212, 167, 44, 0.5);
+  border-radius: 12px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.05), transparent 30%),
+    linear-gradient(160deg, #1d1712 0%, #100c09 70%);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.level-scene[data-level="3"] .museum-plate-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 12px;
+}
+
+.level-scene[data-level="3"] .museum-plate-kicker {
+  margin: 0;
+  color: var(--museum-brass-2);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="3"] .museum-plate-title {
+  margin: 0;
+  flex: 1 1 auto;
+  color: var(--museum-ink);
+  font-family: "Cinzel", Georgia, serif;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.level-scene[data-level="3"] .museum-phase {
+  padding: 4px 10px;
+  border: 1px solid rgba(212, 167, 44, 0.55);
+  border-radius: 999px;
+  color: var(--museum-brass-2);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="3"] .museum-wing-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.level-scene[data-level="3"] .museum-wing-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid #2a3646;
+  border-radius: 999px;
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="3"] .museum-wing-tag::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.level-scene[data-level="3"] .museum-wing-tag--day::before {
+  background: var(--museum-brass-2);
+  box-shadow: 0 0 8px rgba(240, 207, 106, 0.8);
+}
+
+.level-scene[data-level="3"] .museum-wing-tag--night::before {
+  background: var(--museum-teal);
+  box-shadow: 0 0 8px rgba(56, 198, 184, 0.8);
+}
+
+.level-scene[data-level="3"] .museum-editor-slot {
+  min-height: 220px;
+  padding: 12px;
+  border: 1px dashed rgba(212, 167, 44, 0.4);
+  border-radius: 8px;
+  background: rgba(5, 8, 12, 0.55);
+}
+
+.level-scene[data-level="3"] .museum-editor-note {
+  margin: 0;
+  color: var(--museum-muted);
+  font-family: "Special Elite", "Courier New", monospace;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.level-scene[data-level="3"] .museum-glyphs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.level-scene[data-level="3"] .museum-glyph {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #2a3646;
+  border-radius: 8px;
+  background: rgba(7, 11, 16, 0.6);
+}
+
+.level-scene[data-level="3"] .museum-glyph--fork {
+  color: var(--museum-brass-2);
+}
+
+.level-scene[data-level="3"] .museum-glyph--spring {
+  color: var(--museum-teal);
+}
+
+.level-scene[data-level="3"] .museum-glyph-art {
+  flex: 0 0 auto;
+  width: 40px;
+  height: auto;
+}
+
+.level-scene[data-level="3"] .museum-glyph-caption {
+  margin: 0;
+  color: var(--museum-ink);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.level-scene[data-level="3"] .museum-status {
+  position: relative;
+  z-index: 1;
+  width: min(94%, 860px);
+  margin: 0 auto 20px;
+  padding: 10px 14px;
+  border: 1px solid #2a3646;
+  border-radius: 999px;
+  background: rgba(7, 11, 16, 0.82);
+}
+
+.level-scene[data-level="3"] .museum-status-note {
+  margin: 0;
+  color: var(--museum-muted);
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+/* Foco visible y blancos táctiles de 44 px. */
+.level-scene[data-level="3"] :focus-visible {
+  outline: 2px solid var(--museum-teal);
+  outline-offset: 2px;
+}
+
+.level-scene[data-level="3"] button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Movimiento con propósito; quietud total si el sistema lo pide. */
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="3"],
+  .level-scene[data-level="3"] *,
+  .level-scene[data-level="3"] *::before,
+  .level-scene[data-level="3"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
