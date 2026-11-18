@@ -13,6 +13,12 @@ import { createGraphEditor } from './ui/graphEditor.js';
 import { createDrumEditor } from './ui/drumEditor.js';
 import { createTapePanel } from './ui/tapePanel.js';
 import { createWorkbenchView } from './ui/workbenchView.js';
+import { createWorkbenchScene } from './ui/workbenchScene.js';
+import { createLevelScene as createLevel1Scene } from './ui/levels/level1Scene.js';
+import { createLevelScene as createLevel2Scene } from './ui/levels/level2Scene.js';
+import { createLevelScene as createLevel3Scene } from './ui/levels/level3Scene.js';
+import { createLevelScene as createLevel4Scene } from './ui/levels/level4Scene.js';
+import { createLevelScene as createLevel5Scene } from './ui/levels/level5Scene.js';
 import { loadManifest } from './ui/assets.js';
 import { createAudio } from './ui/audio.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
@@ -510,11 +516,194 @@ function firstKey() {
   }
   return state.level.keys[0].symbol;
 }
+function createLevelSceneFor(level) {
+  const options = { level, puzzle: state.puzzle, phase: state.phase };
+  if (level.id === 5) {
+    return createLevel5Scene(options);
+  }
+  if (level.id === 4) {
+    return createLevel4Scene(options);
+  }
+  if (level.id === 3) {
+    return createLevel3Scene(options);
+  }
+  if (level.id === 2) {
+    return createLevel2Scene(options);
+  }
+  return createLevel1Scene(options);
+}
+function renderSceneWorkshop() {
+  const scene = createWorkbenchScene({
+    contract: state.level.contract,
+    title: state.level.title,
+    client: state.level.client,
+    phase: phaseWord(),
+    objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
+    soundEnabled: soundOn,
+    handlers: {
+      onBack: renderMap,
+      onProbe: handleProbe,
+      onAssault: handleAssault,
+      onOpenDoc: openWorkshopDoc,
+      onToggleSound: toggleSound
+    }
+  });
+  workbenchView = scene;
+  const levelScene = createLevelSceneFor(state.level);
+  app.replaceChildren(scene.element);
+  scene.slots.stage.append(levelScene.element);
+
+  const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+  canvas.id = 'canvas';
+  canvas.setAttribute('viewBox', '0 0 820 520');
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', 'Mecanismo de la cerradura');
+  levelScene.editorSlot.append(canvas);
+
+  const tools = document.createElement('div');
+  tools.className = 'tools';
+  const palette = document.createElement('div');
+  palette.id = 'palette';
+  palette.className = 'palette';
+  const scissors = document.createElement('button');
+  scissors.id = 'scissors';
+  scissors.type = 'button';
+  scissors.className = 'tool';
+  scissors.setAttribute('aria-pressed', 'false');
+  scissors.setAttribute('aria-label', 'Cortar cables');
+  scissors.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="3"></circle><circle cx="6" cy="18" r="3"></circle><line x1="20" y1="4" x2="8.12" y2="15.88"></line><line x1="14.47" y1="14.48" x2="20" y2="20"></line><line x1="8.12" y1="8.12" x2="12" y2="12"></line></svg>';
+  const scissorsLabel = document.createElement('span');
+  scissorsLabel.textContent = 'Cortar';
+  scissors.append(scissorsLabel);
+  tools.append(palette);
+  tools.append(scissors);
+  if (state.level.parts.includes('spring')) {
+    const spring = document.createElement('button');
+    spring.id = 'spring-tool';
+    spring.type = 'button';
+    spring.className = 'tool';
+    spring.setAttribute('aria-pressed', 'false');
+    spring.setAttribute('aria-label', 'Tender resortes');
+    spring.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l3-6 3 12 3-12 3 12 3-12 3 6"></path></svg>';
+    const springLabel = document.createElement('span');
+    springLabel.textContent = 'Resorte';
+    spring.append(springLabel);
+    spring.addEventListener('click', toggleSpring);
+    tools.append(spring);
+  }
+  let stackTools = null;
+  let stackHelp = null;
+  if (state.level.machine === 'pda') {
+    stackTools = document.createElement('div');
+    stackTools.className = 'stack-tools';
+    const topText = document.createElement('span');
+    topText.className = 'stack-tools-label';
+    topText.textContent = 'Si la pila tiene arriba';
+    stackTools.append(topText);
+    for (const [id, value, word] of [['stack-top-any', 'any', 'Da igual'], ['stack-top-base', 'base', 'Base'], ['stack-top-chip', 'chip', 'Ficha']]) {
+      const option = document.createElement('button');
+      option.id = id;
+      option.type = 'button';
+      option.className = 'tool';
+      option.textContent = word;
+      option.setAttribute('aria-pressed', String(stackTop === value));
+      option.addEventListener('click', () => selectStackTop(value));
+      stackTools.append(option);
+    }
+    const actionText = document.createElement('span');
+    actionText.className = 'stack-tools-label';
+    actionText.textContent = 'Acción';
+    stackTools.append(actionText);
+    for (const [id, value, word] of [['stack-action-keep', 'keep', 'No tocar'], ['stack-action-push', 'push', 'Cargar'], ['stack-action-pop', 'pop', 'Soltar']]) {
+      const option = document.createElement('button');
+      option.id = id;
+      option.type = 'button';
+      option.className = 'tool';
+      option.textContent = word;
+      option.setAttribute('aria-pressed', String(stackAction === value));
+      option.addEventListener('click', () => selectStackAction(value));
+      stackTools.append(option);
+    }
+    stackHelp = document.createElement('p');
+    stackHelp.className = 'stack-help';
+    stackHelp.textContent = 'La pila es la memoria del mecanismo. El cable mira la ficha de arriba: cargar apila una ficha, soltar la saca y no tocar la deja igual. Se lee: llave · qué hay arriba · qué hace.';
+  }
+  const toolsTitle = document.createElement('h2');
+  toolsTitle.textContent = 'Herramientas';
+  scene.slots.inventory.append(toolsTitle);
+  scene.slots.inventory.append(tools);
+  if (stackTools !== null) {
+    scene.slots.inventory.append(stackTools);
+  }
+  if (stackHelp !== null) {
+    scene.slots.status.append(stackHelp);
+  }
+
+  const active = document.createElement('span');
+  active.id = 'active-key';
+  active.className = 'active-key';
+  active.textContent = `Llave activa: ${selectedKey}`;
+  scene.slots.status.append(active);
+
+  const legend = document.createElement('div');
+  legend.className = 'legend';
+  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
+    const entry = document.createElement('span');
+    const icon = document.createElement('i');
+    icon.className = `legend-dot ${dot}`;
+    entry.append(icon);
+    entry.append(word);
+    legend.append(entry);
+  }
+  scene.slots.status.append(legend);
+
+  const hint = document.createElement('p');
+  hint.id = 'tool-hint';
+  hint.className = 'hint';
+  scene.slots.status.append(hint);
+
+  if (state.level.machine === 'pda') {
+    const block = document.createElement('div');
+    block.className = 'stack-block';
+    const stackTitle = document.createElement('h2');
+    stackTitle.textContent = 'Pila · arriba primero';
+    const stackPanel = document.createElement('div');
+    stackPanel.id = 'stack-panel';
+    stackPanel.className = 'stack-panel';
+    stackPanel.setAttribute('aria-live', 'polite');
+    stackPanel.setAttribute('aria-label', 'Pila del mecanismo');
+    block.append(stackTitle);
+    block.append(stackPanel);
+    const host = levelScene.statusSlot ?? scene.slots.status;
+    host.append(block);
+  }
+
+  const assaultButton = scene.element.querySelector('[data-action="assault"]');
+  if (assaultButton !== null) {
+    assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
+    assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
+  }
+  renderPalette();
+  workshop = createGraphEditor({ svg: canvas, cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, stack: state.puzzle.stack ?? null, onConnect: handleConnect, onCut: handleCut });
+  document.querySelector('#scissors').addEventListener('click', toggleScissors);
+  renderTools();
+  if (state.level.machine === 'pda') {
+    renderStack(state.puzzle.stack.base);
+  }
+  appendLog(state.puzzle.intro);
+  if (state.phase === 'repair') {
+    appendLog('Probá la llave y después pedí el ensayo.');
+  } else {
+    appendLog('Probá la llave y después lanzá el asalto.');
+  }
+}
 function renderWorkshop() {
   if (state.level.workspace === 'drum') {
     renderDrumWorkshop();
     return;
   }
+  renderSceneWorkshop();
+  return;
   app.replaceChildren();
   const shell = document.createElement('div');
   shell.className = 'game';
