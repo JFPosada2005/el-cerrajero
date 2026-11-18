@@ -1,6 +1,6 @@
 # Plan de assets P0 — remaster
 
-**Estado:** P0-1 ejecutado en local (Nivel 1, iconos y licencias). P0-2 y P0-3 pendientes. Sin push todavía.
+**Estado:** P0 completo en `feat/remaster-assets` y pusheado (N1, fuentes, iconos, props, N2–N5 y SFX). PR a `feat/remaster-integration` pendiente de abrir. Queda confirmar la licencia exacta de `click.mp3` y las dos dudas de layout con Felipe.
 **Rama de trabajo:** `feat/remaster-assets`, creada desde `origin/feat/remaster-integration` (`53339d3`).
 **Alcance:** `assets/`, `docs/` y `CREDITS.md`. No se toca `src/`, `src/game`, `tests/`, `index.html` ni `styles.css` del juego.
 **Contrato:** [`docs/ASSET-MANIFEST.md`](ASSET-MANIFEST.md) y [`assets/manifest.json`](../assets/manifest.json).
@@ -85,8 +85,8 @@ La columna **Ya tenemos** se refiere a lo que existe en `mockups/nivel-1-taller/
 
 | Slot / archivo final | Ruta final | Formato / objetivo | Ya tenemos | Ruta recomendada |
 |---|---|---|---|---|
-| `n4.stackBase` | `assets/levels/04/stack-base.webp` | WebP con alfa; 512×256; base de pila | No; CSS/SVG | SVG/Pillow, sin IA |
-| `n4.chip` | `assets/levels/04/chip.webp` | WebP con alfa; 128×72; ficha | No; CSS/SVG | SVG/Pillow, sin IA |
+| `n4.stackBase` | `assets/levels/04/stack-base.webp` | WebP con alfa; 128×40 (2× de 64×20); base de pila | No; CSS/SVG | IA (Leonardo) con fondo removido |
+| `n4.chip` | `assets/levels/04/chip.webp` | WebP con alfa; 112×64 (2× de 56×32); ficha | No; CSS/SVG | IA (Leonardo) con fondo removido |
 
 ### 3.7 Nivel 5 — Banco Central, P0
 
@@ -130,7 +130,7 @@ Resultado: N1 completo con assets finales y sin dependencia de arte nuevo.
 
 1. Generar `relay`, `head`, `drum` con los prompts.
 2. Derivar `pinion` del engranaje o generarlo.
-3. Crear en SVG: `fork`, `spring`, `tape`, `pin`, `stack-base`, `chip`.
+3. Crear en SVG: `fork`, `spring`, `tape`, `pin`. Generar `stack-base` y `chip` con IA.
 4. Actualizar manifest y credits.
 5. Commit y push.
 
@@ -184,7 +184,8 @@ Negativo: el mismo bloque de R1.
 ### Sin prompt de IA
 
 - `ui.sound`, `ui.close`, `ui.lock`: extraer del mockup o Lucide; licencia ISC.
-- `fork`, `spring`, `tape`, `pin`, `stack-base`, `chip`: SVG/Pillow; geometría precisa.
+- `fork`, `spring`, `tape`, `pin`: SVG; geometría precisa.
+- `stack-base`, `chip`: IA (Leonardo) y recorte; son props, no iconos.
 - `pinion`: derivar del engranaje; solo usar R2 si se quiere un dibujo distinto.
 - SFX: renderizar la paleta del mockup; no IA.
 - N1: reexportar los placeholders; no IA.
@@ -304,9 +305,23 @@ Actualizar `updated` al final de cada lote. No cambiar los `final` ya acordados.
 - `npm test`: **253/253**.
 - Sin push todavía.
 
+### Checkpoint 2026-11-18 — P0 completo
+
+- P0-1, P0-2 y P0-3 pusheados a `feat/remaster-assets`.
+- Nivel 1: 15 WebP, 496.224 bytes.
+- Fuentes y licencias: Cinzel, Oswald y Special Elite.
+- Iconos de UI: `sound.svg`, `close.svg` y `lock.svg`.
+- Props: relé, bifurcador, resorte, piñón, base de pila, ficha, cinta, cabezal, tambor y púa.
+- SFX: 8 OGG, 63,3 KB; `cable` es síntesis propia.
+- `assets/manifest.json`: **39 rutas `available`**, todas existen.
+- `npm test`: **253/253**.
+- `src/` intacto.
+- Commits: `84493df`, `6aa1d7d`, `0d2a400`, `649ab57`.
+- Pendiente: confirmar la página exacta de Freesound del `click.mp3`; confirmar con Felipe el tamaño final de los props y `n1.gear` vs. celda-relé.
+- PR a `feat/remaster-integration` pendiente de abrir.
+
 ### Pendiente
 
-- **P0-2:** relé, bifurcador, resorte, piñón, base/ficha de pila, cinta, cabezal, tambor y púa.
-- **P0-3:** los ocho SFX.
+- Confirmar la página exacta de Freesound del `click.mp3` para cerrar su licencia.
 - Confirmar con Felipe el tamaño final del workbench y `n1.gear` vs. celda-relé.
-- Los assets de IA que faltan se generan con los prompts de la sección 5.
+- Abrir el PR de `feat/remaster-assets` hacia `feat/remaster-integration`.
