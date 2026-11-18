@@ -212,6 +212,7 @@ test('slots finales con data-src y archivo en disco', () => {
     'levels.01.contract': 'assets/levels/01/props/contract.webp',
     'levels.01.hint': 'assets/levels/01/props/hint.webp',
     'levels.01.log': 'assets/levels/01/props/log.webp',
+    'levels.05.depositSlip': 'assets/levels/05/deposit-slip.webp',
   };
   for (const [slot, src] of Object.entries(expected)) {
     assert.ok(assets.includes(slot), `slot final ${slot}`);
@@ -221,15 +222,29 @@ test('slots finales con data-src y archivo en disco', () => {
   assert.ok(textOf(scene.element).includes('final') === false, 'el aviso vive en atributos, no en texto visible');
 });
 
-test('la boleta sigue a producir', () => {
+test('la boleta es final con su asset en disco', () => {
   const scene = setup();
-  const marked = findAll(scene.element, (node) => node.getAttribute('data-status') === 'a producir');
-  assert.equal(marked.length, 1, 'solo la boleta sigue sin asset');
-  assert.ok(String(marked[0].getAttribute('data-asset')).includes('n5.depositSlip'), 'la boleta cubre n5.depositSlip');
+  const pending = findAll(scene.element, (node) => node.getAttribute('data-status') === 'a producir');
+  assert.equal(pending.length, 0, 'nada sigue a producir');
   const slip = findAll(scene.element, (node) => classes(node).includes('counting-slip'))[0];
   assert.ok(slip, 'hay boleta de depósito');
-  assert.equal(slip.getAttribute('data-asset'), 'n5.depositSlip');
-  assert.equal(slip.getAttribute('data-status'), 'a producir', 'la boleta CSS conserva su estado');
+  assert.equal(slip.getAttribute('data-asset'), 'levels.05.depositSlip', 'la boleta cubre levels.05.depositSlip');
+  assert.equal(slip.getAttribute('data-status'), 'final', 'la boleta es asset final');
+  assert.equal(slip.getAttribute('data-src'), 'assets/levels/05/deposit-slip.webp');
+  assert.ok(existsSync(join(here, '..', 'assets/levels/05/deposit-slip.webp')), 'la boleta existe en disco');
+});
+
+test('sin sello duplicado: el papel trae la casilla vacía', () => {
+  const scene = setup();
+  const slip = findAll(scene.element, (node) => classes(node).includes('counting-slip'))[0];
+  assert.equal(
+    findAll(slip, (node) => classes(node).includes('slip-seal')).length,
+    1,
+    'un solo lacre: el asset no trae sello dibujado',
+  );
+  const stamps = findAll(slip, (node) => classes(node).includes('slip-stamp'));
+  assert.equal(stamps.length, 1, 'un solo cuño en texto');
+  assert.ok(stamps[0].textContent.includes('reparaci'), 'el cuño marca la fase');
 });
 
 test('props diegéticos con data-action: papeles, manivela y volante', () => {
@@ -497,22 +512,52 @@ test('a 1440 las tres secciones entran sin scroll: presupuesto declarado', () =>
   const bottom = plate.match(/bottom\s*:\s*(\d+)px/);
   assert.ok(top !== null && bottom !== null, 'placa anclada arriba y abajo');
   const offsets = Number(top[1]) + Number(bottom[1]);
-  // Cromo de la placa: paddings 12 + rótulo 21 + riel 34 + leyenda 20 + línea 26 + editor 10.
-  const chrome = 12 + 21 + 34 + 20 + 26 + 10;
+  // Cromo de la placa: paddings 12 + rótulo 14 + riel 34 + leyenda 18 + línea 23 + editor 10.
+  const chrome = 12 + 14 + 34 + 18 + 23 + 10;
   // Contenido: cinta compacta 67 + tres secciones (74 cada una + gaps 4).
   const content = 67 + (74 * 3 + 4);
   // Con stage drum-room de 605 px (1440×900) sobran píxeles: LISTO visible.
   assert.ok(605 - offsets >= chrome + content, `placa útil ${605 - offsets} px para ${chrome + content} px`);
+  // Cuando el shell corrija el stage a 816, el sobrante lo absorben las
+  // secciones (reparto flex), no queda aire muerto bajo el tambor.
+  assert.ok(816 - offsets >= chrome + content, 'también entra con stage a 816');
+  const immersiveAt = css.indexOf('.wb-scene.is-immersive .level-scene[data-level="5"] .counting-bench-plate {');
+  const immersive = css.slice(immersiveAt, css.indexOf('}', immersiveAt));
+  const immersiveTop = immersive.match(/top\s*:\s*(\d+)px/);
+  const immersiveBottom = immersive.match(/bottom\s*:\s*(\d+)px/);
+  assert.ok(immersiveTop !== null && immersiveBottom !== null, 'anclaje inmersivo declarado');
+  assert.ok(816 - Number(immersiveTop[1]) - Number(immersiveBottom[1]) >= chrome + content, 'también entra en inmersivo a 816');
   const editorCss = blocksFor('.counting-editor').join('\n');
   assert.ok(editorCss.includes('padding: 4px'), 'marco del editor compacto');
   assert.ok(editorCss.includes('overflow: auto'), 'el scroll queda solo como red');
+  assert.ok(editorCss.includes('display: flex'), 'el editor reparte el alto');
+  assert.ok(editorCss.includes('flex-direction: column'), 'cinta arriba, tambor con el resto');
+  const tapePanelCss = blocksFor('#tape-panel {').join('\n');
+  assert.ok(tapePanelCss.includes('flex: none'), 'la cinta no se comprime');
+  const drumColCss = blocksFor('#drum .drum {').join('\n');
+  assert.ok(drumColCss.includes('flex-direction: column'), 'secciones apiladas en orden');
+  assert.ok(drumColCss.includes('flex: 1'), 'el tambor toma el alto libre');
+  const drumRootCss = blocksFor('#drum {').join('\n');
+  assert.ok(drumRootCss.includes('flex: 1'), 'la raíz del tambor crece con el editor');
   const sectionCss = blocksFor('.drum-section').join('\n');
   assert.ok(sectionCss.includes('padding: 6px'), 'secciones compactas');
   assert.ok(sectionCss.includes('margin: 0'), 'sin margen que empuje LISTO afuera');
+  assert.ok(sectionCss.includes('flex: 1'), 'las secciones se reparten el alto libre');
+  const pinsCss = blocksFor('.drum-pins').join('\n');
+  assert.ok(pinsCss.includes('align-items: flex-start'), 'las púas quedan arriba con 44 px');
   const drumCss = blocksFor('#drum .drum {').join('\n');
   assert.ok(drumCss.includes('flex-direction: column'), 'secciones apiladas en orden');
   const tapeCss = blocksFor('#tape-panel {').join('\n');
   assert.ok(tapeCss.includes('margin-bottom: 2px'), 'cinta compacta sobre el tambor');
+});
+
+test('el panel de púa vive dentro del marco y lo cierra el editor', () => {
+  const pinEditorCss = blocksFor('.pin-editor').join('\n');
+  assert.ok(!pinEditorCss.includes('display'), 'la escena no fuerza la visibilidad del panel');
+  const sized = pinEditorCss.replace(/min-height|max-height|line-height/g, '');
+  assert.ok(!sized.includes('height:'), 'sin altura fija: el editor decide cuándo se ve');
+  const editorCss = blocksFor('.counting-editor').join('\n');
+  assert.ok(editorCss.includes('overflow: auto'), 'el marco contiene el panel con scroll interno');
 });
 
 test('setPhase mueve la línea grabada y el cuño', () => {
@@ -578,6 +623,7 @@ test('css con alcance, 44px, foco y movimiento reducido, con imágenes finales y
     'assets/levels/05/pin.svg',
     'assets/levels/05/drum.webp',
     'assets/levels/05/head.webp',
+    'assets/levels/05/deposit-slip.webp',
   ]) {
     assert.ok(css.includes(asset), `el css usa ${asset}`);
     assert.ok(existsSync(join(here, '..', asset)), `${asset} existe en disco`);

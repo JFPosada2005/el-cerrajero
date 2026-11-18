@@ -22,8 +22,8 @@
  * duplicarlo.
  *
  * Placeholders CSS/DOM (ver `docs/ASSET-MANIFEST.md`):
- * fondo, cinta, cabezal, tambor y púa en `final`; la boleta sigue
- * `a producir` hasta que llegue `n5.depositSlip`.
+ * fondo, cinta, cabezal, tambor y púa en `final`; la boleta usa el asset
+ * final `levels.05.depositSlip` como fondo del papel.
  */
 
 const PHASE_WORDS = { repair: 'Reparación', build: 'Construcción' };
@@ -51,11 +51,6 @@ function make(tag, className, text) {
     node.textContent = text;
   }
   return node;
-}
-
-function markProducing(node, asset) {
-  node.setAttribute('data-asset', asset);
-  node.setAttribute('data-status', 'a producir');
 }
 
 function markFinal(node, asset, src) {
@@ -196,7 +191,7 @@ export function createLevelScene(options = {}) {
 
   const slip = make('aside', 'counting-slip');
   slip.setAttribute('aria-label', 'Boleta de depósito');
-  markProducing(slip, 'n5.depositSlip');
+  markFinal(slip, 'levels.05.depositSlip', 'assets/levels/05/deposit-slip.webp');
   const seal = make('span', 'slip-seal');
   seal.setAttribute('aria-hidden', 'true');
   const stamp = make('span', 'slip-stamp', STAMP_WORDS[phase] ?? phaseWord(phase, puzzle));

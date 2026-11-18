@@ -133,7 +133,7 @@
   position: absolute;
   left: 50%;
   top: 8px;
-  bottom: 150px;
+  bottom: 140px;
   z-index: 2;
   display: flex;
   flex-direction: column;
@@ -212,7 +212,7 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 2px 12px;
-  padding: 0 18px 6px;
+  padding: 0 18px 2px;
   pointer-events: none;
 }
 
@@ -315,7 +315,7 @@
 
 .level-scene[data-level="5"] .plate-caption {
   flex: none;
-  margin: 2px 0;
+  margin: 0;
   font-size: 13px;
   line-height: 1.4;
   color: var(--counting-muted);
@@ -324,6 +324,8 @@
 /* El editor real vive aquí; su desborde nunca sale de la placa. */
 .level-scene[data-level="5"] .counting-editor {
   flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
   min-height: 0;
   overflow: auto;
   border: 1px dashed rgba(240, 207, 106, 0.4);
@@ -337,8 +339,8 @@
  * Latón claro sobre placa oscura, 14 px. */
 .level-scene[data-level="5"] .plate-state {
   flex: none;
-  margin: 4px 0 0;
-  padding-top: 2px;
+  margin: 2px 0 0;
+  padding-top: 0;
   border-top: 1px solid rgba(240, 207, 106, 0.4);
   color: var(--counting-brass-2);
   font-size: 14px;
@@ -525,9 +527,12 @@
   pointer-events: none;
 }
 
-/* --- Boleta de depósito: papel ivory con lacre y cuño, el estado ---
- * El contador del mecanismo (statusSlot) vive justo debajo, como línea
- * grabada sobre la mesa, sin franja de panel. */
+/* --- Boleta de depósito: el asset final como fondo del papel ---
+ * El formulario trae la casilla del cuño vacía y ningún sello dibujado,
+ * así el lacre CSS y el cuño en texto no duplican nada; los gradientes
+ * quedan debajo como fallback si el webp falta. El contador del
+ * mecanismo (statusSlot) vive justo debajo, como línea grabada sobre la
+ * mesa, sin franja de panel. */
 .level-scene[data-level="5"] .counting-slip {
   position: absolute;
   right: 16px;
@@ -542,9 +547,13 @@
   border: 1px solid #c9b78e;
   border-radius: 5px;
   background:
+    url("../../../assets/levels/05/deposit-slip.webp"),
     linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent 42%),
     repeating-linear-gradient(0deg, rgba(122, 90, 18, 0.04) 0 1px, transparent 1px 5px),
     linear-gradient(160deg, #faf4e6 0%, var(--counting-paper) 55%, var(--counting-paper-2) 100%);
+  background-size: 100% 100%, auto, auto, auto;
+  background-position: center;
+  background-repeat: no-repeat;
   color: #17130a;
   box-shadow:
     0 18px 40px rgba(0, 0, 0, 0.5),
@@ -717,6 +726,7 @@
 /* --- Integración del editor real en la placa (solo presentación) ---
  * Marco compacto: a 1440×900 las tres secciones entran sin scroll. */
 .level-scene[data-level="5"] #tape-panel {
+  flex: none;
   min-width: 0;
   margin-bottom: 2px;
 }
@@ -777,17 +787,30 @@
 }
 
 .level-scene[data-level="5"] #drum {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
   min-width: 0;
 }
 
 .level-scene[data-level="5"] #drum .drum {
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
 
-/* Anillos del tambor: aros oscuros con filo de latón, compactos para que
- * las tres secciones entren a 1440×900 sin scroll interno. */
+/* Las secciones se reparten el alto libre del editor: cuando el stage
+ * crece, el aire sobrante se distribuye entre las tres en vez de quedar
+ * abajo del tambor. Las púas no crecen: quedan arriba con sus 44 px. */
+.level-scene[data-level="5"] #drum .drum-section {
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Anillos del tambor: aros oscuros con filo de latón, compactos para
+ * que las tres secciones entren sin scroll interno. */
 .level-scene[data-level="5"] #drum .drum-section,
 .level-scene[data-level="5"] .drum-section {
   border: 1px solid rgba(240, 207, 106, 0.5);
@@ -836,9 +859,13 @@
 }
 
 /* Las tres púas comparten la fila sin envolverse: cada una toma el
- * mismo ancho y el texto nunca se corta por el borde. */
+ * mismo ancho y el texto nunca se corta por el borde. La fila crece con
+ * la sección, pero las púas quedan arriba con sus 44 px. */
 .level-scene[data-level="5"] #drum .drum-pins {
+  flex: 1 0 auto;
   display: flex;
+  align-items: flex-start;
+  align-content: flex-start;
   gap: 6px;
 }
 
