@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" role="img" aria-label="Bifurcador">
+  <defs>
+    <linearGradient id="brass" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F0CF6A"/>
+      <stop offset="0.45" stop-color="#C79A32"/>
+      <stop offset="1" stop-color="#6E5317"/>
+    </linearGradient>
+    <linearGradient id="shine" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FFF3C4" stop-opacity="0.85"/>
+      <stop offset="1" stop-color="#FFF3C4" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M32 55V38M32 38L17 15M32 38L47 15" stroke="#2B1C0B" stroke-width="14"/>
+    <path d="M32 55V38M32 38L17 15M32 38L47 15" stroke="url(#brass)" stroke-width="9"/>
+    <path d="M30 52V38L17.5 17" stroke="url(#shine)" stroke-width="2.4"/>
+  </g>
+  <path d="M32 27.5L40.5 36L32 44.5L23.5 36Z" fill="url(#brass)" stroke="#2B1C0B" stroke-width="3"/>
+  <path d="M32 31.5L36.5 36L32 40.5L27.5 36Z" fill="#F0CF6A" opacity="0.5"/>
+</svg>
