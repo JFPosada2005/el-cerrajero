@@ -391,8 +391,7 @@
   }
 
   .wb-scene .wb-stage {
-    height: clamp(380px, calc(100vh - 320px), 580px);
+    height: clamp(380px, calc(100vh - 355px), 580px);
     min-height: 0;
   }
 }
-

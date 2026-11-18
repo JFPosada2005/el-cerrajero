@@ -377,6 +377,14 @@ test('S-D3 the rotated paper does not overflow its scroll container', () => {
 
 ---
 
+## Estado de implementación (2026-11-17)
+
+- **R0/R1:** autorizaciones Aut-1/Aut-2 aprobadas; fuentes Cinzel/Oswald/Special Elite; manifiesto de assets; shell compartido y escenas N1–N5 integrados.
+- **Hecho:** escena del N1 con banco, mesa, placa, ladrón, papeles y campana; escenas N2–N5 montadas con placeholders; editor real dentro de cada placa; `343/343` tests.
+- **Desvíos deliberados:** fuentes de Mateo (`153ee7d`) reemplazan Bodoni/Jost/Plex; ficha de objetivo lateral (M1) en lugar del papel único del mockup; escenas N2–N5 usan CSS/SVG hasta que lleguen los assets.
+- **Pendiente inmediato:** M2/M3/M5 visuales (nodos, cables y llavero), limpieza de N5 y mobile, assets de Mateo.
+- **Deuda:** el render viejo de `main.js` quedó detrás de un early return; limpiar al cerrar la integración.
+
 ## Key Learnings
 
 1. El mockup del nivel 1 mezcla en un mismo cable los dos sentidos de un par de piezas y usa el doble clic para cancelar; eso choca con los cables de ida y vuelta y con los bucles del nivel 2.

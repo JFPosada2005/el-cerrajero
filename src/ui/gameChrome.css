@@ -1,0 +1,409 @@
+/* El Cerrajero — acabado del llavero y los botones (unidad B).
+ * CSS-only, alcance estricto `.wb-scene`: cada selector empieza con
+ * `.wb-scene`. Sin resets globales, sin selectores de elemento sueltos,
+ * sin imágenes fuera de `mockups/nivel-1-taller/assets/`.
+ * Solo presentación: no toca lógica, datos, jueces ni callbacks. Los botones
+ * reales y sus `aria-label` se conservan; el número de cada llave sigue visible.
+ * Se carga después de `workbenchScene.css` y reutiliza sus variables `--wb-*`
+ * (con valores de respaldo por si el orden de carga cambia).
+ */
+
+/* --- Llavero: riel y fila de llaves (slot `.wb-inventory` del parent) --- */
+.wb-scene .wb-inventory .tools {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 12px 20px;
+}
+
+.wb-scene .wb-inventory #palette {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 10px 12px;
+}
+
+/* Riel de latón del que cuelgan las llaves, como en el mockup. */
+.wb-scene .wb-inventory #palette::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 8px;
+  height: 5px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #f0cf6a, #8a651f 55%, #3a2a12);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.55);
+  pointer-events: none;
+}
+
+.wb-scene .wb-inventory #palette .key {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  min-width: 44px;
+  width: 52px;
+  min-height: 44px;
+  height: 84px;
+  padding: 0 0 12px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  border-radius: 6px;
+  background-color: transparent;
+  background-repeat: no-repeat;
+  background-position: 50% 0;
+  background-size: contain;
+  color: #f2ede3;
+  font-family: var(--wb-font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9), 0 0 6px rgba(0, 0, 0, 0.7);
+  cursor: pointer;
+  touch-action: manipulation;
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 5px 6px rgba(0, 0, 0, 0.55));
+  transition: transform 160ms ease-out, filter 160ms ease-out;
+}
+
+/* Llaves colgadas con leve giro, como en el mockup. */
+.wb-scene .wb-inventory #palette .key:nth-child(4n + 1) {
+  transform: rotate(-8deg);
+}
+
+.wb-scene .wb-inventory #palette .key:nth-child(4n + 2) {
+  transform: rotate(2deg);
+}
+
+.wb-scene .wb-inventory #palette .key:nth-child(4n + 3) {
+  transform: rotate(-3deg);
+}
+
+.wb-scene .wb-inventory #palette .key:nth-child(4n + 4) {
+  transform: rotate(8deg);
+}
+
+/* Imagen del mockup + banda de color por llave (el color nunca es la única
+ * señal: el número de la llave sigue visible como texto del botón). */
+.wb-scene .wb-inventory #palette .key[data-key="1"],
+.wb-scene .wb-inventory #palette .key.key-1 {
+  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-1.png");
+  border-bottom-color: var(--wb-brass, #d4a72c);
+}
+
+.wb-scene .wb-inventory #palette .key[data-key="2"],
+.wb-scene .wb-inventory #palette .key.key-2 {
+  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-2.png");
+  border-bottom-color: var(--wb-teal, #38c6b8);
+}
+
+.wb-scene .wb-inventory #palette .key[data-key="3"],
+.wb-scene .wb-inventory #palette .key.key-3 {
+  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-3.png");
+  border-bottom-color: var(--wb-coral, #f06a4a);
+}
+
+.wb-scene .wb-inventory #palette .key[data-key="4"],
+.wb-scene .wb-inventory #palette .key.key-4 {
+  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-4.png");
+  border-bottom-color: var(--wb-violet, #a18be0);
+}
+
+.wb-scene .wb-inventory #palette .key:hover {
+  transform: translateY(-3px) rotate(0deg);
+  filter: drop-shadow(0 0 9px rgba(240, 207, 106, 0.45)) drop-shadow(0 7px 8px rgba(0, 0, 0, 0.6));
+}
+
+.wb-scene .wb-inventory #palette .key.is-active {
+  transform: translateY(-6px) rotate(0deg);
+  filter: drop-shadow(0 0 9px rgba(240, 207, 106, 0.45)) drop-shadow(0 7px 8px rgba(0, 0, 0, 0.6));
+}
+
+.wb-scene .wb-inventory #palette .key.is-active::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 18px;
+  height: 3px;
+  border-radius: 50%;
+  background: var(--wb-brass-2, #f0cf6a);
+  box-shadow: 0 0 8px rgba(240, 207, 106, 0.7);
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.wb-scene .wb-inventory #palette .key:focus-visible {
+  outline: 2px solid var(--wb-teal, #38c6b8);
+  outline-offset: 3px;
+}
+
+.wb-scene .wb-inventory #palette .key:disabled,
+.wb-scene .wb-inventory #palette .key[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: grayscale(0.5);
+}
+
+/* --- Herramientas (cortar, resorte): medallones coherentes con el llavero --- */
+.wb-scene .wb-inventory .tools > .tool {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 10px 14px;
+  border: 1px solid rgba(212, 167, 44, 0.45);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 50% 0%, rgba(240, 207, 106, 0.22), transparent 60%),
+    linear-gradient(180deg, #2b3542 0%, #1b2430 60%, #12161d 100%);
+  color: var(--wb-ink, #f2ede3);
+  font-family: var(--wb-font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 4px 10px rgba(0, 0, 0, 0.45);
+  transition: transform 120ms ease-out, border-color 120ms ease-out, filter 120ms ease-out;
+}
+
+.wb-scene .wb-inventory .tools > .tool svg {
+  width: 18px;
+  height: 18px;
+  flex: 0 0 auto;
+}
+
+.wb-scene .wb-inventory .tools > .tool:hover {
+  border-color: var(--wb-brass, #d4a72c);
+  filter: brightness(1.12);
+}
+
+.wb-scene .wb-inventory .tools > .tool:active {
+  transform: scale(0.97);
+}
+
+.wb-scene .wb-inventory .tools > .tool:focus-visible {
+  outline: 2px solid var(--wb-teal, #38c6b8);
+  outline-offset: 3px;
+}
+
+/* Tijera activa en coral (corta el cable completo); resorte activo en teal. */
+.wb-scene .wb-inventory .tools > .tool.is-active {
+  transform: translateY(-3px);
+}
+
+.wb-scene .wb-inventory .tools > #scissors.is-active {
+  border-color: var(--wb-coral, #f06a4a);
+  filter: drop-shadow(0 0 10px rgba(240, 106, 74, 0.4));
+}
+
+.wb-scene .wb-inventory .tools > #spring-tool.is-active {
+  border-color: var(--wb-teal, #38c6b8);
+  filter: drop-shadow(0 0 10px rgba(56, 198, 184, 0.4));
+}
+
+.wb-scene .wb-inventory .tools > .tool:disabled,
+.wb-scene .wb-inventory .tools > .tool[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
+}
+
+/* --- Botones de acción: placas de latón con bisel y remaches (mockup) --- */
+.wb-scene .wb-actions .wb-btn {
+  position: relative;
+  min-width: 44px;
+  min-height: 48px;
+  padding: 0 26px;
+  border: 1px solid #8a7345;
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.22), transparent 48%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.045) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #82796a 0%, #4d4940 25%, #28251f 63%, #15120e 100%);
+  color: #f0e4c7;
+  font-family: var(--wb-font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.18em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.75), 0 -1px 0 rgba(255, 255, 255, 0.08);
+  cursor: pointer;
+  touch-action: manipulation;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.18),
+    0 4px 0 #15100b,
+    0 8px 14px rgba(0, 0, 0, 0.55);
+  transition: transform 90ms ease-out, filter 140ms ease-out, box-shadow 90ms ease-out;
+}
+
+/* Remaches laterales de la placa. */
+.wb-scene .wb-actions .wb-btn::before,
+.wb-scene .wb-actions .wb-btn::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 32% 28%, #fff6cf 0%, #d4a72c 36%, #6b4c0d 72%, #221607 100%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.55),
+    0 1px 1px rgba(0, 0, 0, 0.65);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.wb-scene .wb-actions .wb-btn::before {
+  left: 9px;
+}
+
+.wb-scene .wb-actions .wb-btn::after {
+  right: 9px;
+}
+
+.wb-scene .wb-actions .wb-btn:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.32),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.18),
+    0 5px 0 #15100b,
+    0 10px 18px rgba(0, 0, 0, 0.6);
+}
+
+.wb-scene .wb-actions .wb-btn:active {
+  transform: translateY(2px);
+  filter: brightness(0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 2px 5px rgba(0, 0, 0, 0.55),
+    inset 0 0 0 2px rgba(0, 0, 0, 0.2),
+    0 2px 0 #15100b,
+    0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+.wb-scene .wb-actions .wb-btn:focus-visible {
+  outline: 2px solid var(--wb-teal, #38c6b8);
+  outline-offset: 3px;
+}
+
+.wb-scene .wb-actions .wb-btn:disabled,
+.wb-scene .wb-actions .wb-btn[aria-disabled="true"] {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+  filter: grayscale(0.5);
+}
+
+/* Las cinco placas del taller: Probar, Ensayo/Asalto, Contrato, Pista y
+ * Bitácora. Comparten la placa de latón; la etiqueta nunca se corta. */
+.wb-scene .wb-actions .wb-btn[data-action="probe"],
+.wb-scene .wb-actions .wb-btn[data-action="assault"],
+.wb-scene .wb-actions .wb-btn[data-doc="contract"],
+.wb-scene .wb-actions .wb-btn[data-doc="hint"],
+.wb-scene .wb-actions .wb-btn[data-doc="log"] {
+  white-space: nowrap;
+}
+
+/* Placa primaria dorada: Ensayo/Asalto (único botón primario por pantalla). */
+.wb-scene .wb-actions .wb-btn-primary,
+.wb-scene .wb-actions .wb-btn[data-action="assault"] {
+  border-color: #c79a32;
+  background:
+    radial-gradient(circle at 50% 8%, rgba(255, 255, 255, 0.4), transparent 52%),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.07) 0 1px, transparent 1px 3px),
+    linear-gradient(180deg, #f6dc92 0%, #d4a72c 26%, #8a651f 64%, #5c3f12 100%);
+  color: #17130a;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.35), 0 -1px 0 rgba(92, 63, 18, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 2px rgba(92, 63, 18, 0.18),
+    0 4px 0 #3a2a12,
+    0 8px 14px rgba(0, 0, 0, 0.55);
+}
+
+.wb-scene .wb-actions .wb-btn-primary:hover,
+.wb-scene .wb-actions .wb-btn[data-action="assault"]:hover {
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.38),
+    inset 0 0 0 2px rgba(92, 63, 18, 0.18),
+    0 5px 0 #3a2a12,
+    0 10px 18px rgba(0, 0, 0, 0.6);
+}
+
+.wb-scene .wb-actions .wb-btn-primary:active,
+.wb-scene .wb-actions .wb-btn[data-action="assault"]:active {
+  transform: translateY(2px);
+  filter: brightness(0.96);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 2px 5px rgba(0, 0, 0, 0.45),
+    inset 0 0 0 2px rgba(92, 63, 18, 0.2),
+    0 2px 0 #3a2a12,
+    0 3px 6px rgba(0, 0, 0, 0.45);
+}
+
+/* --- Movimiento reducido: acabado estático, sin transiciones ni relieve --- */
+@media (prefers-reduced-motion: reduce) {
+  .wb-scene .wb-inventory #palette .key,
+  .wb-scene .wb-inventory .tools > .tool,
+  .wb-scene .wb-actions .wb-btn {
+    transition: none;
+  }
+
+  .wb-scene .wb-inventory #palette .key:hover,
+  .wb-scene .wb-inventory #palette .key.is-active,
+  .wb-scene .wb-inventory .tools > .tool:active,
+  .wb-scene .wb-actions .wb-btn:hover,
+  .wb-scene .wb-actions .wb-btn:active,
+  .wb-scene .wb-actions .wb-btn-primary:active,
+  .wb-scene .wb-actions .wb-btn[data-action="assault"]:active {
+    transform: none;
+  }
+}
+
+/* Integracion: el inventario no lleva titulo y las llaves no deben empujar la pagina. */
+.wb-scene .wb-inventory > h2 {
+  display: none;
+}
+
+.wb-scene .wb-inventory {
+  padding: 4px 8px;
+}
+
+.wb-scene .wb-inventory #palette .key {
+  height: 64px;
+}
+
+
+/* Barra de estado: separar llave activa, leyenda y ayuda. */
+.wb-scene .wb-status {
+  flex-wrap: wrap;
+  gap: 8px 18px;
+}
+
+.wb-scene .wb-status .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.wb-scene .wb-status .hint {
+  margin: 0;
+}
+

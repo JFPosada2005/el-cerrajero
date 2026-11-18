@@ -1,0 +1,114 @@
+/* Decoración visual del editor de grafos — El Cerrajero (ola 2, unidad A).
+ *
+ * Todo vive bajo `#canvas.gv-decorated` (clase que pone `decorateGraph`
+ * sobre el `<svg id="canvas">` del editor real). No toca `styles.css`:
+ * estas reglas solo se suman encima y nunca cambian el modelo, los
+ * callbacks ni los grupos interactivos.
+ *
+ * - Los círculos viejos se vuelven invisibles pero siguen ahí: el
+ *   `circle.state-body` (r=44, 88 px de diámetro) conserva el área
+ *   táctil y el foco de teclado del grupo; solo se apagan anillo y
+ *   etiquetas. Las imágenes `.gv-sprite` llevan `pointer-events: none`
+ *   para no tapar la celda.
+ * - Los cables toman color de trenza por llave (oro/teal/coral/violeta
+ *   del mockup) sin pisar los estados del editor: `is-lit` sigue teal
+ *   y el modo tijera (`is-cutting`) sigue coral.
+ */
+
+/* Piezas: oculta lo viejo sin quitar hit areas ni listeners. */
+#canvas.gv-decorated .state .state-body {
+  fill: transparent;
+  stroke: none;
+  filter: none;
+}
+
+#canvas.gv-decorated .state .accept-ring,
+#canvas.gv-decorated .state .state-label {
+  display: none;
+}
+
+/* Sprites del mockup: decorado puro sobre la celda interactiva. */
+#canvas.gv-decorated .gv-sprite {
+  pointer-events: none;
+}
+
+#canvas.gv-decorated .gv-sprite-lock-bolt {
+  transition: transform 420ms ease;
+}
+
+/* El perno cede cuando el cerrojo se ilumina (recorrido válido). */
+#canvas.gv-decorated .state.is-lit .gv-sprite-lock-bolt {
+  transform: translateX(12%);
+}
+
+/* La pieza iluminada, pendiente o apagada se lee en el sprite,
+ * no en el círculo oculto. */
+#canvas.gv-decorated .state.is-lit .gv-sprite {
+  filter: drop-shadow(0 0 10px rgba(56, 198, 184, 0.75));
+}
+
+#canvas.gv-decorated .state.is-pending .gv-sprite {
+  filter: drop-shadow(0 0 10px rgba(240, 207, 106, 0.8));
+}
+
+#canvas.gv-decorated .state.is-muted .gv-sprite {
+  opacity: 0.55;
+}
+
+/* Foco visible sobre la pieza (el grupo real conserva el tabindex). */
+#canvas.gv-decorated .state:focus-visible {
+  outline: none;
+}
+
+#canvas.gv-decorated .state:focus-visible .gv-sprite {
+  filter: drop-shadow(0 0 12px rgba(56, 198, 184, 0.9));
+}
+
+/* Cables: trenza ancha de color por llave (paleta del mockup). */
+#canvas.gv-decorated .wire:not(.is-cutting) .edge {
+  stroke-width: 5;
+  stroke-linecap: round;
+}
+
+#canvas.gv-decorated .wire.gv-key-gold:not(.is-cutting) .edge:not(.is-lit) {
+  stroke: #b08a3e;
+  filter: drop-shadow(0 0 3px rgba(240, 207, 106, 0.45));
+}
+
+#canvas.gv-decorated .wire.gv-key-teal:not(.is-cutting) .edge:not(.is-lit) {
+  stroke: #2b9a90;
+  filter: drop-shadow(0 0 3px rgba(56, 198, 184, 0.45));
+}
+
+#canvas.gv-decorated .wire.gv-key-coral:not(.is-cutting) .edge:not(.is-lit) {
+  stroke: #c05a44;
+  filter: drop-shadow(0 0 3px rgba(240, 106, 74, 0.45));
+}
+
+#canvas.gv-decorated .wire.gv-key-violet:not(.is-cutting) .edge:not(.is-lit) {
+  stroke: #7d6cba;
+  filter: drop-shadow(0 0 3px rgba(161, 139, 224, 0.45));
+}
+
+#canvas.gv-decorated .wire.gv-spring:not(.is-cutting) .edge:not(.is-lit) {
+  stroke: #8a9aa8;
+}
+
+/* Tijera: blanco de 44 px solo en modo corte (el cable trae
+ * tabindex únicamente ahí, así no tapa celdas en modo cable). */
+#canvas.gv-decorated .wire.is-cutting .edge-hit {
+  stroke-width: 44;
+  pointer-events: stroke;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #canvas.gv-decorated .state .gv-sprite,
+  #canvas.gv-decorated .wire .edge {
+    transition: none;
+    animation: none;
+  }
+
+  #canvas.gv-decorated .state.is-lit .gv-sprite-lock-bolt {
+    transform: none;
+  }
+}

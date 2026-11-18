@@ -14,6 +14,7 @@ import { createDrumEditor } from './ui/drumEditor.js';
 import { createTapePanel } from './ui/tapePanel.js';
 import { createWorkbenchView } from './ui/workbenchView.js';
 import { createWorkbenchScene } from './ui/workbenchScene.js';
+import { decorateGraph } from './ui/graphVisuals.js';
 import { createLevelScene as createLevel1Scene } from './ui/levels/level1Scene.js';
 import { createLevelScene as createLevel2Scene } from './ui/levels/level2Scene.js';
 import { createLevelScene as createLevel3Scene } from './ui/levels/level3Scene.js';
@@ -28,6 +29,7 @@ let workshop = null;
 let drumEditor = null;
 let tapePanel = null;
 let workbenchView = null;
+let graphVisuals = null;
 let audio = null;
 let manifest = null;
 let soundOn = false;
@@ -171,6 +173,10 @@ function appendLog(message, tone = '') {
   log.scrollTop = log.scrollHeight;
 }
 function renderTitle() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const progress = loadProgress();
   app.replaceChildren();
   const main = document.createElement('main');
@@ -203,6 +209,10 @@ function renderTitle() {
   app.append(main);
 }
 function renderMap() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const progress = loadProgress();
   app.replaceChildren();
   const main = document.createElement('main');
@@ -533,6 +543,10 @@ function createLevelSceneFor(level) {
   return createLevel1Scene(options);
 }
 function renderSceneWorkshop() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const scene = createWorkbenchScene({
     contract: state.level.contract,
     title: state.level.title,
@@ -685,6 +699,7 @@ function renderSceneWorkshop() {
   }
   renderPalette();
   workshop = createGraphEditor({ svg: canvas, cells: state.puzzle.cells, alphabet: levelAlphabet(), blueprint: state.blueprint, stack: state.puzzle.stack ?? null, onConnect: handleConnect, onCut: handleCut });
+  graphVisuals = decorateGraph(canvas, { level: state.level, cells: state.puzzle.cells });
   document.querySelector('#scissors').addEventListener('click', toggleScissors);
   renderTools();
   if (state.level.machine === 'pda') {
@@ -972,6 +987,10 @@ function readLabel(symbol) {
   return symbol;
 }
 function renderDrumScene() {
+  if (graphVisuals !== null) {
+    graphVisuals.dispose();
+    graphVisuals = null;
+  }
   const scene = createWorkbenchScene({
     contract: state.level.contract,
     title: state.level.title,
