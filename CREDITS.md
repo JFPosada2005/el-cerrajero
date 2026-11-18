@@ -25,6 +25,21 @@ Actualizado: 2026-11-17.
 
 Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del mockup. El manifiesto de rutas y estados está en `assets/manifest.json`.
 
+## Props compartidos y niveles 2–5 (P0)
+
+| Asset | Uso | Origen | Licencia |
+|---|---|---|---|
+| Relé | Celda-relé compartida del Nivel 2 | Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256 | Proyecto |
+| Piñón | Bucle del Nivel 2 | Generado por el owner en Leonardo.ai; recortado y exportado a WebP 512×512 | Proyecto |
+| Tambor | Tambor del Nivel 5 | Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 512×512 | Proyecto |
+| Cabezal de cinta | Cabezal del Nivel 5 | Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256 | Proyecto |
+| Bifurcador | Glifo de cable del Nivel 3 | SVG dibujado a mano para el remaster; 64×64 | Proyecto |
+| Resorte | Glifo de cable del Nivel 3 | SVG dibujado a mano para el remaster; 64×64 | Proyecto |
+| Celda de cinta | Casilla de la cinta del Nivel 5 | SVG dibujado a mano para el remaster; 80×80, 2× de 40×40 | Proyecto |
+| Púa | Púa del tambor del Nivel 5 | SVG dibujado a mano para el remaster; 32×32 | Proyecto |
+| Base de pila | Base del Nivel 4 | Generada con Pillow; 128×40, 2× de 64×20 | Proyecto |
+| Ficha | Ficha del Nivel 4 | Generada con Pillow; 112×64, 2× de 56×32 | Proyecto |
+
 ## Audio
 
 Pendiente de la entrega P0-3. Los SFX actuales son síntesis Web Audio dentro del mockup; los archivos finales se registrarán aquí cuando se rendericen.

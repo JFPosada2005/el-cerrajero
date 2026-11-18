@@ -88,19 +88,25 @@
       "final": "assets/shared/props/relay.webp",
       "kind": "image",
       "priority": "P0",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — asset IA (Leonardo.ai)",
+      "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256"
     },
     "prop.fork": {
       "final": "assets/shared/props/fork.svg",
       "kind": "icon",
       "priority": "P0",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — SVG original",
+      "source": "Dibujado a mano para el remaster; 64×64"
     },
     "prop.spring": {
       "final": "assets/shared/props/spring.svg",
       "kind": "icon",
       "priority": "P0",
-      "status": "missing"
+      "status": "available",
+      "license": "Proyecto — SVG original",
+      "source": "Dibujado a mano para el remaster; 64×64"
     }
   },
   "levels": {
@@ -254,7 +260,9 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 512×512"
       },
       "floorIndicator": {
         "final": "assets/levels/02/floor-indicator.svg",
@@ -300,14 +308,18 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset original",
+        "source": "Generado con Pillow; 128×40, 2× de la base de 64×20"
       },
       "chip": {
         "final": "assets/levels/04/chip.webp",
         "placeholder": null,
         "kind": "image",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset original",
+        "source": "Generado con Pillow; 112×64, 2× de la ficha de 56×32"
       },
       "selectors": {
         "final": "assets/levels/04/selectors.svg",
@@ -330,28 +342,36 @@
         "placeholder": null,
         "kind": "icon",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; celda 80×80, 2× de 40×40"
       },
       "head": {
         "final": "assets/levels/05/head.webp",
         "placeholder": null,
         "kind": "image",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; recortado y exportado a WebP 256×256"
       },
       "drum": {
         "final": "assets/levels/05/drum.webp",
         "placeholder": null,
         "kind": "image",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Leonardo.ai)",
+        "source": "Generado por el owner en Leonardo.ai; fondo removido, recortado y exportado a WebP 512×512"
       },
       "pin": {
         "final": "assets/levels/05/pin.svg",
         "placeholder": null,
         "kind": "icon",
         "priority": "P0",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 32×32"
       },
       "depositSlip": {
         "final": "assets/levels/05/deposit-slip.webp",
