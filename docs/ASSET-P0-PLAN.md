@@ -316,7 +316,7 @@ Actualizar `updated` al final de cada lote. No cambiar los `final` ya acordados.
 - `assets/manifest.json`: **39 rutas `available`**, todas existen.
 - `npm test`: **253/253**.
 - `src/` intacto.
-- Commits: `84493df`, `6aa1d7d`, `0d2a400`, `649ab57`.
+- Commits de assets: `84493df`, `6aa1d7d`, `0d2a400`, `649ab57`; estado del plan: `abb7958`, `f37ce7e`.
 - Pendiente: confirmar la página exacta de Freesound del `click.mp3`; confirmar con Felipe el tamaño final de los props y `n1.gear` vs. celda-relé.
 - PR abierto a `feat/remaster-integration`.
 
@@ -324,4 +324,4 @@ Actualizar `updated` al final de cada lote. No cambiar los `final` ya acordados.
 
 - Confirmar la página exacta de Freesound del `click.mp3` para cerrar su licencia.
 - Confirmar con Felipe el tamaño final del workbench y `n1.gear` vs. celda-relé.
-- Abrir el PR de `feat/remaster-assets` hacia `feat/remaster-integration`.
+- Revisión de Felipe en el PR.
