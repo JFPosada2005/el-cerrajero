@@ -1,11 +1,11 @@
 /* El Cerrajero — carretes de cable del inventario (unidad C).
  * CSS-only, alcance estricto `.wb-scene`: cada selector empieza con
  * `.wb-scene`. Sin resets globales, sin selectores de elemento sueltos,
- * sin imágenes fuera de `mockups/nivel-1-taller/assets/`.
+ * sin imágenes fuera de `assets/levels/01/props/`.
  * Se carga DESPUÉS de `src/ui/gameChrome.css` y la reemplaza solo dentro
- * de `#palette`: anula las cuatro `llave-N.png` por el carrete de cobre
- * (`carrete-cobre.png`) teñido por CSS, sin tocar herramientas
- * (`.tools > .tool`) ni botones de acción (`.wb-actions`).
+ * de `#palette`: anula las cuatro `key-N.webp` por el carrete final
+ * (`assets/levels/01/props/spool.webp`) teñido por CSS, sin tocar
+ * herramientas (`.tools > .tool`) ni botones de acción (`.wb-actions`).
  * Solo presentación: el botón real, su `data-key`, su texto/número y su
  * `aria-label` se conservan; el número queda sobre una chapa del color
  * del cable (el color nunca es la única señal).
@@ -23,7 +23,7 @@
   border-radius: 8px;
   background-color: transparent;
   background-image:
-    url("../../mockups/nivel-1-taller/assets/sprites/carrete-cobre.png"),
+    url("../../assets/levels/01/props/spool.webp"),
     linear-gradient(180deg, transparent 0 58%, var(--spool, var(--wb-brass, #d4a72c)) 58%);
   background-repeat: no-repeat, no-repeat;
   background-position: 50% 0, 0 0;
@@ -65,7 +65,7 @@
   --spool-wash: rgba(212, 167, 44, 0.25);
   --spool-glow: rgba(240, 207, 106, 0.55);
   background-image:
-    url("../../mockups/nivel-1-taller/assets/sprites/carrete-cobre.png"),
+    url("../../assets/levels/01/props/spool.webp"),
     linear-gradient(180deg, transparent 0 58%, var(--wb-brass, #d4a72c) 58%);
   border-bottom-color: var(--wb-brass, #d4a72c);
 }
@@ -77,7 +77,7 @@
   --spool-wash: rgba(56, 198, 184, 0.55);
   --spool-glow: rgba(56, 198, 184, 0.55);
   background-image:
-    url("../../mockups/nivel-1-taller/assets/sprites/carrete-cobre.png"),
+    url("../../assets/levels/01/props/spool.webp"),
     linear-gradient(180deg, transparent 0 58%, var(--wb-teal, #38c6b8) 58%);
   border-bottom-color: var(--wb-teal, #38c6b8);
 }
@@ -89,7 +89,7 @@
   --spool-wash: rgba(240, 106, 74, 0.55);
   --spool-glow: rgba(240, 106, 74, 0.55);
   background-image:
-    url("../../mockups/nivel-1-taller/assets/sprites/carrete-cobre.png"),
+    url("../../assets/levels/01/props/spool.webp"),
     linear-gradient(180deg, transparent 0 58%, var(--wb-coral, #f06a4a) 58%);
   border-bottom-color: var(--wb-coral, #f06a4a);
 }
@@ -101,7 +101,7 @@
   --spool-wash: rgba(161, 139, 224, 0.6);
   --spool-glow: rgba(161, 139, 224, 0.6);
   background-image:
-    url("../../mockups/nivel-1-taller/assets/sprites/carrete-cobre.png"),
+    url("../../assets/levels/01/props/spool.webp"),
     linear-gradient(180deg, transparent 0 58%, var(--wb-violet, #a18be0) 58%);
   border-bottom-color: var(--wb-violet, #a18be0);
 }

@@ -5,10 +5,13 @@
 // real dentro de `editorSlot` y conserva probar, ensayo, máquinas,
 // jueces, datos y callbacks.
 //
-// Los sprites son placeholders del mockup
-// (`mockups/nivel-1-taller/assets/sprites/*`); no se copia ningún asset.
-// Si un sprite falta, el navegador muestra el marco igual: la escena no
-// se bloquea. Ver `docs/ASSET-MANIFEST.md` para los slots finales.
+// Fondo, ladrón, papeles y campana son assets finales
+// (`assets/levels/01/*`, slots `n1.*` del manifiesto) y llevan
+// `data-asset` + `data-status="final"` + `data-src`. La mesa
+// (`mesa-madera.svg`) y la placa (`placa-textura.jpg`, `placa-marco.svg`)
+// siguen en `mockups/` porque no tienen slot final (ver
+// `docs/ASSET-INTEGRATION.md` §3). Si un asset falta, el navegador
+// muestra el marco igual: la escena no se bloquea.
 
 const SPRITES = 'mockups/nivel-1-taller/assets/sprites';
 
@@ -40,12 +43,20 @@ function caption(text, className) {
   return node;
 }
 
-function paperFigure(src, name) {
+function finalImage(src, asset, { alt = '', hidden = true } = {}) {
+  const node = image(src, { alt, hidden });
+  node.setAttribute('data-asset', asset);
+  node.setAttribute('data-status', 'final');
+  node.setAttribute('data-src', src);
+  return node;
+}
+
+function paperFigure(src, name, asset) {
   const item = document.createElement('li');
   item.className = 'level-paper-item';
   const figure = document.createElement('figure');
   figure.className = 'level-paper';
-  figure.append(image(`${SPRITES}/${src}`, { alt: '' }));
+  figure.append(finalImage(src, asset, { alt: '' }));
   const name_ = document.createElement('figcaption');
   name_.className = 'level-paper-name';
   name_.textContent = name;
@@ -66,7 +77,7 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   element.setAttribute('data-level', '1');
   element.setAttribute('aria-label', `${client}: mesa de trabajo. ${title}.`);
 
-  const backdrop = image(`${SPRITES}/fondo-banco.jpg`, { alt: '' });
+  const backdrop = finalImage('assets/levels/01/background.webp', 'n1.background', { alt: '' });
   backdrop.className = 'level-backdrop';
   element.append(backdrop);
 
@@ -79,7 +90,7 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   bench.className = 'level-bench';
   element.append(bench);
 
-  const thief = image(`${SPRITES}/ladron.png`, {
+  const thief = finalImage('assets/levels/01/thief.webp', 'n1.thief', {
     alt: 'El ladrón observa desde la penumbra',
     hidden: false,
   });
@@ -115,14 +126,14 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   const papers = document.createElement('ul');
   papers.className = 'level-papers';
   papers.setAttribute('aria-label', 'Papeles sobre la mesa');
-  papers.append(paperFigure('contrato.png', 'Contrato'));
-  papers.append(paperFigure('nota-pista.png', 'Pista'));
-  papers.append(paperFigure('libreta.png', 'Bitácora'));
+  papers.append(paperFigure('assets/levels/01/props/contract.webp', 'Contrato', 'n1.contract'));
+  papers.append(paperFigure('assets/levels/01/props/hint.webp', 'Pista', 'n1.hint'));
+  papers.append(paperFigure('assets/levels/01/props/log.webp', 'Bitácora', 'n1.log'));
   element.append(papers);
 
   const bell = document.createElement('figure');
   bell.className = 'level-bell';
-  bell.append(image(`${SPRITES}/campana-alarma.png`, { alt: '' }));
+  bell.append(finalImage('assets/levels/01/props/bell.webp', 'n1.bell', { alt: '' }));
   const bellName = document.createElement('figcaption');
   bellName.className = 'level-bell-name';
   bellName.textContent = 'Campana de alarma';

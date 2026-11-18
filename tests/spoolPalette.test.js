@@ -79,14 +79,15 @@ test('sin selectores globales body / html / :root / *', () => {
   assert.ok(!/(^|[}\s])\*(?=[\s{.,:[])/.test(stripComments(css)), 'hay selector universal *');
 });
 
-test('todas las imágenes viven en mockups/nivel-1-taller/assets/ y existen', () => {
+test('todas las imágenes son el carrete final y existen en disco', () => {
   const found = urls(css);
   assert.ok(found.length >= 1, 'se esperaba al menos el carrete como imagen');
   for (const reference of found) {
     assert.ok(
-      reference.includes('mockups/nivel-1-taller/assets/'),
-      `imagen fuera del mockup: ${reference}`,
+      reference.includes('assets/levels/01/props/spool.webp'),
+      `imagen fuera del slot final n1.spool: ${reference}`,
     );
+    assert.ok(!reference.includes('mockups/'), `el carrete ya no usa el mockup: ${reference}`);
     assert.ok(!/^https?:\/\//.test(reference), `imagen externa prohibida: ${reference}`);
     assert.ok(!reference.startsWith('data:'), `data URI prohibido: ${reference}`);
     const disk = normalize(join(here, '..', 'src', 'ui', reference));
@@ -94,10 +95,12 @@ test('todas las imágenes viven en mockups/nivel-1-taller/assets/ y existen', ()
   }
 });
 
-test('el héroe es el carrete de cobre, no las llaves', () => {
+test('el héroe es el carrete final, no las llaves ni el mockup', () => {
   const clean = stripComments(css);
-  assert.ok(clean.includes('carrete-cobre.png'), 'falta el carrete de cobre como imagen');
+  assert.ok(clean.includes('assets/levels/01/props/spool.webp'), 'falta el carrete final como imagen');
   assert.ok(!clean.includes('llave-'), 'las imágenes de llave deben quedar anuladas');
+  assert.ok(!clean.includes('carrete-cobre.png'), 'el placeholder del mockup ya no se usa');
+  assert.ok(!clean.includes('mockups/'), 'ninguna imagen del mockup en el carrete');
 });
 
 test('las cuatro variantes existen con su color (dorado 1, teal 2, coral 3, violeta 4)', () => {
@@ -110,7 +113,7 @@ test('las cuatro variantes existen con su color (dorado 1, teal 2, coral 3, viol
       ...rulesFor(css, `.key[data-key="${number}"]`),
       ...rulesFor(css, `.key.key-${number}`),
     ].join('\n');
-    assert.ok(blocks.includes('carrete-cobre.png'), `el carrete ${number} debe usar el carrete de cobre`);
+    assert.ok(blocks.includes('assets/levels/01/props/spool.webp'), `el carrete ${number} debe usar el carrete final`);
     assert.ok(blocks.includes(color), `el carrete ${number} debe llevar su color ${color}`);
   }
 });

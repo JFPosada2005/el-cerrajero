@@ -1,8 +1,8 @@
 // Decoración visual del editor de grafos — El Cerrajero (ola 2, unidad A).
 //
 // Solo decora el `<svg id="canvas">` ya creado por el editor real:
-// sprites del mockup sobre las celdas y trenzas de color por llave en los
-// cables. No crea editor, cables, llaves, juicio ni lógica; no toca
+// assets finales del N1 sobre las celdas y trenzas de color por llave en
+// los cables. No crea editor, cables, llaves, juicio ni lógica; no toca
 // el editor, `main.js`, `styles.css`, `src/core`, `src/game`,
 // tests existentes, `mockups/` ni git.
 //
@@ -13,21 +13,23 @@
 // de una pasada sigue intacta.
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
-const SPRITES = 'mockups/nivel-1-taller/assets/sprites';
+const PERNO = 'mockups/nivel-1-taller/assets/sprites/perno.svg';
+const N1 = 'assets/levels/01/props';
 const TONES = ['gold', 'teal', 'coral', 'violet'];
 
 const N1_ASSETS = {
-  entry: [`${SPRITES}/bocallave-entrada.png`],
-  lock: [`${SPRITES}/perno.svg`, `${SPRITES}/cilindro-cerradura.png`],
-  gear: [`${SPRITES}/rueda-engranaje.png`],
+  entry: [`${N1}/entry.webp`],
+  lock: [PERNO, `${N1}/lock.webp`],
+  gear: [`${N1}/gear.webp`],
 };
 
-// Fallback genérico para N2–N4 (celda-relé/engranaje) con placeholder
-// del mockup hasta tener assets finales.
+// Fallback genérico para N2–N4 con los assets finales del N1 (bocallave
+// de entrada y engranaje) hasta que esos niveles tengan assets propios.
+// El perno del cerrojo sigue en `mockups/` porque no tiene slot final.
 const FALLBACK_ASSETS = {
-  entry: [`${SPRITES}/rueda-engranaje.png`],
-  lock: [`${SPRITES}/rueda-engranaje.png`],
-  gear: [`${SPRITES}/rueda-engranaje.png`],
+  entry: [`${N1}/entry.webp`],
+  lock: [`${N1}/gear.webp`],
+  gear: [`${N1}/gear.webp`],
 };
 
 const SPRITE_CLASS = {

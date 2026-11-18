@@ -1,11 +1,12 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createLevelScene } from '../src/ui/levels/level1Scene.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const ROOT = join(here, '..');
 const source = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level1Scene.js'), 'utf8');
 const css = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level1.css'), 'utf8');
 
@@ -143,15 +144,34 @@ test('sello de fase con vocabulario de taller', () => {
   assert.equal(findOne(fallback.element, (n) => classes(n).includes('level-phase-seal'), 'el sello').textContent, 'En reparación');
 });
 
-test('fondo, mesa, ladrón, placa, campana y papeles con sprites del mockup', () => {
+test('fondo, ladrón, campana y papeles con los assets finales; mesa y placa en el mockup', () => {
   const view = setup();
-  const sources = findAll(view.element, (n) => n.tag === 'img').map((n) => n.getAttribute('src'));
+  const images = findAll(view.element, (n) => n.tag === 'img');
+  const sources = images.map((n) => n.getAttribute('src'));
   assert.ok(sources.length >= 9, `la escena trae sus props, hay ${sources.length} imágenes`);
-  for (const src of sources) {
-    assert.match(src, /^mockups\/nivel-1-taller\/assets\/sprites\//, `placeholder del mockup: ${src}`);
+  const finalSources = [
+    'assets/levels/01/background.webp',
+    'assets/levels/01/thief.webp',
+    'assets/levels/01/props/contract.webp',
+    'assets/levels/01/props/hint.webp',
+    'assets/levels/01/props/log.webp',
+    'assets/levels/01/props/bell.webp',
+  ];
+  for (const src of finalSources) {
+    assert.ok(sources.includes(src), `falta el asset final ${src}`);
+    assert.ok(existsSync(join(ROOT, src)), `el asset final existe en disco: ${src}`);
   }
-  for (const sprite of ['fondo-banco.jpg', 'mesa-madera.svg', 'ladron.png', 'placa-textura.jpg', 'placa-marco.svg', 'campana-alarma.png', 'contrato.png', 'nota-pista.png', 'libreta.png']) {
-    assert.ok(sources.some((src) => src.endsWith(sprite)), `falta el sprite ${sprite}`);
+  for (const sprite of ['mesa-madera.svg', 'placa-textura.jpg', 'placa-marco.svg']) {
+    assert.ok(
+      sources.some((src) => src === `mockups/nivel-1-taller/assets/sprites/${sprite}`),
+      `mesa y placa siguen en el mockup: ${sprite}`,
+    );
+  }
+  const marked = findAll(view.element, (n) => n.getAttribute('data-status') === 'final');
+  assert.equal(marked.length, finalSources.length, 'cada asset final declara su estado');
+  for (const node of marked) {
+    assert.match(String(node.getAttribute('data-asset')), /^n1\./, 'el slot viene del manifiesto');
+    assert.ok(existsSync(join(ROOT, String(node.getAttribute('data-src')))), 'data-src apunta a un archivo real');
   }
   const thief = findOne(view.element, (n) => classes(n).includes('level-thief'), 'el ladrón');
   assert.match(thief.getAttribute('alt'), /ladrón/);

@@ -121,26 +121,29 @@ test('la API devuelve { dispose } y decora sin romper el render', () => {
   view.dispose();
 });
 
-test('N1 usa los sprites del mockup por rol', () => {
+test('N1 usa los assets finales por rol', () => {
   const { svg } = setup();
   const view = decorateGraph(svg, { level: level1, cells });
   const byLabel = new Map(directGroups(svg, 'state').map((group) => [group.getAttribute('aria-label'), group]));
-  assert.deepEqual(hrefsOf(byLabel.get('Entrada')), ['mockups/nivel-1-taller/assets/sprites/bocallave-entrada.png']);
+  assert.deepEqual(hrefsOf(byLabel.get('Entrada')), ['assets/levels/01/props/entry.webp']);
   const lockHrefs = hrefsOf(byLabel.get('Cerrojo'));
-  assert.ok(lockHrefs.includes('mockups/nivel-1-taller/assets/sprites/cilindro-cerradura.png'), 'cuerpo del cerrojo');
-  assert.ok(lockHrefs.includes('mockups/nivel-1-taller/assets/sprites/perno.svg'), 'perno del cerrojo');
+  assert.ok(lockHrefs.includes('assets/levels/01/props/lock.webp'), 'cuerpo del cerrojo final');
+  assert.ok(lockHrefs.includes('mockups/nivel-1-taller/assets/sprites/perno.svg'), 'el perno sigue en mockups: no tiene slot final');
   for (const label of ['Celda 1', 'Celda 2']) {
-    assert.deepEqual(hrefsOf(byLabel.get(label)), ['mockups/nivel-1-taller/assets/sprites/rueda-engranaje.png']);
+    assert.deepEqual(hrefsOf(byLabel.get(label)), ['assets/levels/01/props/gear.webp']);
   }
   view.dispose();
 });
 
-test('los sprites existen en el mockup y viven dentro de los grupos interactivos', () => {
+test('los sprites finales existen en disco y el perno sigue en el mockup', () => {
   const { svg } = setup();
   const view = decorateGraph(svg, { level: level1, cells });
   for (const group of directGroups(svg, 'state')) {
     for (const href of hrefsOf(group)) {
-      assert.match(href, /^mockups\/nivel-1-taller\/assets\/sprites\//);
+      assert.ok(
+        href.startsWith('assets/levels/01/props/') || href.startsWith('mockups/nivel-1-taller/assets/sprites/'),
+        `ruta trazable: ${href}`,
+      );
       assert.ok(existsSync(join(root, href)), `el sprite existe: ${href}`);
     }
     for (const image of imagesOf(group)) {
@@ -255,15 +258,15 @@ test('el resorte se marca como resorte, sin tono de llave', () => {
   view.dispose();
 });
 
-test('N2 usa el fallback genérico de engranaje con placeholder', () => {
+test('N2 usa el fallback con los assets finales del N1', () => {
   const { svg } = setup();
   const view = decorateGraph(svg, { level: { id: 2 }, cells });
   assert.ok(tokens(svg).includes('gv-level-2'));
-  for (const group of directGroups(svg, 'state')) {
-    const hrefs = hrefsOf(group);
-    assert.ok(hrefs.length >= 1, 'toda celda trae placeholder');
-    for (const href of hrefs) {
-      assert.equal(href, 'mockups/nivel-1-taller/assets/sprites/rueda-engranaje.png');
+  const byLabel = new Map(directGroups(svg, 'state').map((group) => [group.getAttribute('aria-label'), group]));
+  assert.deepEqual(hrefsOf(byLabel.get('Entrada')), ['assets/levels/01/props/entry.webp']);
+  for (const label of ['Cerrojo', 'Celda 1', 'Celda 2']) {
+    for (const href of hrefsOf(byLabel.get(label))) {
+      assert.equal(href, 'assets/levels/01/props/gear.webp');
       assert.ok(existsSync(join(root, href)));
     }
   }

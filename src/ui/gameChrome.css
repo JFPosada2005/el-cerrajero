@@ -1,7 +1,7 @@
 /* El Cerrajero — acabado del llavero y los botones (unidad B).
  * CSS-only, alcance estricto `.wb-scene`: cada selector empieza con
  * `.wb-scene`. Sin resets globales, sin selectores de elemento sueltos,
- * sin imágenes fuera de `mockups/nivel-1-taller/assets/`.
+ * sin imágenes fuera de `assets/levels/01/props/`.
  * Solo presentación: no toca lógica, datos, jueces ni callbacks. Los botones
  * reales y sus `aria-label` se conservan; el número de cada llave sigue visible.
  * Se carga después de `workbenchScene.css` y reutiliza sus variables `--wb-*`
@@ -86,29 +86,30 @@
   transform: rotate(8deg);
 }
 
-/* Imagen del mockup + banda de color por llave (el color nunca es la única
- * señal: el número de la llave sigue visible como texto del botón). */
+/* Imagen final del N1 + banda de color por llave (el color nunca es
+ * la única señal: el número de la llave sigue visible como texto del
+ * botón). Rutas del manifiesto (`assets/levels/01/props/key-N.webp`). */
 .wb-scene .wb-inventory #palette .key[data-key="1"],
 .wb-scene .wb-inventory #palette .key.key-1 {
-  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-1.png");
+  background-image: url("../../assets/levels/01/props/key-1.webp");
   border-bottom-color: var(--wb-brass, #d4a72c);
 }
 
 .wb-scene .wb-inventory #palette .key[data-key="2"],
 .wb-scene .wb-inventory #palette .key.key-2 {
-  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-2.png");
+  background-image: url("../../assets/levels/01/props/key-2.webp");
   border-bottom-color: var(--wb-teal, #38c6b8);
 }
 
 .wb-scene .wb-inventory #palette .key[data-key="3"],
 .wb-scene .wb-inventory #palette .key.key-3 {
-  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-3.png");
+  background-image: url("../../assets/levels/01/props/key-3.webp");
   border-bottom-color: var(--wb-coral, #f06a4a);
 }
 
 .wb-scene .wb-inventory #palette .key[data-key="4"],
 .wb-scene .wb-inventory #palette .key.key-4 {
-  background-image: url("../../mockups/nivel-1-taller/assets/sprites/llave-4.png");
+  background-image: url("../../assets/levels/01/props/key-4.webp");
   border-bottom-color: var(--wb-violet, #a18be0);
 }
 

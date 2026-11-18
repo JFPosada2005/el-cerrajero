@@ -79,14 +79,15 @@ test('sin selectores globales body / html / :root / *', () => {
   assert.ok(!/(^|[}\s])\*(?=[\s{.,:[])/.test(stripComments(css)), 'hay selector universal *');
 });
 
-test('todas las imágenes viven en mockups/nivel-1-taller/assets/ y existen', () => {
+test('todas las imágenes son las llaves finales y existen en disco', () => {
   const found = urls(css);
   assert.ok(found.length >= 4, 'se esperaban al menos las 4 llaves como imágenes');
   for (const reference of found) {
     assert.ok(
-      reference.includes('mockups/nivel-1-taller/assets/'),
-      `imagen fuera del mockup: ${reference}`,
+      reference.includes('assets/levels/01/props/key-'),
+      `imagen fuera del slot final n1.keys: ${reference}`,
     );
+    assert.ok(!reference.includes('mockups/'), `la llave ya no usa el mockup: ${reference}`);
     assert.ok(!/^https?:\/\//.test(reference), `imagen externa prohibida: ${reference}`);
     assert.ok(!reference.startsWith('data:'), `data URI prohibido: ${reference}`);
     const disk = normalize(join(here, '..', 'src', 'ui', reference));
@@ -94,11 +95,11 @@ test('todas las imágenes viven en mockups/nivel-1-taller/assets/ y existen', ()
   }
 });
 
-test('las cuatro llaves del mockup tienen su imagen (llave-1…4.png)', () => {
+test('las cuatro llaves finales tienen su imagen (key-1…4.webp)', () => {
   for (const number of ['1', '2', '3', '4']) {
     assert.ok(
-      css.includes(`llave-${number}.png`),
-      `falta la imagen de la llave ${number}`,
+      css.includes(`assets/levels/01/props/key-${number}.webp`),
+      `falta la imagen final de la llave ${number}`,
     );
     const keyed = rulesFor(css, `.key[data-key="${number}"]`).length > 0
       || rulesFor(css, `.key.key-${number}`).length > 0;
