@@ -1,13 +1,26 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createLevelScene } from '../src/ui/levels/level3Scene.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
+const repoRoot = join(here, '..');
 const sceneSource = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level3Scene.js'), 'utf8');
 const sceneCss = readFileSync(join(here, '..', 'src', 'ui', 'levels', 'level3.css'), 'utf8');
+const manifest = JSON.parse(
+  readFileSync(join(here, '..', 'assets', 'manifest.json'), 'utf8'),
+);
+
+function manifestFinal(slot) {
+  const [area, ...rest] = slot.split('.');
+  if (area === 'levels') {
+    const [group, ...keyParts] = rest;
+    return manifest[area][group][keyParts.join('.')].final;
+  }
+  return manifest[area][rest.join('.')].final;
+}
 
 // --- DOM falso mínimo (createElement + createElementNS + árbol) ---
 function fakeElement(tag, ns = null) {
@@ -99,6 +112,17 @@ test('no crea editor, cables, llaves, juicio ni lógica', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
   assert.equal(nodes.filter((node) => node.tag === 'svg').length, 4, 'solo glifos SVG propios (Y, resorte, 2 lámparas)');
+  const imgs = nodes.filter((node) => node.tag === 'img');
+  assert.equal(imgs.length, 2, 'solo las fotos finales de bifurcador y resorte');
+  for (const img of imgs) {
+    assert.ok(
+      ['assets/shared/props/fork.svg', 'assets/shared/props/spring.svg'].includes(
+        img.getAttribute('src'),
+      ),
+      `img con asset final: ${img.getAttribute('src')}`,
+    );
+    assert.equal(img.getAttribute('aria-hidden'), 'true', 'los glifos con foto siguen decorativos');
+  }
   assert.equal(nodes.filter((node) => node.tag === 'canvas').length, 0);
   const classed = nodes.flatMap((node) => classes(node));
   for (const banned of ['wire', 'edge', 'state', 'key', 'inventory', 'graph']) {
@@ -119,21 +143,91 @@ test('no crea editor, cables, llaves, juicio ni lógica', () => {
   assert.ok(sceneSource.includes('createElementNS'), 'los glifos usan createElementNS');
 });
 
-test('placeholders marcados a producir: fondo, lámparas, bifurcador y resorte', () => {
+test('slots finales con asset del manifiesto y lámpara a producir', () => {
   const scene = createLevelScene({});
-  const placeholders = all(scene).filter((node) => node.getAttribute('data-status') === 'a producir');
-  assert.ok(placeholders.length >= 5, `hay ${placeholders.length} placeholders`);
+  const nodes = all(scene);
+  const finals = nodes.filter((node) => node.getAttribute('data-status') === 'final');
+  assert.ok(finals.length >= 4, `hay ${finals.length} slots finales`);
+  const expected = {
+    'levels.03.backgroundDay': 'assets/levels/03/day.webp',
+    'levels.03.backgroundNight': 'assets/levels/03/night.webp',
+    'shared.prop.fork': 'assets/shared/props/fork.svg',
+    'shared.prop.spring': 'assets/shared/props/spring.svg',
+  };
+  for (const [slot, src] of Object.entries(expected)) {
+    const found = finals.find((node) => node.getAttribute('data-asset') === slot);
+    assert.ok(found, `slot final: ${slot}`);
+    assert.equal(found.getAttribute('data-src'), src, `data-src de ${slot}`);
+    assert.equal(found.getAttribute('data-src'), manifestFinal(slot), `data-src igual al manifiesto en ${slot}`);
+    assert.ok(existsSync(join(repoRoot, src)), `el asset existe en disco: ${src}`);
+  }
+  const placeholders = nodes.filter((node) => node.getAttribute('data-status') === 'a producir');
   for (const node of placeholders) {
     assert.equal(node.getAttribute('data-todo'), 'a producir');
     assert.ok(node.getAttribute('data-asset'), 'cada placeholder nombra su slot de asset');
   }
   const assets = placeholders.map((node) => node.getAttribute('data-asset')).join(' ');
-  for (const slot of ['n3.background', 'n3.lamp', 'n3.fork', 'n3.spring']) {
-    assert.ok(assets.includes(slot), `placeholder de ${slot}`);
-  }
-  assert.ok(!sceneSource.includes('<img'), 'sin imágenes externas en la escena');
+  assert.ok(assets.includes('levels.03.lamp'), 'la lámpara sigue a producir');
+  assert.ok(!assets.includes('levels.03.backgroundDay'), 'el día ya es final');
+  assert.ok(!assets.includes('shared.prop.fork'), 'el bifurcador ya es final');
+  assert.ok(!assets.includes('shared.prop.spring'), 'el resorte ya es final');
   assert.ok(!sceneSource.includes('url('), 'la escena no carga recursos por URL');
   assert.ok(!/url\(\s*['"]?https?:/i.test(sceneCss), 'el CSS no carga imágenes externas');
+});
+
+test('las alas usan la foto final visible: respaldo, velo y luz translúcidos', () => {
+  function rulesOf(css) {
+    const clean = css.replace(/\/\*[\s\S]*?\*\//g, '');
+    return clean
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }));
+  }
+  function wingBody(modifier) {
+    const exact = `.level-scene[data-level="3"] ${modifier}`;
+    const found = rulesOf(sceneCss).find((rule) =>
+      rule.selector.split(',').map((part) => part.trim()).includes(exact),
+    );
+    assert.ok(found, `hay regla para ${exact}`);
+    return found.body;
+  }
+  const day = wingBody('.museum-wing--day');
+  const night = wingBody('.museum-wing--night');
+  assert.ok(day.includes('url("../../../assets/levels/03/day.webp")'), 'el ala de día usa day.webp');
+  assert.ok(night.includes('url("../../../assets/levels/03/night.webp")'), 'el ala de noche usa night.webp');
+  assert.ok(
+    existsSync(join(repoRoot, 'assets', 'levels', '03', 'day.webp')),
+    'day.webp existe en disco',
+  );
+  assert.ok(
+    existsSync(join(repoRoot, 'assets', 'levels', '03', 'night.webp')),
+    'night.webp existe en disco',
+  );
+  for (const [name, body] of [['day', day], ['night', night]]) {
+    assert.ok(/background-color\s*:\s*#[0-9a-f]{6}/i.test(body), `el ala ${name} conserva color de respaldo`);
+    assert.ok(/background-size\s*:\s*cover/.test(body), `el ala ${name} cubre con cover`);
+    assert.ok(/background-position\s*:\s*center/.test(body), `el ala ${name} centra la foto`);
+    assert.ok(!/gradient\([^;]*?#[0-9a-f]{3,8}/i.test(body), `ninguna capa opaca tapa la foto del ala ${name}`);
+  }
+  assert.ok(/rgba\(5,\s*8,\s*12,\s*0\.45\)/.test(sceneCss), 'velo de oscurecimiento sobre la foto');
+  assert.ok(/text-shadow/.test(sceneCss), 'la etiqueta de sala se lee sobre la foto');
+});
+
+test('bifurcador y resorte conservan glifo, tamaño y nombre con foto final', () => {
+  const scene = createLevelScene({});
+  const nodes = all(scene);
+  for (const [slot, label] of [['shared.prop.fork', 'Bifurcador'], ['shared.prop.spring', 'Resorte']]) {
+    const holder = nodes.find((node) => node.getAttribute('data-asset') === slot);
+    assert.ok(holder, `contenedor de ${slot}`);
+    assert.equal(holder.getAttribute('aria-label'), label, `el contenedor nombra: ${label}`);
+    const tags = holder.children.map((child) => child.tag);
+    assert.ok(tags.includes('img'), `${slot} usa <img> final`);
+    assert.ok(tags.includes('svg'), `${slot} conserva el glifo con topes/bocas`);
+    const img = holder.children.find((child) => child.tag === 'img');
+    assert.ok(classes(img).includes('museum-glyph-art'), `${slot} conserva el tamaño del glifo`);
+    assert.ok(/\.museum-glyph img\.museum-glyph-art/.test(sceneCss), 'el CSS fija el tamaño de la foto del glifo');
+  }
 });
 
 test('alas de día y noche, lámparas y glifos con vocabulario de taller', () => {

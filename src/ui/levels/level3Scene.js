@@ -2,8 +2,10 @@
 //
 // Aporta fondo, mesa, placa, utilería y decoración. No crea el editor
 // real (el parent monta el #canvas en `editorSlot`), ni cables, llaves,
-// juicio o lógica. Todo asset final figura como "a producir" con
-// `data-asset` + `data-status="a producir"`; el dibujo es CSS/SVG propio.
+// juicio o lógica. Las alas de día/noche y los glifos de bifurcador y
+// resorte usan los assets finales del manifiesto (`data-status="final"`
+// con `data-asset` + `data-src`); la lámpara (`levels.03.lamp`, missing)
+// sigue como placeholder CSS/SVG con `data-status="a producir"`.
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -30,6 +32,15 @@ function markPlaceholder(element, asset) {
   element.setAttribute('data-asset', asset);
   element.setAttribute('data-status', 'a producir');
   element.setAttribute('data-todo', 'a producir');
+}
+
+// Slot integrado con asset final: conserva el slot del manifiesto y la
+// ruta usada para trazabilidad. `src` va en relativo al documento
+// (`assets/...`), como consume el manifiesto.
+function markFinal(element, asset, src) {
+  element.setAttribute('data-asset', asset);
+  element.setAttribute('data-status', 'final');
+  element.setAttribute('data-src', src);
 }
 
 function phaseWord(phase) {
@@ -135,7 +146,7 @@ function lampFigure(variant) {
     stroke: 'currentColor', 'stroke-width': '2', 'stroke-linecap': 'round',
   }));
   figure.append(svg);
-  markPlaceholder(figure, 'n3.lamp');
+  markPlaceholder(figure, 'levels.03.lamp');
   return figure;
 }
 
@@ -152,18 +163,18 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   element.setAttribute('aria-label', `${client} · ${title} · ${word}`);
 
   // Fondo: ala de día (luz cálida de claraboya, arriba) y ala de noche
-  // (luz teal de luna, abajo). La luz va pintada en el fondo CSS.
+  // (luz teal de luna, abajo). Las fotos van pintadas en el fondo CSS de
+  // cada ala; la luz decorativa (claraboya, luna, lámparas) sigue en CSS/SVG.
   const backdrop = node('div', 'museum-backdrop');
   backdrop.setAttribute('aria-hidden', 'true');
-  markPlaceholder(backdrop, 'n3.background.day + n3.background.night');
 
   const dayWing = node('div', 'museum-wing museum-wing--day');
-  markPlaceholder(dayWing, 'n3.background.day');
+  markFinal(dayWing, 'levels.03.backgroundDay', 'assets/levels/03/day.webp');
   dayWing.append(node('span', 'museum-wing-name', 'Sala de día'));
   dayWing.append(node('span', 'museum-skylight'));
 
   const nightWing = node('div', 'museum-wing museum-wing--night');
-  markPlaceholder(nightWing, 'n3.background.night');
+  markFinal(nightWing, 'levels.03.backgroundNight', 'assets/levels/03/night.webp');
   nightWing.append(node('span', 'museum-wing-name', 'Sala de noche'));
   nightWing.append(node('span', 'museum-moon'));
 
@@ -209,7 +220,13 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   const glyphs = node('div', 'museum-glyphs');
 
   const fork = node('div', 'museum-glyph museum-glyph--fork');
-  markPlaceholder(fork, 'n3.fork');
+  fork.setAttribute('aria-label', 'Bifurcador');
+  markFinal(fork, 'shared.prop.fork', 'assets/shared/props/fork.svg');
+  const forkImg = node('img', 'museum-glyph-art');
+  forkImg.setAttribute('src', 'assets/shared/props/fork.svg');
+  forkImg.setAttribute('alt', '');
+  forkImg.setAttribute('aria-hidden', 'true');
+  fork.append(forkImg);
   fork.append(forkGlyph());
   fork.append(
     node(
@@ -220,7 +237,13 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   );
 
   const spring = node('div', 'museum-glyph museum-glyph--spring');
-  markPlaceholder(spring, 'n3.spring');
+  spring.setAttribute('aria-label', 'Resorte');
+  markFinal(spring, 'shared.prop.spring', 'assets/shared/props/spring.svg');
+  const springImg = node('img', 'museum-glyph-art');
+  springImg.setAttribute('src', 'assets/shared/props/spring.svg');
+  springImg.setAttribute('alt', '');
+  springImg.setAttribute('aria-hidden', 'true');
+  spring.append(springImg);
   spring.append(springGlyph());
   spring.append(
     node('p', 'museum-glyph-caption', 'Resorte: une dos salas sin pedir llave.'),
