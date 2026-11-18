@@ -40,6 +40,15 @@ Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del
 | Base de pila | Base del Nivel 4 | Generada por el owner en Leonardo.ai; fondo removido, recortada y exportada a WebP 128×40 | Proyecto |
 | Ficha | Ficha del Nivel 4 | Generada por el owner en Leonardo.ai; fondo removido, recortada y exportada a WebP 112×64 | Proyecto |
 
+## UI y piezas P1 (vectorial)
+
+| Asset | Uso | Origen | Licencia |
+|---|---|---|---|
+| Velocidad | Control de velocidad | Lucide, adaptado a 24×24 y trazo 1,5 px | ISC |
+| Indicador de piso | Nivel 2 | SVG dibujado a mano; 160×64 | Proyecto |
+| Selectores de pila | Nivel 4 | SVG dibujado a mano; 240×64 | Proyecto |
+| Palanca arriba/abajo | Nivel 4 | SVG dibujado a mano; 64×64 | Proyecto |
+
 ## Audio
 
 | SFX | Archivo | Origen | Licencia |

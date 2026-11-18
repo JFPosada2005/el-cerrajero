@@ -64,7 +64,9 @@
       "final": "assets/shared/ui/speed.svg",
       "kind": "icon",
       "priority": "P1",
-      "status": "missing"
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
     },
     "paper.contract": {
       "final": "assets/shared/paper/contract.webp",
@@ -269,7 +271,9 @@
         "placeholder": null,
         "kind": "icon",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 160×64"
       }
     },
     "03": {
@@ -326,7 +330,27 @@
         "placeholder": null,
         "kind": "icon",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 240×64"
+      },
+      "leverUp": {
+        "final": "assets/levels/04/lever-up.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 64×64"
+      },
+      "leverDown": {
+        "final": "assets/levels/04/lever-down.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "available",
+        "license": "Proyecto — SVG original",
+        "source": "Dibujado a mano para el remaster; 64×64"
       }
     },
     "05": {
