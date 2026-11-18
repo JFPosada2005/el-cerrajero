@@ -141,90 +141,54 @@ Resultado: N1 completo con assets finales y sin dependencia de arte nuevo.
 3. Registrar licencia propia.
 4. Actualizar manifest, commit y push.
 
-## 5. Prompts P0 faltantes (v2)
+## 5. Prompts P0 faltantes
 
-La primera generación del relé se descarta: salió con perspectiva/isometría, fondo gris con sombra, cara de piedra azul y terminales de caja eléctrica. Los prompts siguientes corrigen eso.
-
-### Regla de cámara
-
-Todos los props P0 que se generen con IA deben ser **iconos 2D de vista frontal ortográfica**:
-
-- cámara perpendicular a la cara frontal;
-- 0° de inclinación y 0° de giro;
-- sin perspectiva, sin isometría, sin vista 3/4;
-- sin caras laterales, superiores o inferiores visibles;
-- sin sombra proyectada, sin piso, sin mesa, sin fondo;
-- fondo transparente real (PNG alfa). Si la herramienta no soporta alfa, usar un fondo uniforme magenta `#FF00FF`, sin degradado ni sombra; nosotros lo recortamos;
-- composición cuadrada 1:1, objeto centrado y ocupando ~80 % del encuadre;
-- 1024×1024 de generación; la tabla indica el tamaño final al que se exporta.
-
-### Generación vs entrega
-
-| Asset | Máster de generación | Archivo final |
-|---|---:|---:|
-| Relé | 1024×1024 | `assets/shared/props/relay.webp`, 256×256 |
-| Tambor | 1024×1024 | `assets/levels/05/drum.webp`, 512×512 |
-| Cabezal | 1024×1024 | `assets/levels/05/head.webp`, 256×256 |
-| Piñón opcional | 1024×1024 | `assets/levels/02/pinion.webp`, 512×512 |
-
-No generar al tamaño final directamente: se pierde detalle. Si la herramienta solo llega a 512×512, también sirve; para el tambor es 2× del final.
+Usar 1024×1024 o 2048×2048, fondo transparente real, luz cálida superior izquierda, sin texto. Generar 3 variantes y elegir la que mejor integre.
 
 ### R1 — Relé / celda-relé
 
 ```text
-Single compact electromechanical relay component for a precision-noir 2D puzzle game, rendered as a flat orthographic front elevation with the camera exactly perpendicular to the front face, no perspective, no isometric, no three-quarter view, no visible top, bottom or side faces, no camera tilt. Rounded-square aged brass housing with a dark blued-steel front panel, four slotted corner screws, one small circular glass window in the center with a warm amber filament, subtle bevels and engraved seams only on the front face, no protruding top terminals, no loose wires. Symmetrical, centered, square 1:1 composition, subject fills about 80% of the frame, generous empty margin. Photorealistic materials but flat 2D game-prop icon, crisp readable silhouette at small size, soft even frontal light, transparent PNG alpha background, no cast shadow, no floor, no backdrop, no texture behind the object. 1024x1024 master. No text, no numbers, no logo, no junction box, no wall outlet, no blue stone, no marble, no concrete, no neon.
+Single compact electromechanical relay cell for a precision-noir puzzle game, aged brass housing with a blued steel face, rounded rectangular casing, small inset glass window showing a warm amber filament, four slotted screw terminals, fine engraved seams, subtle patina and wear, photorealistic 3D render, centered composition, top-left warm key light, transparent background, 1024x1024, no text, no numbers, no logos, no wires, no gears, no neon, no UI.
+```
+
+Negativo:
+
+```text
+text, numbers, letters, logo, watermark, background, floor, table, multiple objects, cartoon, pixel art, low-poly, neon, glow, blurry, cropped, duplicate, perspective distortion.
 ```
 
 ### R2 — Piñón de bucle (opcional; preferible derivarlo del engranaje)
 
 ```text
-Single machined pinion gear for a precision-noir 2D puzzle game, flat orthographic top view with the camera exactly perpendicular to the gear face, no perspective, no isometric, no three-quarter view, no visible side faces, no tilt. Twelve precise teeth, aged brass and gunmetal, central axle hole, subtle wear on the teeth, crisp readable silhouette, centered, square 1:1 composition, subject fills about 80% of the frame. Photorealistic materials but flat 2D game-prop icon, soft even light, transparent PNG alpha background, no cast shadow, no floor, no backdrop. 1024x1024 master. No text, no numbers, no logo, no extra gears, no blue stone, no neon.
+Single machined pinion gear for a precision-noir clockwork mechanism, 12 precise teeth, aged brass and gunmetal, central axle hole, subtle wear on the teeth, photorealistic 3D render, centered, top-left warm light, transparent background, 1024x1024, no text, no numbers, no logos, no extra gears, no background, no neon.
 ```
+
+Negativo: el mismo bloque de R1.
 
 ### R3 — Tambor de control
 
 ```text
-Single compact horizontal control drum for a 1930s precision-noir bank mechanism, flat orthographic front elevation with the camera exactly perpendicular to the drum, drum axis horizontal, no perspective, no isometric, no three-quarter view, no visible top or side faces, no tilt. Aged brass cylinder with engraved section rings, small pin holes, knurled edges and a steel axle, crisp readable silhouette, centered, square 1:1 composition, subject fills about 80% of the frame. Photorealistic materials but flat 2D game-prop icon, soft even frontal light, transparent PNG alpha background, no cast shadow, no floor, no backdrop. 1024x1024 master. No text, no numbers, no logo, no loose parts, no blue stone, no neon.
+Compact horizontal control drum for a 1930s bank vault mechanism, aged brass cylinder with engraved section rings, small pin holes, knurled edges, steel axle, warm patina, photorealistic 3D render, three-quarter view, centered, top-left warm light, transparent background, 1024x1024, no text, no numbers, no logos, no background, no neon.
 ```
+
+Negativo: el mismo bloque de R1.
 
 ### R4 — Cabezal de cinta
 
 ```text
-Single vintage reel-to-reel magnetic tape head for a precision-noir 2D puzzle game, flat orthographic front elevation with the camera exactly perpendicular to the face, no perspective, no isometric, no three-quarter view, no visible top, bottom or side faces, no tilt. Rectangular brass and black Bakelite body, one small precise read gap, two mounting screws, fine machining marks, crisp readable silhouette, centered, square 1:1 composition, subject fills about 80% of the frame. Photorealistic materials but flat 2D game-prop icon, soft even frontal light, transparent PNG alpha background, no cast shadow, no floor, no backdrop. 1024x1024 master. No text, no numbers, no logo, no tape reel, no wires, no blue stone, no neon.
+Vintage reel-to-reel magnetic tape head, brass and black Bakelite body, small precise read gap, two mounting screws, fine machining marks, photorealistic 3D render, three-quarter view, centered, top-left warm light, transparent background, 1024x1024, no text, no numbers, no logos, no tape reel, no background, no neon.
 ```
 
-### Negativo común
-
-```text
-isometric, isometric view, three-quarter view, 3/4 view, perspective, vanishing point, camera tilt, diagonal, rotated, side face, top face, bottom face, visible depth, product photography, gray background, gradient background, floor, table, wall, cast shadow, drop shadow, vignette, text, numbers, letters, logo, watermark, multiple objects, extra terminals, junction box, wall outlet, blue stone, granite, marble, concrete, fabric, cartoon, pixel art, low-poly, neon, glow, blurry, cropped, duplicate, asymmetric composition.
-```
+Negativo: el mismo bloque de R1.
 
 ### Sin prompt de IA
 
-- Nivel 1: reexportar los placeholders del mockup; no generar arte nuevo.
-- `ui.sound`, `ui.close`, `ui.lock`: extraer del mockup o Lucide; ISC.
+- `ui.sound`, `ui.close`, `ui.lock`: extraer del mockup o Lucide; licencia ISC.
 - `fork`, `spring`, `tape`, `pin`, `stack-base`, `chip`: SVG/Pillow; geometría precisa.
-- `pinion`: derivar del engranaje; R2 solo si se quiere un dibujo distinto.
+- `pinion`: derivar del engranaje; solo usar R2 si se quiere un dibujo distinto.
 - SFX: renderizar la paleta del mockup; no IA.
+- N1: reexportar los placeholders; no IA.
 - Fuentes y licencias: descarga directa de Google Fonts.
-
-### Entrega de los PNG
-
-Guardar los originales en:
-
-```text
-assets/incoming/relay.png
-assets/incoming/drum.png
-assets/incoming/head.png
-```
-
-Opcional:
-
-```text
-assets/incoming/pinion.png
-```
-
-No hace falta renombrar a WebP ni tocar el manifest: eso se hace al integrar el lote.
 
 ## 6. Flujo de entrega y Git
 
