@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createLevelScene } from '../src/ui/levels/level5Scene.js';
@@ -107,12 +107,13 @@ test('statusSlot para el contador del mecanismo', () => {
   assert.ok(findAll(scene.element, (node) => node === scene.statusSlot).length === 1);
 });
 
-test('la escena no crea el editor real', () => {
+test('la escena no crea el editor real ni toca sus secciones', () => {
   assert.ok(!source.includes('drumEditor'), 'sin importar el editor de tambor');
   assert.ok(!source.includes('tapePanel'), 'sin importar el panel de cinta');
   assert.ok(!source.includes('handleProbe'), 'sin lógica de probar');
   assert.ok(!source.includes('handleAssault'), 'sin lógica de ensayo');
   assert.ok(!source.includes('toMachine'), 'sin construir máquinas');
+  assert.ok(!source.includes('sections'), 'sin leer secciones: la protección de "Listo" queda en el editor');
   assert.ok(!source.includes('.innerHTML'), 'sin innerHTML');
   const scene = setup();
   for (const banned of ['drum-pin', 'drum-section', 'pin-editor', 'tape-cell', 'tape-marker']) {
@@ -142,7 +143,7 @@ test('un solo taller: sin cinta ni tambor decorativos duplicados', () => {
   }
 });
 
-test('la placa enmarca el editor real y conserva los marcadores de producción', () => {
+test('la placa enmarca el editor real y conserva los slots del mecanismo', () => {
   const scene = setup();
   const plate = findAll(scene.element, (node) => classes(node).includes('counting-bench-plate'))[0];
   assert.ok(plate, 'hay una sola placa de taller');
@@ -160,15 +161,35 @@ test('la placa enmarca el editor real y conserva los marcadores de producción',
   );
 });
 
-test('placeholders marcados a producir', () => {
+test('slots finales con data-src y archivo en disco', () => {
+  const scene = setup();
+  const final = findAll(scene.element, (node) => node.getAttribute('data-status') === 'final');
+  assert.ok(final.length >= 2, 'fondo y placa del mecanismo marcados como final');
+  const assets = final.map((node) => node.getAttribute('data-asset')).join(' ');
+  const srcs = final.map((node) => node.getAttribute('data-src')).join(' ');
+  const expected = {
+    'n5.background': 'assets/levels/05/background.webp',
+    'n5.tape': 'assets/levels/05/tape.svg',
+    'n5.head': 'assets/levels/05/head.webp',
+    'n5.drum': 'assets/levels/05/drum.webp',
+    'n5.pin': 'assets/levels/05/pin.svg',
+  };
+  for (const [slot, src] of Object.entries(expected)) {
+    assert.ok(assets.includes(slot), `slot final ${slot}`);
+    assert.ok(srcs.includes(src), `data-src con ${src}`);
+    assert.ok(existsSync(join(here, '..', src)), `${src} existe en disco`);
+  }
+  assert.ok(textOf(scene.element).includes('final') === false, 'el aviso vive en atributos, no en texto visible');
+});
+
+test('la boleta sigue a producir', () => {
   const scene = setup();
   const marked = findAll(scene.element, (node) => node.getAttribute('data-status') === 'a producir');
-  assert.ok(marked.length >= 3, 'fondo, cinta/cabezal, tambor y boleta marcados');
-  const assets = marked.map((node) => node.getAttribute('data-asset')).join(' ');
-  for (const slot of ['n5.background', 'n5.tape', 'n5.head', 'n5.drum', 'n5.pin', 'n5.depositSlip']) {
-    assert.ok(assets.includes(slot), `placeholder ${slot}`);
-  }
-  assert.ok(textOf(scene.element).includes('a producir') === false, 'el aviso vive en atributos, no en texto visible');
+  assert.equal(marked.length, 1, 'solo la boleta sigue sin asset');
+  assert.ok(String(marked[0].getAttribute('data-asset')).includes('n5.depositSlip'), 'la boleta cubre n5.depositSlip');
+  const slip = findAll(scene.element, (node) => classes(node).includes('counting-slip'))[0];
+  assert.ok(slip, 'hay boleta de depósito');
+  assert.equal(slip.getAttribute('data-status'), 'a producir', 'la boleta CSS conserva su estado');
 });
 
 test('decoración fuera del lector y vocabulario de taller', () => {
@@ -207,12 +228,46 @@ test('la boleta muestra los datos por textContent, sin parsear marcas', () => {
   }
 });
 
-test('css con alcance, 44px, foco y movimiento reducido, sin imágenes externas', () => {
+test('css con alcance, 44px, foco y movimiento reducido, con imágenes finales y fallback', () => {
   assert.ok(css.includes('.level-scene[data-level="5"]'), 'alcance a la escena del nivel 5');
   assert.ok(css.includes('min-height: 44px'), 'toques de 44 px');
   assert.ok(css.includes(':focus-visible'), 'foco visible');
   assert.ok(css.includes('prefers-reduced-motion'), 'respeta movimiento reducido');
-  assert.ok(!css.includes('url('), 'placeholders CSS, sin imágenes externas');
+  for (const asset of [
+    'assets/levels/05/background.webp',
+    'assets/levels/05/tape.svg',
+    'assets/levels/05/pin.svg',
+    'assets/levels/05/drum.webp',
+    'assets/levels/05/head.webp',
+  ]) {
+    assert.ok(css.includes(asset), `el css usa ${asset}`);
+    assert.ok(existsSync(join(here, '..', asset)), `${asset} existe en disco`);
+  }
+  assert.ok(css.includes('linear-gradient'), 'los gradientes siguen como fallback');
+  assert.ok(css.includes('background-size: cover'), 'el fondo cubre la sala');
+  assert.ok(css.includes('background-size: contain'), 'cinta y púa conservan su dibujo');
+});
+
+test('cinta y púa visten al editor real sin romper sus estados', () => {
+  const tapeBlocks = blocksFor('.tape-cell').join('\n');
+  assert.ok(tapeBlocks.includes('assets/levels/05/tape.svg'), 'la casilla usa tape.svg');
+  const pinBlocks = blocksFor('.drum-pin').join('\n');
+  assert.ok(pinBlocks.includes('assets/levels/05/pin.svg'), 'la púa usa pin.svg');
+  for (const state of ['.tape-cell.is-head', '.drum-pin.is-lit', '.drum-pin.is-final', ':focus-visible']) {
+    assert.ok(css.includes(state), `el estado ${state} sigue pintado`);
+  }
+});
+
+test('tambor y cabezal solo como cromo tenue de la placa y el riel', () => {
+  const plateBlocks = blocksFor('.counting-bench-plate::before').join('\n');
+  assert.ok(plateBlocks.includes('assets/levels/05/drum.webp'), 'el tambor decora la placa');
+  const railBlocks = blocksFor('.plate-rail::after').join('\n');
+  assert.ok(railBlocks.includes('assets/levels/05/head.webp'), 'el cabezal decora el riel');
+  for (const block of [plateBlocks, railBlocks]) {
+    const opacity = block.match(/opacity\s*:\s*([\d.]+)/);
+    assert.ok(opacity !== null && Number(opacity[1]) <= 0.35, 'cromo tenue que no compite con el mecanismo');
+    assert.ok(/pointer-events\s*:\s*none/.test(block), 'el cromo no intercepta el editor');
+  }
 });
 
 test('css integra el editor real en la placa y limita el alto al marco', () => {

@@ -10,8 +10,9 @@
  * un riel de cabezal con cinta perforada decorativa (orificios sin casillas
  * ni símbolos) que marca el lugar del mecanismo real sin duplicarlo.
  *
- * Placeholders CSS/DOM marcados "a producir" (ver `docs/ASSET-MANIFEST.md`):
- * n5.background, n5.tape, n5.head, n5.drum, n5.pin, n5.depositSlip.
+ * Placeholders CSS/DOM (ver `docs/ASSET-MANIFEST.md`):
+ * fondo, cinta, cabezal, tambor y púa en `final`; la boleta sigue
+ * `a producir` hasta que llegue `n5.depositSlip`.
  */
 
 const PHASE_WORDS = { repair: 'Reparación', build: 'Construcción' };
@@ -46,10 +47,16 @@ function markProducing(node, asset) {
   node.setAttribute('data-status', 'a producir');
 }
 
+function markFinal(node, asset, src) {
+  node.setAttribute('data-asset', asset);
+  node.setAttribute('data-status', 'final');
+  node.setAttribute('data-src', src);
+}
+
 /**
  * @param {object} options
  * @param {object} options.level Nivel 5 (contrato, título, cliente).
- * @param {object} options.puzzle Puzzle de la fase (goal, intro, sections, examples).
+ * @param {object} options.puzzle Puzzle de la fase (goal, intro, examples).
  * @param {string} options.phase 'repair' | 'build' (o palabra ya traducida).
  */
 export function createLevelScene(options = {}) {
@@ -63,7 +70,7 @@ export function createLevelScene(options = {}) {
 
   const backdrop = make('div', 'counting-backdrop');
   backdrop.setAttribute('aria-hidden', 'true');
-  markProducing(backdrop, 'n5.background');
+  markFinal(backdrop, 'n5.background', 'assets/levels/05/background.webp');
   const light = make('div', 'counting-light');
   light.setAttribute('aria-hidden', 'true');
   const bench = make('div', 'counting-bench');
@@ -79,7 +86,11 @@ export function createLevelScene(options = {}) {
   const body = make('div', 'counting-body');
 
   const benchPlate = make('div', 'counting-bench-plate');
-  markProducing(benchPlate, 'n5.tape, n5.head, n5.drum, n5.pin');
+  markFinal(
+    benchPlate,
+    'n5.tape, n5.head, n5.drum, n5.pin',
+    'assets/levels/05/tape.svg, assets/levels/05/head.webp, assets/levels/05/drum.webp, assets/levels/05/pin.svg',
+  );
   const rivets = make('div', 'plate-rivets');
   rivets.setAttribute('aria-hidden', 'true');
   for (let index = 0; index < 4; index += 1) {
