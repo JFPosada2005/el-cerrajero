@@ -98,7 +98,18 @@ export function createWorkbenchScene(options = {}) {
   const noteEl = make('p', 'wb-note', objective.note || DEFAULT_NOTE);
   const openContract = makeButton({ text: 'Abrir contrato', label: 'Abrir el contrato en papel', doc: 'contract', className: 'wb-btn wb-open-contract' });
   openContract.addEventListener('click', () => call(onOpenDoc, 'contract'));
-  objectiveAside.append(kicker, ruleEl, introEl, noteEl, openContract);
+  // Plegable solo móvil (≤768px): en escritorio queda oculto por CSS y no
+  // cambia la composición. Solo alterna `data-collapsed`; sin lógica.
+  const objectiveToggle = makeButton({ text: 'Plegar', label: 'Plegar o desplegar el objetivo del contrato', className: 'wb-btn wb-objective-toggle' });
+  objectiveToggle.setAttribute('aria-expanded', 'true');
+  objectiveToggle.addEventListener('click', () => {
+    const collapsed = objectiveAside.getAttribute('data-collapsed') === 'true';
+    objectiveAside.setAttribute('data-collapsed', String(!collapsed));
+    objectiveToggle.setAttribute('aria-expanded', String(collapsed));
+    objectiveToggle.textContent = collapsed ? 'Plegar' : 'Desplegar';
+  });
+  objectiveAside.setAttribute('data-collapsed', 'false');
+  objectiveAside.append(kicker, ruleEl, introEl, noteEl, objectiveToggle, openContract);
 
   const stage = make('section', 'wb-stage');
   stage.setAttribute('data-slot', 'stage');
@@ -109,7 +120,16 @@ export function createWorkbenchScene(options = {}) {
   logAside.setAttribute('aria-label', 'Bitácora');
   const logTitle = make('p', 'wb-log-title', 'Bitácora');
   const logList = make('div', 'wb-log-list');
-  logAside.append(logTitle, logList);
+  const logToggle = makeButton({ text: 'Plegar', label: 'Plegar o desplegar la bitácora del caso', className: 'wb-btn wb-log-toggle' });
+  logToggle.setAttribute('aria-expanded', 'true');
+  logToggle.addEventListener('click', () => {
+    const collapsed = logAside.getAttribute('data-collapsed') === 'true';
+    logAside.setAttribute('data-collapsed', String(!collapsed));
+    logToggle.setAttribute('aria-expanded', String(collapsed));
+    logToggle.textContent = collapsed ? 'Plegar' : 'Desplegar';
+  });
+  logAside.setAttribute('data-collapsed', 'false');
+  logAside.append(logTitle, logToggle, logList);
   logAside.hidden = true;
 
   body.append(objectiveAside, stage, logAside);
@@ -140,7 +160,14 @@ export function createWorkbenchScene(options = {}) {
   }
   actions.append(probeButton, assaultButton, contractDoc, hintDoc, logDoc);
 
-  element.append(header, body, status, inventory, actions);
+  // Dock móvil: agrupa inventario + acciones para que el sticky inferior los
+  // muestre juntos sin superponerse. En escritorio usa `display: contents`
+  // (ver CSS) y la composición no cambia. Solo agrupa; sin lógica.
+  const dock = make('div', 'wb-dock');
+  dock.setAttribute('aria-label', 'Inventario y acciones');
+  dock.append(inventory, actions);
+
+  element.append(header, body, status, dock);
 
   function setPhase(nextPhase) {
     phaseBadge.textContent = String(nextPhase);

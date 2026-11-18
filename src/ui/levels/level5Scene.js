@@ -1,13 +1,15 @@
 /**
  * Escena del nivel 5 — Banco Central, sala de recuento.
  *
- * Solo marco y atmósfera: fondo de sala, mesa, cinta de papel perforada con
- * cabezal de latón, tambor tipo caja de música y boleta de depósito.
- * El tambor y la cinta reales los monta el parent en `editorSlot`
- * (editores del taller); esta escena no crea editor, púas, juicio
- * ni lógica, y no toca la protección de la sección "Listo".
+ * Un solo taller: fondo de sala, mesa y una placa con riel de cabezal que
+ * enmarca el editor real. El tambor y la cinta reales los monta el parent
+ * en `editorSlot`; esta escena no crea editor, púas, juicio ni lógica, y
+ * no toca la protección de la sección "Listo".
  *
- * Placeholders CSS/SVG marcados "a producir" (ver `docs/ASSET-MANIFEST.md`):
+ * Sin maquetas de cinta ni de tambor: el riel del cabezal es solo
+ * atmósfera (sin casillas ni púas) para no duplicar el mecanismo real.
+ *
+ * Placeholders CSS/DOM marcados "a producir" (ver `docs/ASSET-MANIFEST.md`):
  * n5.background, n5.tape, n5.head, n5.drum, n5.pin, n5.depositSlip.
  */
 
@@ -70,50 +72,26 @@ export function createLevelScene(options = {}) {
   const plate = make('p', 'counting-plate', 'Caja 05 · N.º 0501');
   head.append(kicker, title, phaseBadge, plate);
 
-  const tapeFrame = make('div', 'counting-tape-frame');
-  markProducing(tapeFrame, 'n5.tape, n5.head');
-  const tapeCaption = make(
-    'p',
-    'frame-caption',
-    'Cinta de papel perforada y cabezal de latón (marco; el mecanismo real lo monta el taller).',
-  );
-  const tapeMock = make('div', 'tape-mock');
-  tapeMock.setAttribute('aria-hidden', 'true');
-  for (let index = 0; index < 7; index += 1) {
-    const cell = make('span', index === 3 ? 'tape-mock-cell is-head' : 'tape-mock-cell');
-    cell.append(make('i', 'tape-mock-hole'));
-    tapeMock.append(cell);
-  }
-  tapeMock.append(make('span', 'tape-mock-head'));
-  tapeFrame.append(tapeCaption, tapeMock);
+  const body = make('div', 'counting-body');
 
-  const cabinet = make('div', 'counting-cabinet');
-
-  const drumFrame = make('div', 'counting-drum-frame');
-  markProducing(drumFrame, 'n5.drum, n5.pin');
-  const drumCaption = make(
+  const benchPlate = make('div', 'counting-bench-plate');
+  markProducing(benchPlate, 'n5.tape, n5.head, n5.drum, n5.pin');
+  const rail = make('div', 'plate-rail');
+  rail.setAttribute('aria-hidden', 'true');
+  rail.append(make('span', 'plate-rail-notch'));
+  const plateCaption = make(
     'p',
-    'frame-caption',
-    'Tambor tipo caja de música (marco; las púas reales las pone el taller).',
+    'plate-caption',
+    'El tambor y la cinta del taller trabajan sobre esta placa.',
   );
-  const drumMock = make('div', 'drum-mock');
-  drumMock.setAttribute('aria-hidden', 'true');
-  const sections = Array.isArray(puzzle.sections) ? puzzle.sections : [];
-  const rings = sections.length > 0 ? sections : [{ id: 'ring', label: 'Anillo' }];
-  for (const section of rings) {
-    const ring = make('div', 'drum-mock-ring');
-    ring.append(make('span', 'drum-mock-pin'));
-    ring.append(make('span', 'drum-mock-pin'));
-    ring.append(make('span', 'drum-mock-pin'));
-    drumMock.append(ring);
-  }
-  drumFrame.append(drumCaption, drumMock);
 
   const editorSlot = make('div', 'counting-editor');
   editorSlot.setAttribute('data-slot', 'editor');
   editorSlot.setAttribute('aria-label', 'Tambor y cinta del taller');
 
-  cabinet.append(drumFrame, editorSlot);
+  benchPlate.append(rail, plateCaption, editorSlot);
+
+  const side = make('div', 'counting-side');
 
   const slip = make('aside', 'counting-slip');
   slip.setAttribute('aria-label', 'Boleta de depósito');
@@ -134,7 +112,10 @@ export function createLevelScene(options = {}) {
   statusSlot.setAttribute('data-slot', 'status');
   statusSlot.setAttribute('aria-label', 'Contador del mecanismo');
 
-  element.append(backdrop, bench, head, tapeFrame, cabinet, slip, statusSlot);
+  side.append(slip, statusSlot);
+  body.append(benchPlate, side);
+
+  element.append(backdrop, bench, head, body);
 
   function setPhase(next) {
     phaseBadge.textContent = PHASE_WORDS[next] ?? String(next);

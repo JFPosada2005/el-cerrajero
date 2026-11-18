@@ -1,4 +1,9 @@
-/* Nivel 5 — Banco Central, sala de recuento. Alcance estricto a la escena. */
+/* Nivel 5 — Banco Central, sala de recuento. Alcance estricto a la escena.
+ * Un solo taller: la placa enmarca el editor real (#tape-panel y #drum
+ * que monta el parent). Sin maquetas de cinta ni de tambor. El alto queda
+ * limitado al marco del wb-stage: la escena no desplaza la página; si el
+ * tambor crece, el desplazamiento vive dentro de .counting-editor.
+ */
 
 .level-scene[data-level="5"] {
   --counting-ink: var(--ink, #f2ede3);
@@ -6,9 +11,14 @@
   --counting-teal: var(--teal, #38c6b8);
   --counting-paper: #f4ecd9;
   position: relative;
+  box-sizing: border-box;
   display: grid;
-  gap: 16px;
-  padding: 24px;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  padding: 14px 16px;
   overflow: hidden;
   border: 1px solid var(--line, #2a3646);
   border-radius: 12px;
@@ -30,18 +40,23 @@
 .level-scene[data-level="5"] .counting-bench {
   position: absolute;
   inset: auto 0 0 0;
-  height: 120px;
+  height: 96px;
   background: linear-gradient(180deg, #6b4a2c 0%, #463019 100%);
   border-top: 2px solid rgba(212, 167, 44, 0.5);
   pointer-events: none;
 }
 
 .level-scene[data-level="5"] .counting-head,
-.level-scene[data-level="5"] .counting-tape-frame,
-.level-scene[data-level="5"] .counting-cabinet,
-.level-scene[data-level="5"] .counting-slip,
-.level-scene[data-level="5"] .counting-status {
+.level-scene[data-level="5"] .counting-body {
   position: relative;
+  min-width: 0;
+}
+
+.level-scene[data-level="5"] .counting-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
 }
 
 .level-scene[data-level="5"] .counting-kicker {
@@ -51,122 +66,102 @@
 }
 
 .level-scene[data-level="5"] .counting-title {
-  margin: 4px 0;
-  font-size: 22px;
+  margin: 0;
+  font-size: 20px;
   line-height: 1.2;
 }
 
 .level-scene[data-level="5"] .counting-phase {
   display: inline-block;
-  margin: 0 8px 0 0;
+  margin: 0 0 0 auto;
   padding: 8px 12px;
   border: 1px solid var(--counting-brass);
   border-radius: 999px;
   font-size: 14px;
+  line-height: 1;
 }
 
 .level-scene[data-level="5"] .counting-plate {
-  margin: 8px 0 0;
+  flex-basis: 100%;
+  margin: 0;
   font-size: 12px;
   opacity: 0.85;
 }
 
-.level-scene[data-level="5"] .counting-tape-frame,
-.level-scene[data-level="5"] .counting-drum-frame {
+/* --- Cuerpo: placa del editor + costado (boleta y contador) --- */
+.level-scene[data-level="5"] .counting-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 260px;
+  gap: 12px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* --- Placa única del taller: riel de cabezal + editor real --- */
+.level-scene[data-level="5"] .counting-bench-plate {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(212, 167, 44, 0.55);
   border-radius: 12px;
-  padding: 16px;
+  padding: 10px 12px;
   background: rgba(11, 15, 20, 0.55);
 }
 
-.level-scene[data-level="5"] .frame-caption {
-  margin: 0 0 12px;
-  font-size: 14px;
-  line-height: 1.5;
+.level-scene[data-level="5"] .plate-rail {
+  position: relative;
+  flex: none;
+  height: 14px;
+  border-radius: 7px;
+  background: linear-gradient(180deg, #f0cf6a 0%, #7a5a12 60%, #4a380c 100%);
+}
+
+.level-scene[data-level="5"] .plate-rail-notch {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  width: 26px;
+  height: 22px;
+  transform: translateX(-50%);
+  border: 2px solid var(--counting-teal);
+  border-radius: 4px;
+  background: rgba(11, 15, 20, 0.35);
+}
+
+.level-scene[data-level="5"] .plate-caption {
+  flex: none;
+  margin: 8px 0;
+  font-size: 13px;
+  line-height: 1.4;
   opacity: 0.9;
 }
 
-.level-scene[data-level="5"] .tape-mock {
-  position: relative;
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: 8px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: var(--counting-paper);
-}
-
-.level-scene[data-level="5"] .tape-mock-cell {
-  display: flex;
-  min-height: 44px;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed rgba(23, 19, 10, 0.4);
-  border-radius: 4px;
-}
-
-.level-scene[data-level="5"] .tape-mock-cell.is-head {
-  border: 2px solid var(--counting-teal);
-}
-
-.level-scene[data-level="5"] .tape-mock-hole {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: rgba(23, 19, 10, 0.55);
-}
-
-.level-scene[data-level="5"] .tape-mock-head {
-  position: absolute;
-  top: -10px;
-  left: 50%;
-  width: 24px;
-  height: 16px;
-  transform: translateX(-50%);
-  border-radius: 4px 4px 0 0;
-  background: linear-gradient(180deg, #f0cf6a, #7a5a12);
-}
-
-.level-scene[data-level="5"] .counting-cabinet {
-  display: grid;
-  gap: 16px;
-  grid-template-columns: minmax(0, 5fr) minmax(0, 7fr);
-}
-
-.level-scene[data-level="5"] .drum-mock {
-  display: grid;
-  gap: 8px;
-}
-
-.level-scene[data-level="5"] .drum-mock-ring {
-  display: flex;
-  gap: 12px;
-  align-items: center;
-  min-height: 44px;
-  padding: 8px 12px;
-  border: 1px solid rgba(212, 167, 44, 0.4);
-  border-radius: 999px;
-  background: rgba(242, 237, 227, 0.04);
-}
-
-.level-scene[data-level="5"] .drum-mock-pin {
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #f0cf6a, #7a5a12 70%);
-}
-
+/* El editor real vive aquí; su desborde nunca sale de la placa. */
 .level-scene[data-level="5"] .counting-editor {
-  min-height: 220px;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
   border: 1px dashed rgba(242, 237, 227, 0.4);
   border-radius: 12px;
-  padding: 16px;
+  padding: 12px;
   background: rgba(20, 27, 36, 0.6);
 }
 
+/* --- Costado: boleta de depósito + contador --- */
+.level-scene[data-level="5"] .counting-side {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+}
+
 .level-scene[data-level="5"] .counting-slip {
-  max-width: 420px;
-  padding: 16px;
+  flex: none;
+  padding: 12px 14px;
   border-radius: 4px;
   background: var(--counting-paper);
   color: #17130a;
@@ -193,10 +188,109 @@
 }
 
 .level-scene[data-level="5"] .counting-status {
+  flex: none;
   min-height: 44px;
   border-top: 1px solid var(--line, #2a3646);
-  padding-top: 12px;
+  padding-top: 10px;
   font-size: 14px;
+}
+
+/* --- Integración del editor real en la placa (solo presentación) --- */
+.level-scene[data-level="5"] #tape-panel {
+  min-width: 0;
+  margin-bottom: 10px;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-section {
+  margin: 0 0 6px;
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--counting-brass);
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cells {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cell,
+.level-scene[data-level="5"] .tape-cell {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cell {
+  border-color: rgba(212, 167, 44, 0.55);
+  background: rgba(244, 236, 217, 0.08);
+}
+
+.level-scene[data-level="5"] #tape-panel .tape-cell.is-head {
+  border: 2px solid var(--counting-teal);
+  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.35);
+}
+
+.level-scene[data-level="5"] #drum {
+  min-width: 0;
+}
+
+.level-scene[data-level="5"] #drum .drum {
+  gap: 8px;
+}
+
+.level-scene[data-level="5"] #drum .drum-section,
+.level-scene[data-level="5"] .drum-section {
+  border-color: rgba(212, 167, 44, 0.45);
+  background: rgba(242, 237, 227, 0.04);
+}
+
+.level-scene[data-level="5"] #drum .drum-section.is-lit {
+  border-color: var(--counting-teal);
+  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.35);
+}
+
+.level-scene[data-level="5"] #drum .drum-pins {
+  gap: 8px;
+}
+
+.level-scene[data-level="5"] #drum .drum-pin,
+.level-scene[data-level="5"] .drum-pin {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="5"] #drum .drum-pin {
+  border-color: rgba(212, 167, 44, 0.45);
+  background: rgba(20, 27, 36, 0.85);
+  color: var(--counting-ink);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin:hover {
+  border-color: var(--counting-brass);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin.is-lit {
+  border-color: var(--counting-teal);
+  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.45);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin.is-final {
+  opacity: 0.75;
+  cursor: not-allowed;
+}
+
+.level-scene[data-level="5"] #drum .pin-editor {
+  border-color: rgba(212, 167, 44, 0.55);
+  background: rgba(20, 27, 36, 0.9);
+}
+
+.level-scene[data-level="5"] #drum .pin-choice {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+.level-scene[data-level="5"] #drum .pin-choice.is-selected {
+  border-color: var(--counting-teal);
 }
 
 .level-scene[data-level="5"] button {
@@ -210,8 +304,28 @@
 }
 
 @media (max-width: 900px) {
-  .level-scene[data-level="5"] .counting-cabinet {
+  .level-scene[data-level="5"] {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+
+  .level-scene[data-level="5"] .counting-title {
+    font-size: 18px;
+  }
+
+  .level-scene[data-level="5"] .counting-body {
     grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+
+  .level-scene[data-level="5"] .counting-side {
+    max-height: 32%;
+    border-top: 1px solid rgba(212, 167, 44, 0.35);
+    padding-top: 8px;
+  }
+
+  .level-scene[data-level="5"] .counting-slip {
+    transform: none;
   }
 }
 

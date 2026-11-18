@@ -321,6 +321,110 @@ test('botones reales, con foco posible y sin trampas de foco', () => {
   }
 });
 
+test('el objetivo se puede plegar y desplegar sin romper callbacks', () => {
+  const { scene, calls } = setup();
+  const aside = findOne(scene.element, (n) => classes(n).includes('wb-objective'));
+  const toggle = findOne(aside, (n) => classes(n).includes('wb-objective-toggle'));
+  assert.equal(toggle.tag, 'button');
+  assert.equal(toggle.type, 'button');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true');
+  assert.equal(aside.getAttribute('data-collapsed'), 'false');
+  assert.ok(toggle.getAttribute('aria-label'), 'el plegable tiene etiqueta accesible');
+
+  click(toggle);
+  assert.equal(aside.getAttribute('data-collapsed'), 'true');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+  assert.equal(toggle.textContent, 'Desplegar');
+  click(toggle);
+  assert.equal(aside.getAttribute('data-collapsed'), 'false');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true');
+  assert.equal(toggle.textContent, 'Plegar');
+
+  // Los callbacks del shell siguen intactos tras plegar.
+  click(findOne(scene.element, (n) => n.attributes['data-action'] === 'probe'));
+  click(findOne(scene.element, (n) => n.attributes['data-action'] === 'assault'));
+  assert.deepEqual([calls.probe, calls.assault], [1, 1]);
+  const trapped = findAll(scene.element, (n) => n.listenerTypes().some((type) => type !== 'click'));
+  assert.equal(trapped.length, 0, 'el plegable solo escucha click');
+});
+
+test('la bitácora se puede plegar y conserva mostrar/ocultar por contenido', () => {
+  const { scene } = setup();
+  const logAside = findOne(scene.element, (n) => classes(n).includes('wb-log'));
+  const toggle = findOne(logAside, (n) => classes(n).includes('wb-log-toggle'));
+  assert.equal(toggle.tag, 'button');
+  assert.equal(toggle.type, 'button');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'true');
+  assert.equal(logAside.hidden, true);
+
+  scene.addLog('Pulso inicial');
+  assert.equal(logAside.hidden, false);
+  click(toggle);
+  assert.equal(logAside.getAttribute('data-collapsed'), 'true');
+  assert.equal(toggle.getAttribute('aria-expanded'), 'false');
+  assert.equal(logAside.hidden, false, 'plegar no vacía la bitácora');
+  click(toggle);
+  assert.equal(logAside.getAttribute('data-collapsed'), 'false');
+  assert.equal(scene.slots.log.children.length, 1);
+  scene.clearLog();
+  assert.equal(logAside.hidden, true);
+});
+
+test('el dock agrupa inventario y acciones sin romper slots', () => {
+  const { scene } = setup();
+  const dock = findOne(scene.element, (n) => classes(n).includes('wb-dock'));
+  assert.equal(dock.tag, 'div');
+  assert.deepEqual(
+    dock.children,
+    [scene.slots.inventory, scene.slots.actions],
+    'el dock contiene inventario y luego acciones, en ese orden',
+  );
+  assert.strictEqual(scene.slots.inventory.tag, 'footer');
+  const bar = findOne(scene.element, (n) => classes(n).includes('wb-actions'));
+  assert.strictEqual(bar, scene.slots.actions);
+});
+
+test('el css móvil (≤768px) fija el dock, compacta inventario y pliega papeles', () => {
+  const mobileAt = css.indexOf('max-width: 768px');
+  assert.ok(mobileAt > 0, 'hay un bloque móvil a 768px');
+  const after = css.slice(mobileAt);
+  const dockAt = after.indexOf('.wb-dock');
+  assert.ok(dockAt > 0, 'el dock tiene reglas móviles');
+  assert.ok(after.slice(dockAt, dockAt + 400).includes('position: sticky'), 'el dock queda fijo abajo en móvil');
+  assert.ok(!/\.wb-actions\s*\{[^}]*position:\s*sticky/.test(after), 'las acciones ya no son sticky por separado: el dock las lleva');
+  assert.ok(after.includes('.wb-inventory'), 'el inventario tiene reglas móviles');
+  assert.ok(after.includes('overflow-x: auto'), 'el inventario usa scroll interno');
+  assert.ok(after.includes('.wb-stage'), 'el escenario tiene reglas móviles');
+  assert.ok(after.includes('overflow: auto'), 'el escenario usa scroll interno');
+  assert.ok(after.includes('data-collapsed'), 'los papeles se pliegan en móvil');
+  assert.ok(after.includes('scroll-margin-bottom'), 'el foco no queda tapado por la barra fija');
+  assert.ok(after.includes('safe-area-inset-bottom'), 'respeta el área segura');
+  assert.ok(after.includes('overflow-x: clip'), 'sin scroll horizontal de página');
+  assert.ok(after.includes('flex-wrap: wrap'), 'la cabecera y las acciones envuelven a 320px');
+});
+
+test('el dock no cambia el escritorio: display contents en base', () => {
+  const base = css.slice(0, css.indexOf('max-width: 768px'));
+  const dockAt = base.indexOf('.wb-dock');
+  assert.ok(dockAt > 0, 'el dock existe en base');
+  assert.ok(base.slice(dockAt, dockAt + 200).includes('display: contents'), 'en escritorio el dock desaparece del layout');
+});
+
+test('los plegables no cambian el escritorio: ocultos por defecto', () => {
+  const base = css.slice(0, css.indexOf('max-width: 768px'));
+  assert.ok(base.includes('.wb-objective-toggle'), 'el plegable del objetivo existe en base');
+  assert.ok(base.includes('.wb-log-toggle'), 'el plegable de la bitácora existe en base');
+  assert.ok(base.includes('display: none'), 'los plegables están ocultos en escritorio');
+});
+
+test('el escritorio (≥900px) conserva su composición', () => {
+  const desktopAt = css.indexOf('(min-width: 900px)');
+  assert.ok(desktopAt > 0, 'el bloque de escritorio sigue existiendo');
+  const desktop = css.slice(desktopAt);
+  assert.ok(desktop.includes('.wb-log'), 'la bitácora de escritorio sigue gobernada');
+  assert.ok(desktop.includes('display: none !important'), 'la bitácora de escritorio sigue oculta');
+  assert.ok(desktop.includes('clamp(380px'), 'el escenario de escritorio conserva su altura');
+});
 test('el css usa alcance propio, foco visible y movimiento reducido', () => {
   assert.ok(css.includes('.wb-stage'), 'expone el contenedor de escena');
   assert.ok(css.includes(':focus-visible'), 'foco visible');

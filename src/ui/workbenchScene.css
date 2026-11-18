@@ -160,6 +160,19 @@
   outline-offset: 2px;
 }
 
+/* --- Plegables: ocultos en escritorio para no cambiar la composición;
+ * solo se muestran en móvil (≤768px). No tocan lógica ni callbacks. --- */
+.wb-scene .wb-objective-toggle,
+.wb-scene .wb-log-toggle {
+  display: none;
+}
+
+/* --- Dock de inventario + acciones: en escritorio desaparece del layout
+ * (`display: contents`) y la composición queda idéntica a la anterior. --- */
+.wb-scene .wb-dock {
+  display: contents;
+}
+
 /* --- Body --- */
 .wb-scene .wb-body {
   display: grid;
@@ -370,6 +383,148 @@
   }
 }
 
+/* --- Móvil ≤768px: taller primero, acciones fijas abajo, papeles plegables ---
+ * Solo afecta a pantallas angostas; a 1440×900 no cambia nada. */
+@media (max-width: 768px) {
+  .wb-scene {
+    max-width: 100%;
+    overflow-x: clip;
+    padding: 8px 8px calc(8px + env(safe-area-inset-bottom, 0px));
+    gap: 8px;
+  }
+
+  /* Cabecera en dos filas que no desborda a 320px. */
+  .wb-scene .wb-header {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .wb-scene .wb-heading {
+    flex: 1 1 100%;
+    order: -1;
+    justify-content: flex-start;
+    min-width: 0;
+  }
+
+  .wb-scene .wb-contract {
+    white-space: normal;
+  }
+
+  .wb-scene .wb-title {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: clip;
+    overflow-wrap: anywhere;
+  }
+
+  .wb-scene .wb-body {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .wb-scene .wb-body > * {
+    min-width: 0;
+  }
+
+  /* El mecanismo va primero y su desborde queda con scroll interno. */
+  .wb-scene .wb-stage {
+    order: -1;
+    min-height: 240px;
+    max-height: 62vh;
+    max-height: 62svh;
+    overflow: auto;
+  }
+
+  .wb-scene .wb-stage:empty::after {
+    min-height: 240px;
+  }
+
+  /* Papeles plegables: el botón solo existe en móvil. */
+  .wb-scene .wb-objective-toggle,
+  .wb-scene .wb-log-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    margin-top: 8px;
+  }
+
+  .wb-scene .wb-objective[data-collapsed="true"] .wb-rule,
+  .wb-scene .wb-objective[data-collapsed="true"] .wb-intro,
+  .wb-scene .wb-objective[data-collapsed="true"] .wb-note {
+    display: none;
+  }
+
+  .wb-scene .wb-log[data-collapsed="true"] .wb-log-list {
+    display: none;
+  }
+
+  /* Inventario compacto con scroll interno, sin empujar la página. */
+  .wb-scene .wb-inventory {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    gap: 8px;
+    min-height: 48px;
+    padding: 8px;
+  }
+
+  .wb-scene .wb-inventory > * {
+    flex: 0 0 auto;
+  }
+
+  /* Dock sticky común: inventario y acciones quedan visibles juntos,
+   * sin superponerse, fijos abajo con el área segura. */
+  .wb-scene .wb-dock {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    position: sticky;
+    bottom: 0;
+    z-index: 20;
+    padding: 8px;
+    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    background: rgba(11, 15, 20, 0.96);
+    border: 1px solid #3a4a5e;
+    border-radius: 12px;
+  }
+
+  .wb-scene .wb-actions {
+    position: static;
+    z-index: auto;
+    flex-wrap: wrap;
+    padding: 0;
+    background: none;
+    border: 0;
+    border-radius: 0;
+  }
+
+  .wb-scene .wb-actions .wb-btn {
+    flex: 1 1 auto;
+  }
+
+  .wb-scene .wb-rule,
+  .wb-scene .wb-intro,
+  .wb-scene .wb-note,
+  .wb-scene .wb-log-entry,
+  .wb-scene .wb-status {
+    overflow-wrap: anywhere;
+  }
+
+  /* El foco nunca queda tapado por la barra fija. */
+  .wb-scene .wb-stage,
+  .wb-scene .wb-objective,
+  .wb-scene .wb-log,
+  .wb-scene .wb-status,
+  .wb-scene .wb-inventory,
+  .wb-scene button,
+  .wb-scene [tabindex] {
+    scroll-margin-top: 8px;
+    scroll-margin-bottom: 128px;
+  }
+}
+
 /* --- Movimiento reducido --- */
 @media (prefers-reduced-motion: reduce) {
   .wb-scene .wb-btn {
@@ -378,6 +533,14 @@
 
   .wb-scene .wb-btn:active {
     transform: none;
+  }
+
+  .wb-scene *,
+  .wb-scene *::before,
+  .wb-scene *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
   }
 }
 
@@ -391,7 +554,7 @@
   }
 
   .wb-scene .wb-stage {
-    height: clamp(380px, calc(100vh - 355px), 580px);
+    height: clamp(380px, calc(100vh - 376px), 580px);
     min-height: 0;
   }
 }

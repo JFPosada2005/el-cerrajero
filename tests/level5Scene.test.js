@@ -124,6 +124,42 @@ test('la escena no crea el editor real', () => {
   }
 });
 
+test('un solo taller: sin cinta ni tambor decorativos duplicados', () => {
+  const scene = setup();
+  for (const mock of ['tape-mock', 'tape-mock-cell', 'tape-mock-hole', 'tape-mock-head', 'drum-mock', 'drum-mock-ring', 'drum-mock-pin']) {
+    assert.equal(
+      findAll(scene.element, (node) => classes(node).includes(mock)).length,
+      0,
+      `sin nodos .${mock}`,
+    );
+  }
+  for (const frame of ['counting-tape-frame', 'counting-drum-frame', 'counting-cabinet']) {
+    assert.equal(
+      findAll(scene.element, (node) => classes(node).includes(frame)).length,
+      0,
+      `sin marco duplicado .${frame}`,
+    );
+  }
+});
+
+test('la placa enmarca el editor real y conserva los marcadores de producción', () => {
+  const scene = setup();
+  const plate = findAll(scene.element, (node) => classes(node).includes('counting-bench-plate'))[0];
+  assert.ok(plate, 'hay una sola placa de taller');
+  assert.ok(findAll(plate, (node) => node === scene.editorSlot).length === 1, 'el editor real vive dentro de la placa');
+  for (const slot of ['n5.tape', 'n5.head', 'n5.drum', 'n5.pin']) {
+    assert.ok(String(plate.getAttribute('data-asset')).includes(slot), `la placa cubre ${slot}`);
+  }
+  const rail = findAll(scene.element, (node) => classes(node).includes('plate-rail'))[0];
+  assert.ok(rail, 'el riel del cabezal es atmósfera');
+  assert.equal(rail.getAttribute('aria-hidden'), 'true', 'el riel queda fuera del lector');
+  assert.equal(
+    findAll(rail, (node) => ['tape-mock-cell', 'drum-mock-pin', 'drum-pin', 'tape-cell'].some((banned) => classes(node).includes(banned))).length,
+    0,
+    'el riel no trae casillas ni púas',
+  );
+});
+
 test('placeholders marcados a producir', () => {
   const scene = setup();
   const marked = findAll(scene.element, (node) => node.getAttribute('data-status') === 'a producir');
@@ -177,4 +213,13 @@ test('css con alcance, 44px, foco y movimiento reducido, sin imágenes externas'
   assert.ok(css.includes(':focus-visible'), 'foco visible');
   assert.ok(css.includes('prefers-reduced-motion'), 'respeta movimiento reducido');
   assert.ok(!css.includes('url('), 'placeholders CSS, sin imágenes externas');
+});
+
+test('css integra el editor real en la placa y limita el alto al marco', () => {
+  for (const selector of ['#tape-panel', '#drum', '.drum-section', '.drum-pin', '.tape-cell']) {
+    assert.ok(css.includes(selector), `la placa integra ${selector}`);
+  }
+  assert.ok(css.includes('.counting-editor'), 'el editor real tiene marco propio');
+  assert.ok(css.includes('overflow'), 'el desborde queda contenido');
+  assert.ok(css.includes('max-height: 100%'), 'la escena no supera el marco del taller');
 });

@@ -1010,6 +1010,8 @@ function renderDrumScene() {
   const levelScene = createLevel5Scene({ level: state.level, puzzle: state.puzzle, phase: state.phase });
   app.replaceChildren(scene.element);
   scene.slots.stage.append(levelScene.element);
+  scene.slots.inventory.hidden = true;
+  scene.slots.inventory.style.display = 'none';
   const tapeRoot = document.createElement('div');
   tapeRoot.id = 'tape-panel';
   const drumRoot = document.createElement('div');
