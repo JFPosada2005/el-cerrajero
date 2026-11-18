@@ -50,6 +50,17 @@ Tarea CSS-only, alcance `.wb-scene`:
 - 44 px, foco visible, `prefers-reduced-motion`, sin imágenes externas fuera de `mockups/nivel-1-taller/assets/`.
 - Tests estáticos: selectores con alcance, assets existentes, targets ≥44 px, sin resets globales.
 
+## Unidad C — Carretes de llave (aprobado 2026-11-17)
+
+El inventario deja de mostrar cuatro llaves y pasa a mostrar **cuatro carretes de cable**, uno por símbolo:
+
+- carrete dorado = `1`;
+- carrete teal = `2`;
+- carrete coral = `3`;
+- carrete violeta = `4`.
+
+El carrete activo es la herramienta; el número sigue visible y el cable conserva el color. Las llaves quedan solo como símbolo en contrato/pista. Se reutiliza `mockups/nivel-1-taller/assets/sprites/carrete-cobre.png` teñido por CSS; no se agregan assets pesados.
+
 ## Integración del parent
 
 1. Importar `decorateGraph` y llamarlo después de `createGraphEditor`.
