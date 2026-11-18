@@ -49,6 +49,12 @@ function makeButton({ text, label, action, doc, className }) {
  * @param {string} options.phase Etiqueta de fase ('Reparación' | 'Construcción').
  * @param {{ rule: string, intro: string, note?: string }} options.objective Textos exactos del puzzle.
  * @param {boolean} options.soundEnabled Estado inicial del sonido.
+ * @param {boolean} options.diegeticActions Cuando es true, la escena del nivel
+ *   aporta sus propios props accionables (`data-action`) y la barra del shell
+ *   se retira (modo diegético del N1).
+ * @param {boolean} options.immersive Cuando es true, la escena ocupa toda la
+ *   ventana: fondo a pantalla completa, sin panel de objetivo ni bitácora,
+ *   header flotante y estado como línea sobre la mesa (corrección §9).
  * @param {object} options.handlers onBack, onProbe, onAssault, onOpenDoc(kind), onToggleSound.
  */
 export function createWorkbenchScene(options = {}) {
@@ -58,6 +64,8 @@ export function createWorkbenchScene(options = {}) {
     phase = 'Reparación',
     objective = {},
     soundEnabled = false,
+    diegeticActions = false,
+    immersive = false,
     handlers = {},
   } = options;
   const { onBack, onProbe, onAssault, onOpenDoc, onToggleSound } = handlers;
@@ -70,6 +78,12 @@ export function createWorkbenchScene(options = {}) {
 
   const element = make('section', 'wb-scene');
   element.setAttribute('aria-label', 'Taller del cerrajero');
+  if (diegeticActions === true) {
+    element.className += ' is-diegetic';
+  }
+  if (immersive === true) {
+    element.className += ' is-immersive';
+  }
 
   // --- Header ---
   const header = make('header', 'wb-header');

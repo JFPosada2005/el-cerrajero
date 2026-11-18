@@ -8,6 +8,8 @@ import { createWorkbenchScene } from '../src/ui/workbenchScene.js';
 const here = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(join(here, '..', 'src', 'ui', 'workbenchScene.js'), 'utf8');
 const css = readFileSync(join(here, '..', 'src', 'ui', 'workbenchScene.css'), 'utf8');
+const modalCss = readFileSync(join(here, '..', 'src', 'ui', 'paperModal.css'), 'utf8');
+const mainSource = readFileSync(join(here, '..', 'src', 'main.js'), 'utf8');
 
 // --- DOM falso mínimo (solo document.createElement + textContent) ---
 function element(tag) {
@@ -464,4 +466,166 @@ test('el css usa alcance propio, foco visible y movimiento reducido', () => {
     return value.endsWith('px') && Number.isFinite(px) && px < 12;
   });
   assert.deepEqual(tooSmall, [], 'ningún font-size bajo 12 px');
+});
+
+test('diegeticActions suma is-diegetic y retira la barra de acciones', () => {
+  const { scene } = setup({ diegeticActions: true });
+  assert.ok(classes(scene.element).includes('is-diegetic'), 'la raíz marca el modo diegético');
+  assert.ok(classes(scene.element).includes('wb-scene'), 'conserva la clase del shell');
+  const plain = setup().scene;
+  assert.ok(!classes(plain.element).includes('is-diegetic'), 'sin la opción no hay marca');
+  const barAt = css.indexOf('.wb-scene.is-diegetic .wb-actions');
+  assert.ok(barAt > 0, 'hay regla diegética para la barra');
+  assert.ok(css.slice(barAt, barAt + 120).includes('display: none'), 'la barra se oculta en modo diegético');
+  const bar = findOne(scene.element, (n) => classes(n).includes('wb-actions'));
+  assert.strictEqual(bar, scene.slots.actions, 'el slot de acciones sigue expuesto para el parent');
+});
+
+test('en modo diegético el contrato de papel reemplaza al botón del objetivo', () => {
+  const { scene } = setup({ diegeticActions: true });
+  const open = findOne(scene.element, (n) => classes(n).includes('wb-open-contract'));
+  assert.equal(open.tag, 'button', 'el botón sigue en el DOM');
+  const at = css.indexOf('.wb-scene.is-diegetic .wb-open-contract');
+  assert.ok(at > 0, 'el CSS oculta Abrir contrato en modo diegético');
+  assert.ok(css.slice(at, at + 120).includes('display: none'), 'display none para el botón del objetivo');
+  const aside = findOne(scene.element, (n) => classes(n).includes('wb-objective'));
+  assert.equal(findOne(aside, (n) => classes(n).includes('wb-rule')).textContent, 'Abre solo con 1 · 2 · 3.');
+  assert.equal(findOne(aside, (n) => classes(n).includes('wb-intro')).textContent, 'El taller huele a aceite.');
+});
+
+test('la franja de estado se lee sobre el fondo oscuro', () => {
+  assert.ok(css.includes('rgba(242, 237, 227, 0.92)'), 'tinta clara del taller a opacidad 0.92');
+  const statusAt = css.indexOf('.wb-scene .wb-status');
+  assert.ok(statusAt > 0, 'la franja de estado tiene reglas propias');
+  assert.ok(/\.wb-scene \.wb-status[\s\S]{0,600}font-size:\s*1[4-9]px/.test(css), 'estado con piso de 14 px');
+  assert.ok(css.includes('border-bottom: 2px solid rgba(212, 167, 44, 0.65)'), 'línea grabada de latón');
+  assert.ok(css.includes('.wb-scene .active-key'), 'la llave activa comparte el piso');
+  assert.ok(css.includes('.wb-scene .legend'), 'la leyenda comparte el piso');
+});
+
+test('immersive agrega is-immersive y libera la ventana', () => {
+  const { scene } = setup({ immersive: true });
+  assert.ok(classes(scene.element).includes('is-immersive'), 'la raíz marca el modo inmersivo');
+  assert.ok(!classes(setup().scene.element).includes('is-immersive'), 'sin la opción no hay marca');
+  const rootAt = css.indexOf('.wb-scene.is-immersive {');
+  assert.ok(rootAt > 0, 'hay reglas inmersivas');
+  const root = css.slice(rootAt, css.indexOf('}', rootAt));
+  assert.ok(root.includes('height: 100dvh'), 'toda la ventana');
+  assert.ok(root.includes('overflow: hidden'), 'sin scroll de página');
+});
+
+test('en inmersivo no hay panel de objetivo ni bitácora', () => {
+  for (const slot of ['.wb-objective', '.wb-log']) {
+    const at = css.indexOf(`.wb-scene.is-immersive ${slot}`);
+    assert.ok(at > 0, `${slot} tiene regla inmersiva`);
+    assert.ok(css.slice(at, at + 160).includes('display: none'), `${slot} se retira`);
+  }
+  const bodyAt = css.indexOf('.wb-scene.is-immersive .wb-body');
+  assert.ok(bodyAt > 0, 'el body colapsa a una columna');
+  assert.ok(css.slice(bodyAt, bodyAt + 120).includes('height: 100%'), 'el body cede todo el alto al stage');
+});
+
+test('el stage inmersivo no tiene marco y el header flota', () => {
+  const stageAt = css.indexOf('.wb-scene.is-immersive .wb-stage');
+  assert.ok(stageAt > 0, 'el stage tiene reglas inmersivas');
+  const stage = css.slice(stageAt, stageAt + 420);
+  assert.ok(stage.includes('position: absolute'), 'el stage cubre la ventana');
+  assert.ok(stage.includes('top: var(--wb-header-h)'), 'el stage arranca debajo del header');
+  assert.ok(stage.includes('height: calc(100dvh - var(--wb-header-h))'), 'sin scroll de página');
+  assert.ok(stage.includes('z-index: 0'), 'atrapado bajo el header');
+  assert.ok(stage.includes('border: 0'), 'sin borde de caja');
+  assert.ok(stage.includes('background: none'), 'el fondo lo pone la escena');
+  const headerAt = css.indexOf('.wb-scene.is-immersive .wb-header');
+  assert.ok(headerAt > 0, 'el header tiene reglas inmersivas');
+  const header = css.slice(headerAt, headerAt + 260);
+  assert.ok(header.includes('position: absolute'), 'el header flota');
+  assert.ok(header.includes('top: 0'), 'arriba');
+  assert.ok(header.includes('z-index: 50'), 'siempre por encima de la escena');
+  assert.ok(header.includes('linear-gradient'), 'degradado tenue para legibilidad');
+});
+
+test('el alto del header es variable: 84px escritorio, 113px móvil', () => {
+  const rootAt = css.indexOf('.wb-scene.is-immersive {');
+  assert.ok(rootAt > 0, 'la raíz inmersiva declara la variable');
+  assert.ok(css.slice(rootAt, css.indexOf('}', rootAt)).includes('--wb-header-h: 84px'), 'escritorio 84px');
+  const mobile = css.slice(css.indexOf('max-width: 768px'));
+  const mobileAt = mobile.indexOf('.wb-scene.is-immersive {');
+  assert.ok(mobileAt > 0, 'el móvil ajusta la variable');
+  assert.ok(mobile.slice(mobileAt, mobile.indexOf('}', mobileAt)).includes('--wb-header-h: 113px'), 'móvil 113px');
+});
+
+test('main.js engancha los selectores de pila del escenario', () => {
+  assert.ok(mainSource.includes('[data-stack-top]'), 'engancha data-stack-top');
+  assert.ok(mainSource.includes('[data-stack-action]'), 'engancha data-stack-action');
+  assert.ok(mainSource.includes('selectStackTop(value)'), 'llama a selectStackTop');
+  assert.ok(mainSource.includes('selectStackAction(value)'), 'llama a selectStackAction');
+  assert.ok(mainSource.includes("getAttribute('data-stack-top') === stackTop"), 'refleja is-active/aria-pressed del tope');
+  assert.ok(mainSource.includes("getAttribute('data-stack-action') === stackAction"), 'refleja is-active/aria-pressed de la acción');
+  assert.ok(mainSource.includes('hasDiegeticStack'), 'la fila del shell sobra si la escena trae selectores');
+});
+
+test('el header queda por encima de la escena en todos los niveles', () => {
+  const headerAt = css.indexOf('.wb-scene .wb-header {');
+  assert.ok(headerAt > 0, 'el header base tiene regla propia');
+  const header = css.slice(headerAt, css.indexOf('}', headerAt));
+  assert.ok(header.includes('position: relative'), 'el header crea su capa');
+  assert.ok(header.includes('z-index: 50'), 'Volver y Sonido por encima de todo prop');
+  const stageAt = css.indexOf('.wb-scene .wb-stage {');
+  assert.ok(stageAt > 0, 'el stage base tiene regla propia');
+  const stage = css.slice(stageAt, css.indexOf('}', stageAt));
+  assert.ok(stage.includes('position: relative'), 'la escena absoluta se contiene en el stage');
+  assert.ok(stage.includes('z-index: 0'), 'la escena queda bajo el header');
+  const mobile = css.slice(css.indexOf('max-width: 768px'));
+  const mobileHeaderAt = mobile.indexOf('.wb-scene .wb-header {');
+  assert.ok(mobileHeaderAt > 0, 'el header móvil tiene regla propia');
+  const mobileHeader = mobile.slice(mobileHeaderAt, mobile.indexOf('}', mobileHeaderAt));
+  assert.ok(!mobileHeader.includes('z-index'), 'el móvil conserva el z-index 50 de base');
+  assert.ok(!mobileHeader.includes('position:'), 'el móvil conserva la capa de base');
+});
+
+test('is-slotted retira rack y estado del shell cuando la escena los aloja', () => {
+  const statusAt = css.indexOf('.wb-scene.is-immersive > .wb-status');
+  assert.ok(statusAt > 0, 'la línea del shell sigue como fallback');
+  assert.ok(css.slice(statusAt, statusAt + 140).includes('position: absolute'), 'fallback flotante');
+  const slottedAt = css.indexOf('.wb-scene.is-immersive.is-slotted');
+  assert.ok(slottedAt > 0, 'hay reglas para escena con ranuras');
+  const slotted = css.slice(slottedAt, slottedAt + 220);
+  assert.ok(slotted.includes('.wb-dock .wb-inventory'), 'el rack del shell se retira');
+  assert.ok(slotted.includes('display: none'), 'sin duplicar rack ni línea');
+  const actionsAt = css.indexOf('.wb-scene.is-immersive .wb-actions');
+  assert.ok(actionsAt > 0 && css.slice(actionsAt, actionsAt + 80).includes('display: none'), 'sin barra de acciones');
+});
+
+test('el velo del modal tapa rack, estado, header y props', () => {
+  assert.ok(modalCss.includes('.modal-backdrop'), 'el velo tiene reglas propias');
+  const veilAt = modalCss.indexOf('.modal-backdrop {');
+  assert.ok(veilAt >= 0, 'regla del backdrop');
+  const veil = modalCss.slice(veilAt, modalCss.indexOf('}', veilAt));
+  assert.ok(veil.includes('position: fixed'), 'cubre la ventana');
+  assert.ok(veil.includes('inset: 0'), 'sin bordes');
+  const zIndex = Number((veil.match(/z-index:\s*(\d+)/) || [])[1]);
+  assert.ok(Number.isFinite(zIndex) && zIndex >= 100, `z-index ${zIndex} por encima del header (50)`);
+});
+
+test('el estado mudado a la escena es línea sin caja en cualquier nivel', () => {
+  const at = css.indexOf('.wb-scene.is-immersive .level-scene .wb-status');
+  assert.ok(at > 0, 'hay regla genérica para el estado dentro de la escena');
+  const rule = css.slice(at, css.indexOf('}', at));
+  assert.ok(rule.includes('background: none'), 'sin fondo de franja');
+  assert.ok(rule.includes('border: 0'), 'sin borde de caja');
+  assert.ok(rule.includes('border-radius: 0'), 'sin radio de caja');
+  assert.ok(rule.includes('font-size: 14px'), 'línea de 14 px');
+  assert.ok(rule.includes('rgba(242, 237, 227, 0.92)'), 'tinta clara del taller');
+  assert.ok(rule.includes('border-bottom'), 'una línea grabada, no una barra');
+});
+
+test('el estado muestra el símbolo del alfabeto, no el carrete', () => {
+  assert.ok(!mainSource.includes('Carrete'), 'sin "Carrete" en la línea de estado');
+  assert.ok(mainSource.includes('function symbolText'), 'helper del símbolo');
+  assert.ok(mainSource.includes('entry.symbol'), 'el símbolo sale de state.level.keys');
+  assert.ok(mainSource.includes('entry.label'), 'el label acompaña cuando aporta');
+  assert.ok(mainSource.includes('Símbolo: ${symbol}'), 'formato Símbolo: X');
+  assert.ok(mainSource.includes('active.textContent = symbolText()'), 'N1 monta la línea con el símbolo');
+  assert.ok(mainSource.includes('activeKey.textContent = symbolText()'), 'renderTools conserva el símbolo');
+  assert.ok(mainSource.includes("'Herramienta: tijera'") && mainSource.includes("'Herramienta: resorte'"), 'herramientas intactas');
 });

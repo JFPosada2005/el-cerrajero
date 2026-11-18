@@ -101,6 +101,21 @@
   pointer-events: stroke;
 }
 
+/* Los engranajes giran despacio: el taller está vivo sin distraer. */
+@media (prefers-reduced-motion: no-preference) {
+  #canvas.gv-decorated .state .gv-sprite-gear {
+    transform-box: fill-box;
+    transform-origin: center;
+    animation: gv-gear-turn 60s linear infinite;
+  }
+
+  @keyframes gv-gear-turn {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   #canvas.gv-decorated .state .gv-sprite,
   #canvas.gv-decorated .wire .edge {

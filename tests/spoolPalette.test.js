@@ -7,6 +7,7 @@ import { dirname, join, normalize } from 'node:path';
 const here = dirname(fileURLToPath(import.meta.url));
 const cssPath = join(here, '..', 'src', 'ui', 'spoolPalette.css');
 const css = readFileSync(cssPath, 'utf8');
+const mainSource = readFileSync(join(here, '..', 'src', 'main.js'), 'utf8');
 
 function stripComments(source) {
   return source.replace(/\/\*[\s\S]*?\*\//g, '');
@@ -161,4 +162,34 @@ test('no toca herramientas ni botones de acción (solo #palette)', () => {
     assert.ok(!selector.includes('#scissors'), `fuga a la tijera: ${selector}`);
     assert.ok(!selector.includes('#spring-tool'), `fuga al resorte: ${selector}`);
   }
+});
+
+test('el carrete viste #palette fuera del inventario (keysSlot)', () => {
+  const clean = stripComments(css);
+  assert.ok(!clean.includes('.wb-inventory'), 'el carrete ya no exige el inventario del shell');
+  const blocks = rulesFor(css, '#palette .key');
+  assert.ok(blocks.length > 0, 'sin reglas para #palette .key');
+  const joined = blocks.join('\n');
+  assert.ok(joined.includes('assets/levels/01/props/spool.webp'), 'el cobre viste también sobre la mesa');
+  assert.ok(joined.includes('linear-gradient'), 'la chapa tiñe también sobre la mesa');
+});
+
+test('el símbolo queda por encima del arte y del velo, ≥16 px', () => {
+  const clean = stripComments(css);
+  assert.ok(!clean.includes('mix-blend-mode'), 'sin mezclas que tapen el símbolo');
+  const joined = rulesFor(css, '#palette .key').join('\n');
+  const sizes = [...joined.matchAll(/font-size\s*:\s*(\d+)px/g)].map((match) => Number(match[1]));
+  assert.ok(sizes.length > 0, 'el símbolo fija su tamaño');
+  assert.ok(sizes.every((size) => size >= 16), `símbolo menor a 16 px: ${sizes}`);
+  const weights = [...joined.matchAll(/font-weight\s*:\s*(\d+)/g)].map((match) => Number(match[1]));
+  assert.ok(weights.some((weight) => weight >= 600), 'el símbolo va en ≥600');
+  assert.ok(joined.includes('overflow: visible'), 'sin recorte del botón');
+  assert.ok(!/overflow\s*:\s*(hidden|clip)/.test(joined), 'nada oculta el símbolo por desborde');
+  const veil = rulesFor(css, '#palette .key::before').join('\n');
+  assert.ok(/z-index\s*:\s*-\d+/.test(veil), 'el velo de teñido pinta detrás del símbolo');
+});
+
+test('el botón conserva textContent con el símbolo del alfabeto', () => {
+  assert.ok(mainSource.includes('button.textContent = entry.symbol'), 'el símbolo viaja en el texto del botón');
+  assert.ok(mainSource.includes("button.setAttribute('data-tone', entry.tone)"), 'el tono viaja en data-tone');
 });

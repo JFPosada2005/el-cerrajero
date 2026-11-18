@@ -22,6 +22,7 @@ import { createLevelScene as createLevel5Scene } from './ui/levels/level5Scene.j
 import { loadManifest } from './ui/assets.js';
 import { createAudio } from './ui/audio.js';
 const PROGRESS_KEY = 'el-cerrajero:progress';
+const SOUND_KEY = 'el-cerrajero:sound';
 const app = document.querySelector('#app');
 const state = { level: null, phase: 'repair', puzzle: null, blueprint: null };
 let workshop = null;
@@ -31,7 +32,16 @@ let workbenchView = null;
 let graphVisuals = null;
 let audio = null;
 let manifest = null;
-let soundOn = false;
+let soundOn = true;
+if (typeof localStorage !== 'undefined') {
+  try {
+    if (localStorage.getItem(SOUND_KEY) === 'off') {
+      soundOn = false;
+    }
+  } catch {
+    // Sin almacenamiento disponible, el sonido queda encendido.
+  }
+}
 let selectedKey = null;
 let cutMode = false;
 let springMode = false;
@@ -261,6 +271,10 @@ function renderPalette() {
     button.type = 'button';
     button.className = `key key-${entry.symbol}`;
     button.dataset.key = entry.symbol;
+    // Tono del carrete: el CSS tiñe por data-tone; data-key queda como fallback 1–4.
+    if (typeof entry.tone === 'string' && entry.tone !== '') {
+      button.setAttribute('data-tone', entry.tone);
+    }
     button.textContent = entry.symbol;
     button.setAttribute('aria-label', `Llave ${entry.symbol}`);
     button.addEventListener('click', () => selectKey(entry.symbol));
@@ -324,12 +338,13 @@ function renderTools() {
   if (activeKey === null || scissors === null) {
     return;
   }
+  const short = document.querySelector('.wb-scene.is-immersive') !== null;
   if (cutMode) {
-    activeKey.textContent = 'Herramienta: tijera';
+    activeKey.textContent = short ? 'Tijera' : 'Herramienta: tijera';
   } else if (springMode) {
-    activeKey.textContent = 'Herramienta: resorte';
+    activeKey.textContent = short ? 'Resorte' : 'Herramienta: resorte';
   } else {
-    activeKey.textContent = `Carrete activo: ${selectedKey}`;
+    activeKey.textContent = symbolText();
   }
   if (cutMode) {
     scissors.classList.add('is-active');
@@ -337,6 +352,10 @@ function renderTools() {
     scissors.classList.remove('is-active');
   }
   scissors.setAttribute('aria-pressed', String(cutMode));
+  for (const node of document.querySelectorAll('[data-action="cut"]')) {
+    node.classList.toggle('is-active', cutMode);
+    node.setAttribute('aria-pressed', String(cutMode));
+  }
   const spring = document.querySelector('#spring-tool');
   if (spring !== null) {
     if (springMode) {
@@ -356,12 +375,14 @@ function renderTools() {
     button.setAttribute('aria-pressed', String(active));
   }
   const hint = document.querySelector('#tool-hint');
-  if (cutMode) {
-    hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
-  } else if (springMode) {
-    hint.textContent = 'Tocá origen y destino para tender un resorte.';
-  } else {
-    hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
+  if (hint !== null) {
+    if (cutMode) {
+      hint.textContent = 'Tocá un cable para cortarlo. La tijera corta el cable completo.';
+    } else if (springMode) {
+      hint.textContent = 'Tocá origen y destino para tender un resorte.';
+    } else {
+      hint.textContent = 'Elegí una llave y tocá origen y destino para conectar.';
+    }
   }
   if (state.level.machine === 'pda') {
     for (const [id, value] of [['#stack-top-any', 'any'], ['#stack-top-base', 'base'], ['#stack-top-chip', 'chip']]) {
@@ -391,11 +412,23 @@ function renderTools() {
       button.setAttribute('aria-pressed', String(actionActive));
     }
   }
+  // Reflejo genérico: los selectores del escenario marcan su estado igual.
+  for (const node of document.querySelectorAll('[data-stack-top]')) {
+    const topActive = node.getAttribute('data-stack-top') === stackTop;
+    node.classList.toggle('is-active', topActive);
+    node.setAttribute('aria-pressed', String(topActive));
+  }
+  for (const node of document.querySelectorAll('[data-stack-action]')) {
+    const actionActive = node.getAttribute('data-stack-action') === stackAction;
+    node.classList.toggle('is-active', actionActive);
+    node.setAttribute('aria-pressed', String(actionActive));
+  }
 }
 function selectKey(key) {
   cutMode = false;
   springMode = false;
   selectedKey = key;
+  sfx('click');
   if (workshop !== null) {
     workshop.setSelectedKey(key);
   }
@@ -404,6 +437,7 @@ function selectKey(key) {
 function toggleScissors() {
   cutMode = cutMode === false;
   springMode = false;
+  sfx('click');
   if (workshop === null) {
     return;
   }
@@ -417,6 +451,7 @@ function toggleScissors() {
 function toggleSpring() {
   springMode = springMode === false;
   cutMode = false;
+  sfx('click');
   if (workshop === null) {
     return;
   }
@@ -452,6 +487,7 @@ function handleConnect(from, to, tool) {
   }
   const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'connect-wire', from, to, tool: editTool });
   if (result.effect === 'blocked') {
+    sfx('error');
     if (result.reason === 'needs-gear') {
       appendLog('Ese cable necesita un engranaje para cerrar sobre la misma celda.', 'bad');
     } else if (result.reason === 'spring-loop') {
@@ -462,6 +498,7 @@ function handleConnect(from, to, tool) {
     return;
   }
   if (result.effect === 'kept') {
+    sfx('error');
     if (tool.kind === 'spring') {
       appendLog(`Ese resorte ya está puesto: ${from} → ${to}.`);
     } else {
@@ -472,24 +509,29 @@ function handleConnect(from, to, tool) {
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
   if (tool.kind === 'spring') {
+    sfx('cable');
     appendLog(`Tendiste un resorte: ${from} → ${to}.`);
     return;
   }
   if (result.effect === 'moved') {
+    sfx('cable');
     appendLog(`Moviste la llave ${key}: ${before} → ${to}.`);
     return;
   }
+  sfx('cable');
   appendLog(`Conectaste la llave ${key}: ${from} → ${to}.`);
 }
 function handleCut(from, to) {
   const keys = cableKeys(from, to);
   const result = applyEdit(state.puzzle, state.level.parts, state.blueprint, { type: 'cut-wire', from, to });
   if (result.effect === 'kept') {
+    sfx('error');
     appendLog(`Ese cable ya está puesto: ${from} → ${to}.`);
     return;
   }
   state.blueprint = result.blueprint;
   workshop.setBlueprint(state.blueprint);
+  sfx('cut');
   if (keys === '') {
     appendLog(`Cortaste el resorte: ${from} → ${to}.`);
     return;
@@ -525,6 +567,17 @@ function firstKey() {
   }
   return state.level.keys[0].symbol;
 }
+function selectedEntry() {
+  return state.level.keys.find((entry) => entry.symbol === selectedKey) ?? null;
+}
+function symbolText() {
+  const entry = selectedEntry();
+  const symbol = entry === null ? selectedKey : entry.symbol;
+  if (entry !== null && typeof entry.label === 'string' && entry.label.trim() !== '' && entry.label !== entry.symbol) {
+    return `Símbolo: ${symbol} · ${entry.label}`;
+  }
+  return `Símbolo: ${symbol}`;
+}
 function createLevelSceneFor(level) {
   const options = { level, puzzle: state.puzzle, phase: state.phase };
   if (level.id === 5) {
@@ -553,6 +606,8 @@ function renderSceneWorkshop() {
     phase: phaseWord(),
     objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
     soundEnabled: soundOn,
+    diegeticActions: true,
+    immersive: true,
     handlers: {
       onBack: renderMap,
       onProbe: handleProbe,
@@ -565,6 +620,31 @@ function renderSceneWorkshop() {
   const levelScene = createLevelSceneFor(state.level);
   app.replaceChildren(scene.element);
   scene.slots.stage.append(levelScene.element);
+
+  const diegeticHandlers = {
+    contract: () => openWorkshopDoc('contract'),
+    hint: () => openWorkshopDoc('hint'),
+    log: () => openWorkshopDoc('log'),
+    probe: handleProbe,
+    assault: handleAssault,
+    cut: toggleScissors,
+  };
+  for (const node of levelScene.element.querySelectorAll('[data-action]')) {
+    const handler = diegeticHandlers[node.getAttribute('data-action')];
+    if (typeof handler === 'function') {
+      node.addEventListener('click', handler);
+    }
+  }
+
+  // Selectores de pila del escenario (N4): la escena decide, el taller obedece.
+  for (const node of levelScene.element.querySelectorAll('[data-stack-top]')) {
+    const value = node.getAttribute('data-stack-top');
+    node.addEventListener('click', () => selectStackTop(value));
+  }
+  for (const node of levelScene.element.querySelectorAll('[data-stack-action]')) {
+    const value = node.getAttribute('data-stack-action');
+    node.addEventListener('click', () => selectStackAction(value));
+  }
 
   const canvas = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
   canvas.id = 'canvas';
@@ -588,6 +668,10 @@ function renderSceneWorkshop() {
   const scissorsLabel = document.createElement('span');
   scissorsLabel.textContent = 'Cortar';
   scissors.append(scissorsLabel);
+  if (levelScene.element.querySelector('[data-action="cut"]') !== null) {
+    scissors.hidden = true;
+    scissors.style.display = 'none';
+  }
   tools.append(palette);
   tools.append(scissors);
   if (state.level.parts.includes('spring')) {
@@ -644,23 +728,30 @@ function renderSceneWorkshop() {
   const toolsTitle = document.createElement('h2');
   toolsTitle.textContent = 'Herramientas';
   scene.slots.inventory.append(toolsTitle);
-  scene.slots.inventory.append(tools);
-  if (stackTools !== null) {
-    scene.slots.inventory.append(stackTools);
+  // Ranuras de la escena: si el nivel expone `keysSlot`, los carretes y las
+  // herramientas viven en la mesa; si no, queda el inventario del shell.
+  const keysHost = levelScene.keysSlot ?? scene.slots.inventory;
+  keysHost.append(tools);
+  // Si la escena ya trae sus selectores de pila, la fila del shell sobra.
+  const hasDiegeticStack = levelScene.element.querySelector('[data-stack-top]') !== null;
+  if (stackTools !== null && !hasDiegeticStack) {
+    keysHost.append(stackTools);
   }
   if (stackHelp !== null) {
     scene.slots.status.append(stackHelp);
   }
 
+  const immersive = scene.element.classList.contains('is-immersive');
   const active = document.createElement('span');
   active.id = 'active-key';
   active.className = 'active-key';
-  active.textContent = `Carrete activo: ${selectedKey}`;
+  active.textContent = symbolText();
   scene.slots.status.append(active);
 
   const legend = document.createElement('div');
   legend.className = 'legend';
-  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', 'Alarma implícita']]) {
+  const alarmWord = immersive ? 'Alarma' : 'Alarma implícita';
+  for (const [dot, word] of [['legend-start', 'Entrada'], ['legend-accept', 'Cerrojo'], ['legend-alarm', alarmWord]]) {
     const entry = document.createElement('span');
     const icon = document.createElement('i');
     icon.className = `legend-dot ${dot}`;
@@ -673,7 +764,10 @@ function renderSceneWorkshop() {
   const hint = document.createElement('p');
   hint.id = 'tool-hint';
   hint.className = 'hint';
-  scene.slots.status.append(hint);
+  // En inmersivo la ayuda vive en contrato/pista; la línea queda en una sola frase.
+  if (!immersive) {
+    scene.slots.status.append(hint);
+  }
 
   if (state.level.machine === 'pda') {
     const block = document.createElement('div');
@@ -691,7 +785,15 @@ function renderSceneWorkshop() {
     host.append(block);
   }
 
-  const assaultButton = scene.element.querySelector('[data-action="assault"]');
+  // La línea de estado se muda a la mesa cuando la escena expone su ranura.
+  if (levelScene.hudSlot) {
+    levelScene.hudSlot.append(scene.slots.status);
+  }
+  if (levelScene.keysSlot || levelScene.hudSlot) {
+    scene.element.classList.add('is-slotted');
+  }
+
+  const assaultButton = scene.slots.actions.querySelector('[data-action="assault"]');
   if (assaultButton !== null) {
     assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
     assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
@@ -749,6 +851,8 @@ function renderDrumScene() {
     phase: phaseWord(),
     objective: { rule: state.puzzle.goal, intro: state.puzzle.intro },
     soundEnabled: soundOn,
+    diegeticActions: true,
+    immersive: true,
     handlers: {
       onBack: renderMap,
       onProbe: handleProbe,
@@ -762,6 +866,21 @@ function renderDrumScene() {
   app.replaceChildren(scene.element);
   scene.element.classList.add('is-drum-room');
   scene.slots.stage.append(levelScene.element);
+  // Enganche diegético genérico: cuando N5 aporte sus props, usan los mismos handlers.
+  for (const node of levelScene.element.querySelectorAll('[data-action]')) {
+    const action = node.getAttribute('data-action');
+    if (action === 'probe') {
+      node.addEventListener('click', handleProbe);
+    } else if (action === 'assault') {
+      node.addEventListener('click', handleAssault);
+    } else if (action === 'contract' || action === 'hint' || action === 'log') {
+      node.addEventListener('click', () => openWorkshopDoc(action));
+    }
+  }
+  if (levelScene.hudSlot) {
+    levelScene.hudSlot.append(scene.slots.status);
+    scene.element.classList.add('is-slotted');
+  }
   scene.slots.inventory.hidden = true;
   scene.slots.inventory.style.display = 'none';
   const tapeRoot = document.createElement('div');
@@ -774,11 +893,11 @@ function renderDrumScene() {
   hint.className = 'hint';
   hint.textContent = 'Tocá una púa para escribir, mover y elegir la sección siguiente.';
   scene.slots.status.append(hint);
-  const probeButton = scene.element.querySelector('[data-action="probe"]');
+  const probeButton = scene.slots.actions.querySelector('[data-action="probe"]');
   if (probeButton !== null) {
     probeButton.textContent = 'Probar la cinta';
   }
-  const assaultButton = scene.element.querySelector('[data-action="assault"]');
+  const assaultButton = scene.slots.actions.querySelector('[data-action="assault"]');
   if (assaultButton !== null) {
     assaultButton.textContent = state.phase === 'repair' ? 'Ensayo' : 'Asalto';
     assaultButton.setAttribute('aria-label', state.phase === 'repair' ? 'Ejecutar el ensayo' : 'Ejecutar el asalto');
@@ -836,6 +955,7 @@ function assaultTape(machine, verdict) {
 }
 function handlePinEdit(edit) {
   const rules = structuredClone(state.blueprint.rules);
+  sfx('gear');
   if (rules[edit.section] === undefined) {
     rules[edit.section] = {};
   }
@@ -876,8 +996,10 @@ function handleProbe() {
   const word = state.puzzle.examples.open[0];
   const result = runMachine(machine, word, { record: true });
   if (result.accepted) {
+    sfx('lock');
     appendLog(`La llave ${word} abrió la caja.`, 'good');
   } else {
+    sfx('error');
     appendLog(`La llave ${word} no abrió la caja.`, 'bad');
   }
   workshop.highlight(frameStates(result.frames));
@@ -889,6 +1011,11 @@ function handleAssault() {
   const machine = toMachine(levelAlphabet(), state.puzzle, state.blueprint, state.level.machine);
   const verdict = judge(state.puzzle, machine);
   const report = thiefReport(verdict, state.level);
+  if (report.tone === 'bad') {
+    sfx('error');
+  } else {
+    sfx('lock');
+  }
   appendLog(report.text, report.tone);
   if (state.level.machine === 'tm') {
     assaultTape(machine, verdict);
@@ -912,6 +1039,7 @@ function handleAssault() {
   }
 }
 function openWorkshopDoc(kind) {
+  sfx('paper');
   if (kind === 'contract') {
     openModal(`Contrato ${state.level.contract}`, state.level.client, state.puzzle.goal, 'Entendido', () => {});
     return;
@@ -942,9 +1070,30 @@ async function toggleSound() {
     audio = createAudio({ manifest });
   }
   audio.setEnabled(soundOn);
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(SOUND_KEY, soundOn ? 'on' : 'off');
+    } catch {
+      // Sin almacenamiento, la preferencia vive solo en la sesión.
+    }
+  }
   if (soundOn) {
     audio.play('click');
   }
+}
+function sfx(id) {
+  if (audio !== null) {
+    audio.play(id);
+  }
+}
+async function initAudio() {
+  if (manifest === null) {
+    manifest = await loadManifest();
+  }
+  if (audio === null) {
+    audio = createAudio({ manifest, enabled: soundOn });
+  }
+  audio.setEnabled(soundOn);
 }
 function openModal(eyebrow, title, body, actionLabel, onAction) {
   const backdrop = document.createElement('div');
@@ -978,6 +1127,26 @@ function openModal(eyebrow, title, body, actionLabel, onAction) {
   backdrop.addEventListener('keydown', (event) => {
     if (event.key === 'Escape') {
       backdrop.remove();
+      return;
+    }
+    // Trampa de foco: el Tab circula dentro del diálogo y no se escapa al taller.
+    if (event.key !== 'Tab') {
+      return;
+    }
+    const focusables = [...modal.querySelectorAll('button, [href], input, [tabindex]:not([tabindex="-1"])')]
+      .filter((node) => node.disabled !== true);
+    if (focusables.length === 0) {
+      event.preventDefault();
+      return;
+    }
+    const first = focusables[0];
+    const last = focusables[focusables.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
     }
   });
   document.body.append(backdrop);
@@ -987,6 +1156,7 @@ function showRepairModal() {
   openModal(`Contrato ${state.level.contract}`, 'Mecanismo reparado', state.level.phases.build.goal, 'Construir el nuevo', startBuild);
 }
 function showWin() {
+  sfx('bell');
   const progress = loadProgress();
   if (progress.completed.includes(state.level.id) === false) {
     progress.completed.push(state.level.id);
@@ -995,3 +1165,4 @@ function showWin() {
   openModal(`Contrato ${state.level.contract}`, 'Bóveda asegurada', state.level.thief.giveUp, 'Volver al mapa', renderMap);
 }
 renderTitle();
+initAudio();

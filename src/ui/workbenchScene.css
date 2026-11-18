@@ -70,6 +70,10 @@
   gap: 12px;
   min-height: 56px;
   padding: 4px;
+  /* Siempre por encima de la escena: ningún prop a pantalla completa puede
+   * tapar Volver/Sonido, en ningún nivel, a ningún tamaño. */
+  position: relative;
+  z-index: 50;
 }
 
 .wb-scene .wb-brand {
@@ -233,6 +237,11 @@
 .wb-scene .wb-stage {
   min-height: 320px;
   padding: 0;
+  /* Contiene las escenas absolutas a pantalla completa y atrapa su stacking
+   * por debajo del header (z-index 50): lo que desborde de la escena nunca
+   * cubre Volver/Sonido. */
+  position: relative;
+  z-index: 0;
   background:
     radial-gradient(ellipse at 30% 0%, rgba(240, 207, 106, 0.1) 0%, transparent 55%),
     linear-gradient(180deg, #3a2a20 0%, var(--wb-wood) 100%);
@@ -359,6 +368,167 @@
   flex-wrap: wrap;
   gap: 8px;
   align-items: center;
+}
+
+/* --- Modo diegético: la escena del nivel es la dueña de los controles.
+ * La barra del shell se retira y el contrato de papel de la escena reemplaza
+ * al botón del objetivo (el texto del objetivo se queda). --- */
+.wb-scene.is-diegetic .wb-actions {
+  display: none;
+}
+
+.wb-scene.is-diegetic .wb-open-contract {
+  display: none;
+}
+
+/* --- Franja de estado legible: tinta clara del taller (#f2ede3) a opacidad
+ * 0.92, piso de 14 px y línea grabada de latón. --- */
+.wb-scene .wb-status {
+  font-size: 14px;
+  color: #f2ede3;
+  color: rgba(242, 237, 227, 0.92);
+  border-bottom: 2px solid rgba(212, 167, 44, 0.65);
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.6);
+}
+
+.wb-scene .active-key,
+.wb-scene .legend {
+  font-size: 14px;
+  color: #f2ede3;
+  color: rgba(242, 237, 227, 0.92);
+}
+
+/* --- Modo inmersivo (corrección del owner §9): la escena ocupa toda la
+ * ventana. Sin scroll de página, sin panel de objetivo ni bitácora, header
+ * flotante (siempre z-index 50, por encima de la escena). Si la escena
+ * expone `keysSlot`/`hudSlot`, el parent mueve ahí rack y estado y el shell
+ * los retira (`is-slotted`); si no, el shell conserva su línea y su rack
+ * como fallback para no romper niveles a medio migrar.
+ * Todo vive bajo `.is-immersive`; los demás niveles quedan igual. --- */
+.wb-scene.is-immersive {
+  position: relative;
+  --wb-header-h: 84px;
+  height: 100dvh;
+  overflow: hidden;
+  gap: 0;
+  padding: 0;
+  border: 0;
+}
+
+.wb-scene.is-immersive .wb-objective,
+.wb-scene.is-immersive .wb-log {
+  display: none;
+}
+
+.wb-scene.is-immersive .wb-body {
+  display: block;
+  height: 100%;
+  min-height: 0;
+}
+
+.wb-scene.is-immersive .wb-stage {
+  position: absolute;
+  inset: 0;
+  top: var(--wb-header-h);
+  z-index: 0;
+  height: calc(100dvh - var(--wb-header-h));
+  min-height: 0;
+  max-height: none;
+  padding: 0;
+  overflow: hidden;
+  background: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wb-scene.is-immersive .wb-header {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 50;
+  padding: 12px 16px 28px;
+  background: linear-gradient(180deg, rgba(5, 8, 12, 0.72) 0%, transparent 100%);
+}
+
+/* Estado y rack del shell: solo cuando la escena NO aporta sus ranuras
+ * (`keysSlot`/`hudSlot`). En cuanto el parent mueve los nodos a la escena
+ * (`is-slotted`), el shell los retira y la mesa manda. */
+.wb-scene.is-immersive > .wb-status {
+  position: absolute;
+  left: 50%;
+  bottom: 10px;
+  z-index: 25;
+  transform: translateX(-50%);
+  width: max-content;
+  max-width: calc(100% - 32px);
+  min-height: 0;
+  padding: 4px 14px;
+  font-size: 14px;
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(212, 167, 44, 0.65);
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+}
+
+.wb-scene.is-immersive .wb-dock .wb-inventory {
+  position: absolute;
+  left: 12px;
+  bottom: 12px;
+  z-index: 20;
+  width: max-content;
+  max-width: calc(100% - 24px);
+  min-height: 0;
+  padding: 0;
+  overflow: visible;
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.wb-scene.is-immersive.is-slotted > .wb-status,
+.wb-scene.is-immersive.is-slotted .wb-dock .wb-inventory {
+  display: none;
+}
+
+/* Línea de estado mudada a la escena (`hudSlot`, cualquier nivel): sin caja
+ * de franja aunque el nodo viaje con sus clases; cada escena la posiciona
+ * en su ranura. El fallback directo (`> .wb-status`) sigue arriba. */
+.wb-scene.is-immersive .level-scene .wb-status {
+  min-height: 0;
+  padding: 4px 14px;
+  font-size: 14px;
+  color: #f2ede3;
+  color: rgba(242, 237, 227, 0.92);
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.85);
+  background: none;
+  background-color: transparent;
+  border: 0;
+  border-bottom: 1px solid rgba(212, 167, 44, 0.65);
+  border-radius: 0;
+  box-shadow: none;
+  pointer-events: none;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.wb-scene.is-immersive .wb-dock {
+  display: contents;
+}
+
+.wb-scene.is-immersive .wb-actions {
+  display: none;
 }
 
 /* --- Foco visible global del shell --- */
@@ -563,6 +733,11 @@
   /* El último contenido de la escena scrollea por encima del dock opaco. */
   .wb-scene .wb-stage {
     scroll-margin-bottom: 260px;
+  }
+
+  /* Header móvil en dos filas: el stage inmersivo arranca más abajo. */
+  .wb-scene.is-immersive {
+    --wb-header-h: 113px;
   }
 }
 

@@ -4,6 +4,9 @@
  */
 
 .modal-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
   background: rgba(4, 6, 10, 0.76);
   backdrop-filter: blur(6px);
 }
