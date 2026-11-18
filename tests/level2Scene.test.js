@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createLevelScene } from '../src/ui/levels/level2Scene.js';
@@ -163,31 +163,112 @@ test('la escena no crea editor, cables, llaves ni juicio', () => {
   }
 });
 
-test('placeholders de sala sin imágenes externas y con aria', () => {
+test('slots finales con imágenes locales y con aria', () => {
   assert.ok(!source.includes('https://'), 'sin URLs externas');
-  for (const raster of ['.png', '.jpg', '.webp', 'src=', 'href=']) {
-    assert.ok(!source.includes(raster), `sin raster ${raster} en el JS`);
+  for (const src of [
+    'assets/levels/02/floor-indicator.svg',
+    'assets/levels/02/pinion.webp',
+    'assets/shared/props/relay.webp',
+  ]) {
+    assert.ok(source.includes(src), `ruta ${src} en el JS`);
   }
+  assert.ok(!source.includes('createElementNS'), 'sin SVG inline');
   const scene = setup();
-  const gauge = findOne(scene.element, (n) => classes(n).includes('l2-gauge-svg'), 'indicador');
-  assert.equal(gauge.attributes.role, 'img');
-  assert.match(gauge.attributes['aria-label'] ?? '', /pisos/i);
+  const gauge = findOne(scene.element, (n) => classes(n).includes('l2-gauge'), 'indicador');
+  assert.match(gauge.getAttribute('aria-label') ?? '', /pisos/i);
+  const gaugeImg = findOne(
+    scene.element,
+    (n) => classes(n).includes('l2-gauge-img'),
+    'imagen del indicador',
+  );
+  assert.equal(gaugeImg.tag, 'img');
+  assert.equal(gaugeImg.getAttribute('src'), 'assets/levels/02/floor-indicator.svg');
+  assert.equal(gaugeImg.getAttribute('alt'), '');
+  const gaugeCaption = findOne(
+    scene.element,
+    (n) => classes(n).includes('l2-gauge-caption'),
+    'leyenda',
+  );
+  assert.equal(gaugeCaption.tag, 'figcaption');
+  assert.match(gaugeCaption.textContent, /pisos/i);
   const props = findOne(scene.element, (n) => classes(n).includes('l2-props'), 'props');
   assert.equal(props.attributes['aria-hidden'], 'true');
-  assert.ok(findAll(scene.element, (n) => classes(n).includes('l2-pinion-svg')).length >= 1);
-  assert.ok(findAll(scene.element, (n) => classes(n).includes('l2-relay')).length >= 1);
+  const pinionImg = findOne(
+    scene.element,
+    (n) => classes(n).includes('l2-pinion-img'),
+    'piñón',
+  );
+  assert.equal(pinionImg.tag, 'img');
+  assert.equal(pinionImg.getAttribute('src'), 'assets/levels/02/pinion.webp');
+  assert.equal(pinionImg.getAttribute('alt'), '');
+  assert.equal(pinionImg.getAttribute('aria-hidden'), 'true');
+  const relays = findAll(scene.element, (n) => classes(n).includes('l2-relay'));
+  assert.ok(relays.length >= 1, 'relés presentes');
+  for (const relay of relays) {
+    const img = findOne(relay, (n) => classes(n).includes('l2-relay-img'), 'imagen del relé');
+    assert.equal(img.tag, 'img');
+    assert.equal(img.getAttribute('src'), 'assets/shared/props/relay.webp');
+  }
   const captions = findAll(scene.element, () => true).map((n) => n.textContent);
-  assert.ok(captions.some((text) => /a producir/i.test(text)), 'marca qué falta por producir');
+  assert.ok(!captions.some((text) => /a producir/i.test(text)), 'nada pendiente por producir');
 });
 
-test('cada placeholder declara su slot del manifiesto', () => {
+test('cada slot final declara su manifiesto con data-src', () => {
   const scene = setup();
-  const pending = byAttr(scene.element, 'data-status', 'a producir');
-  assert.ok(pending.length >= 4, 'fondo, indicador, relés y piñón marcados');
-  const assets = pending.map((node) => node.getAttribute('data-asset'));
-  for (const expected of ['n2.background', 'n2.floorIndicator', 'n2.relay', 'n2.pinion']) {
-    assert.ok(assets.includes(expected), `slot ${expected} declarado`);
+  const finals = byAttr(scene.element, 'data-status', 'final');
+  const byAsset = new Map(finals.map((node) => [node.getAttribute('data-asset'), node]));
+  for (const [asset, src] of [
+    ['levels.02.background', 'assets/levels/02/background.webp'],
+    ['levels.02.floorIndicator', 'assets/levels/02/floor-indicator.svg'],
+    ['levels.02.pinion', 'assets/levels/02/pinion.webp'],
+    ['shared.prop.relay', 'assets/shared/props/relay.webp'],
+  ]) {
+    assert.ok(byAsset.has(asset), `slot ${asset} declarado`);
+    assert.equal(byAsset.get(asset).getAttribute('data-src'), src);
   }
+  const relayFinals = finals.filter(
+    (node) => node.getAttribute('data-asset') === 'shared.prop.relay',
+  );
+  assert.ok(relayFinals.length >= 1, 'relés en final');
+  const pending = byAttr(scene.element, 'data-status', 'a producir');
+  assert.equal(pending.length, 0, 'sin slots pendientes en el N2');
+});
+
+test('los assets finales existen en disco', () => {
+  for (const file of [
+    'assets/levels/02/background.webp',
+    'assets/levels/02/floor-indicator.svg',
+    'assets/levels/02/pinion.webp',
+    'assets/shared/props/relay.webp',
+  ]) {
+    assert.ok(existsSync(join(here, '..', file)), `${file} existe en disco`);
+  }
+  assert.ok(
+    css.includes('../../../assets/levels/02/background.webp'),
+    'el CSS apunta al fondo final',
+  );
+  assert.match(css, /background-size:\s*cover/, 'el fondo cubre la sala');
+  assert.match(css, /background-position:\s*center/, 'el fondo va centrado');
+});
+
+test('defectos de navegador: fondo visible e indicador y piñón legibles', () => {
+  assert.ok(!css.includes('mask-image'), 'la foto no se recorta con máscara');
+  assert.ok(
+    css.includes('rgba(10, 13, 17, 0.35)'),
+    'velo tenue para que el lobby se reconozca',
+  );
+  assert.ok(!css.includes('rgba(10, 13, 17, 0.62)'), 'sin el velo oscuro anterior');
+  assert.ok(!css.includes('padding: 6px 8px 4px'), 'el indicador no va recortado');
+  assert.ok(
+    !css.includes('border-radius: 56px 56px 8px 8px'),
+    'sin arco que recorte el indicador',
+  );
+  assert.match(css, /\.l2-gauge-img[\s\S]*?width:\s*150px/, 'indicador a ~150 px en desktop');
+  assert.match(
+    css,
+    /@media \(max-width: 700px\)[\s\S]*?\.l2-pinion[\s\S]*?width:\s*56px/,
+    'piñón a 56 px en celular',
+  );
 });
 
 test('los datos viajan por textContent, sin innerHTML', () => {
@@ -331,14 +412,14 @@ test('la placa abraza el tablero en vez de estirar un marco vacío', () => {
 });
 
 test('el encabezado compacto deja la placa con aire en desktop', () => {
-  assert.match(css, /\.l2-gauge-svg[\s\S]*?width:\s*90px/, 'indicador compacto en desktop');
+  assert.match(css, /\.l2-gauge-img[\s\S]*?width:\s*150px/, 'indicador legible en desktop');
   assert.match(css, /\.l2-title[\s\S]*?font-size:\s*20px/, 'título compacto en desktop');
   assert.match(
     css,
     /@media \(min-width: 701px\)[\s\S]*?\.l2-title[\s\S]*?white-space:\s*nowrap/,
     'título en una línea en desktop',
   );
-  assert.match(css, /\.l2-pinion[\s\S]*?width:\s*44px/, 'piñón compacto en desktop');
+  assert.match(css, /\.l2-pinion[\s\S]*?width:\s*72px/, 'piñón legible en desktop');
 });
 
 test('en celular la escena no supera al stage ni genera scroll horizontal', () => {

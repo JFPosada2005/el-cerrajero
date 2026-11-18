@@ -7,15 +7,23 @@
  * lógica: el parent monta el tablero de cables real en `editorSlot`
  * y la señal de fase en `statusSlot`.
  *
- * Los dibujos son placeholders en CSS/SVG; los finales están a producir
- * según `docs/ASSET-MANIFEST.md` (n2.*). Cada placeholder lleva
- * `data-asset` con su slot del manifiesto y `data-status="a producir"`.
+ * Los dibujos provisorios quedaron atrás: fondo, indicador de pisos,
+ * piñón y relés usan los finales de `assets/manifest.json`
+ * (`levels.02.background`, `levels.02.floorIndicator`, `levels.02.pinion`,
+ * `shared.prop.relay`). Cada slot final lleva `data-asset` con su slot
+ * del manifiesto, `data-status="final"` y `data-src` con la ruta usada.
+ * No quedan slots pendientes en la escena.
  * Vocabulario de taller en los textos visibles: sin términos académicos.
  */
 
-const SVG_NS = 'http://www.w3.org/2000/svg';
-
 const PHASE_WORDS = { repair: 'Reparación', build: 'Construcción' };
+
+function markFinal(node, asset, src) {
+  node.setAttribute('data-asset', asset);
+  node.setAttribute('data-status', 'final');
+  node.setAttribute('data-src', src);
+  return node;
+}
 
 const DEFAULTS = {
   contract: '02',
@@ -46,68 +54,19 @@ function make(tag, className, text) {
   return node;
 }
 
-function makeSvg(tag, attributes = {}) {
-  const node = document.createElementNS(SVG_NS, tag);
-  for (const [name, value] of Object.entries(attributes)) {
-    node.setAttribute(name, String(value));
-  }
-  return node;
-}
-
-function markPending(node, asset) {
-  node.setAttribute('data-asset', asset);
-  node.setAttribute('data-status', 'a producir');
-  return node;
-}
-
 /**
- * Indicador de pisos semicircular. Adorno de la sala: la aguja no se mueve
- * con el juego; el recorrido real lo muestra el tablero del parent.
+ * Indicador de pisos. Adorno de la sala: no se mueve con el juego;
+ * el recorrido real lo muestra el tablero del parent.
  */
 function buildGauge() {
   const figure = make('figure', 'l2-gauge');
-  markPending(figure, 'n2.floorIndicator');
-  const svg = makeSvg('svg', {
-    class: 'l2-gauge-svg',
-    viewBox: '0 0 200 118',
-    role: 'img',
-    'aria-label': 'Indicador de pisos (adorno del taller)',
-  });
-  svg.append(makeSvg('path', {
-    class: 'l2-gauge-arc',
-    d: 'M 18 104 A 82 82 0 0 1 182 104',
-    fill: 'none',
-  }));
-  for (const [x, label] of [[18, 'Baja'], [100, '1'], [182, '2']]) {
-    const tick = makeSvg('line', {
-      class: 'l2-gauge-tick',
-      x1: x,
-      y1: 104,
-      x2: x,
-      y2: 92,
-    });
-    svg.append(tick);
-    const caption = makeSvg('text', {
-      class: 'l2-gauge-label',
-      x,
-      y: 84,
-      'text-anchor': 'middle',
-    });
-    caption.textContent = label;
-    svg.append(caption);
-  }
-  const needle = makeSvg('line', {
-    class: 'l2-gauge-needle',
-    x1: 100,
-    y1: 104,
-    x2: 100,
-    y2: 40,
-  });
-  svg.append(needle);
-  const hub = makeSvg('circle', { class: 'l2-gauge-hub', cx: 100, cy: 104, r: 7 });
-  svg.append(hub);
+  figure.setAttribute('aria-label', 'Indicador de pisos (adorno del taller)');
+  markFinal(figure, 'levels.02.floorIndicator', 'assets/levels/02/floor-indicator.svg');
+  const img = make('img', 'l2-gauge-img');
+  img.setAttribute('src', 'assets/levels/02/floor-indicator.svg');
+  img.setAttribute('alt', '');
   const caption = make('figcaption', 'l2-gauge-caption', 'Pisos');
-  figure.append(svg, caption);
+  figure.append(img, caption);
   return figure;
 }
 
@@ -116,35 +75,22 @@ function buildGauge() {
  * este solo viste la placa.
  */
 function buildPinion() {
-  const svg = makeSvg('svg', {
-    class: 'l2-pinion-svg',
-    viewBox: '0 0 96 96',
-    'aria-hidden': 'true',
-    focusable: 'false',
-  });
-  for (let index = 0; index < 8; index += 1) {
-    const tooth = makeSvg('rect', {
-      class: 'l2-pinion-tooth',
-      x: 43,
-      y: 4,
-      width: 10,
-      height: 16,
-      rx: 2,
-      transform: `rotate(${index * 45} 48 48)`,
-    });
-    svg.append(tooth);
-  }
-  svg.append(makeSvg('circle', { class: 'l2-pinion-body', cx: 48, cy: 48, r: 32 }));
-  svg.append(makeSvg('circle', { class: 'l2-pinion-hub', cx: 48, cy: 48, r: 10 }));
-  return svg;
+  const img = make('img', 'l2-pinion-img');
+  img.setAttribute('src', 'assets/levels/02/pinion.webp');
+  img.setAttribute('alt', '');
+  img.setAttribute('aria-hidden', 'true');
+  return img;
 }
 
 function buildRelay(name) {
   const relay = make('div', 'l2-relay');
-  markPending(relay, 'n2.relay');
+  markFinal(relay, 'shared.prop.relay', 'assets/shared/props/relay.webp');
+  const img = make('img', 'l2-relay-img');
+  img.setAttribute('src', 'assets/shared/props/relay.webp');
+  img.setAttribute('alt', '');
   const visor = make('div', 'l2-relay-visor');
   const tag = make('span', 'l2-relay-tag', name);
-  relay.append(visor, tag);
+  relay.append(img, visor, tag);
   return relay;
 }
 
@@ -168,7 +114,7 @@ export function createLevelScene(options = {}) {
 
   const background = make('div', 'l2-background');
   background.setAttribute('aria-hidden', 'true');
-  markPending(background, 'n2.background');
+  markFinal(background, 'levels.02.background', 'assets/levels/02/background.webp');
 
   const light = make('div', 'l2-light');
   light.setAttribute('aria-hidden', 'true');
@@ -200,14 +146,14 @@ export function createLevelScene(options = {}) {
   props.setAttribute('aria-hidden', 'true');
   props.append(buildRelay('Cerrada'), buildRelay('Abierta'));
   const pinion = make('div', 'l2-pinion');
-  markPending(pinion, 'n2.pinion');
+  markFinal(pinion, 'levels.02.pinion', 'assets/levels/02/pinion.webp');
   pinion.setAttribute('aria-hidden', 'true');
   pinion.append(buildPinion());
 
   const caption = make(
     'p',
     'l2-caption',
-    'Fondo, indicador y piñón en dibujo provisorio — a producir.',
+    'Fondo, indicador, piñón y relés finales de la sala.',
   );
   plate.append(plateLabel, plateSerial, seal, editorSlot, pinion, caption);
 

@@ -6,8 +6,8 @@
    Contención como el N5: la escena vive dentro del wb-stage sin
    desplazar la página; si el tablero crece, el desplazamiento vive
    dentro de .l2-editor-slot.
-   Placeholders en CSS/SVG; finales a producir: n2.background,
-   n2.pinion, n2.floorIndicator (ver docs/ASSET-MANIFEST.md). */
+   Finales: levels.02.background, levels.02.floorIndicator,
+   levels.02.pinion, shared.prop.relay (ver assets/manifest.json). */
 
 .level-scene[data-level="2"] {
   --l2-nickel: #232c36;
@@ -41,17 +41,22 @@
   line-height: 1.5;
 }
 
-/* Pared de níquel con retícula de latón (placeholder de n2.background). */
+/* Foto final del lobby: se muestra completa, con un velo tenue para que
+   el tablero mantenga contraste; la retícula de latón queda como capa
+   superior. Si la foto falta, el degradado de base sostiene la sala. */
 .level-scene[data-level="2"] .l2-background {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background:
+  background-image:
+    linear-gradient(rgba(10, 13, 17, 0.35), rgba(10, 13, 17, 0.35)),
     linear-gradient(rgba(212, 167, 44, 0.05) 1px, transparent 1px),
     linear-gradient(90deg, rgba(212, 167, 44, 0.05) 1px, transparent 1px),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px);
-  background-size: 48px 48px, 48px 48px, auto;
-  mask-image: radial-gradient(circle at 50% 38%, #000 0%, transparent 78%);
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px),
+    url("../../../assets/levels/02/background.webp");
+  background-size: cover, 48px 48px, 48px 48px, auto, cover;
+  background-position: center, 0 0, 0 0, 0 0, center;
+  background-repeat: no-repeat, repeat, repeat, repeat, no-repeat;
 }
 
 /* Luz cálida desde arriba a la izquierda y filo teal a la derecha. */
@@ -103,47 +108,18 @@
 .level-scene[data-level="2"] .l2-gauge {
   flex: 0 0 auto;
   margin: 0;
-  padding: 6px 8px 4px;
+  padding: 0;
   border: 1px solid rgba(212, 167, 44, 0.45);
-  border-radius: 56px 56px 8px 8px;
+  border-radius: 8px;
   background: linear-gradient(180deg, #313b47 0%, #171c23 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
-.level-scene[data-level="2"] .l2-gauge-svg {
+.level-scene[data-level="2"] .l2-gauge-img {
   display: block;
-  width: 90px;
+  width: 150px;
   max-width: 100%;
   height: auto;
-}
-
-.level-scene[data-level="2"] .l2-gauge-arc {
-  stroke: var(--l2-brass);
-  stroke-width: 3;
-}
-
-.level-scene[data-level="2"] .l2-gauge-tick {
-  stroke: var(--l2-muted);
-  stroke-width: 2;
-}
-
-.level-scene[data-level="2"] .l2-gauge-label {
-  fill: var(--l2-ink);
-  font-family: var(--l2-font-ui);
-  font-size: 13px;
-  letter-spacing: 0.08em;
-}
-
-.level-scene[data-level="2"] .l2-gauge-needle {
-  stroke: var(--l2-teal);
-  stroke-width: 3;
-  stroke-linecap: round;
-}
-
-.level-scene[data-level="2"] .l2-gauge-hub {
-  fill: var(--l2-brass-2);
-  stroke: #2b1c0b;
-  stroke-width: 1.5;
 }
 
 .level-scene[data-level="2"] .l2-gauge-caption {
@@ -330,6 +306,14 @@
   background: linear-gradient(180deg, #232c36, #12161c);
 }
 
+.level-scene[data-level="2"] .l2-relay-img {
+  display: block;
+  width: 22px;
+  height: 22px;
+  flex: none;
+  object-fit: contain;
+}
+
 .level-scene[data-level="2"] .l2-relay-visor {
   width: 14px;
   height: 14px;
@@ -350,35 +334,18 @@
   position: absolute;
   right: 12px;
   bottom: 12px;
-  width: 44px;
-  height: 44px;
+  width: 72px;
+  height: 72px;
   flex: none;
   opacity: 0.85;
   pointer-events: none;
 }
 
-.level-scene[data-level="2"] .l2-pinion-svg {
+.level-scene[data-level="2"] .l2-pinion-img {
   display: block;
   width: 100%;
   height: 100%;
-}
-
-.level-scene[data-level="2"] .l2-pinion-tooth {
-  fill: #8a651f;
-  stroke: #2b1c0b;
-  stroke-width: 1;
-}
-
-.level-scene[data-level="2"] .l2-pinion-body {
-  fill: #3a2a12;
-  stroke: var(--l2-brass-2);
-  stroke-width: 2;
-}
-
-.level-scene[data-level="2"] .l2-pinion-hub {
-  fill: var(--l2-brass-2);
-  stroke: #2b1c0b;
-  stroke-width: 1.5;
+  object-fit: contain;
 }
 
 .level-scene[data-level="2"] .l2-caption {
@@ -440,8 +407,8 @@
     gap: 6px;
   }
 
-  .level-scene[data-level="2"] .l2-gauge-svg {
-    width: 88px;
+  .level-scene[data-level="2"] .l2-gauge-img {
+    width: 120px;
   }
 
   .level-scene[data-level="2"] .l2-title {
@@ -465,8 +432,8 @@
   }
 
   .level-scene[data-level="2"] .l2-pinion {
-    width: 36px;
-    height: 36px;
+    width: 56px;
+    height: 56px;
     right: 8px;
     bottom: 8px;
   }
