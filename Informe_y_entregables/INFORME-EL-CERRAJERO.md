@@ -108,7 +108,7 @@ TABLA II. Los tres jueces del juego.
 | Motivos | Intruso, bloqueo | Intruso, bloqueo, atasco | Atasco, alarma, salida errónea |
 | Cobertura | No aplica | 2 000 palabras o más | 256 pares o más |
 
-El video demostrativo del sistema se encuentra en el siguiente hipervínculo: [Enlace al video — PENDIENTE](https://example.com/video-pendiente).
+El video demostrativo del sistema se encuentra en el siguiente hipervínculo: [Video demostrativo](https://drive.google.com/file/d/1xNz_OS0sN8JovBEKZ8TbTeM5WNeA8MUy/view?usp=sharing).
 
 ### D. Sistema de diseño y accesibilidad
 
@@ -141,7 +141,7 @@ Se logró un videojuego serio completo y verificado: cinco niveles jugables, cua
 
 ## Lista de placeholders pendientes
 
-1. **Video demostrativo:** hipervínculo con texto `[Enlace al video — PENDIENTE]` y URL `https://example.com/video-pendiente`. En el `.docx` debe ser un hyperlink real, no texto plano. Es el único pendiente.
+No queda ningún pendiente: el video demostrativo ya apunta al enlace definitivo de Drive y los datos de autores, institución y docente están confirmados y aplicados.
 
 ## Datos confirmados (ya aplicados en el artículo)
 
