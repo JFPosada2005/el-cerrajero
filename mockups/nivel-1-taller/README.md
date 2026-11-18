@@ -4,13 +4,13 @@ Prototipo visual de “La mesa del cerrajero” para el contrato 01, fase de rep
 
 ## Abrir
 
-Abrir `index.html` directamente en el navegador. No necesita servidor.
-
-También se puede servir desde la raíz del proyecto:
+Servir la carpeta desde la raíz del proyecto:
 
 ```text
 http://localhost:8000/mockups/nivel-1-taller/
 ```
+
+Abrir `index.html` directamente también carga la escena, pero los navegadores basados en Chromium bloquean las fuentes self-hosted por CORS cuando el origen es `file://`. Para ver la tipografía prevista, usar el servidor.
 
 ## Interacciones del prototipo
 
