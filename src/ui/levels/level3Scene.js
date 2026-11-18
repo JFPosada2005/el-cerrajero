@@ -1,11 +1,22 @@
 // El Cerrajero — escena del nivel 3 (Museo del Llano).
 //
-// Aporta fondo, mesa, placa, utilería y decoración. No crea el editor
-// real (el parent monta el #canvas en `editorSlot`), ni cables, llaves,
-// juicio o lógica. Las alas de día/noche y los glifos de bifurcador y
-// resorte usan los assets finales del manifiesto (`data-status="final"`
-// con `data-asset` + `data-src`); la lámpara (`levels.03.lamp`, missing)
-// sigue como placeholder CSS/SVG con `data-status="a producir"`.
+// Aporta fondo a pantalla completa, mesa, placa, utilería y decoración.
+// Cada prop accionable es un `<button type="button">` real con
+// `data-action` y `aria-label`: papeles del conservador (contrato/pista/
+// bitácora), lámpara de alarma (probar), interruptor de la sala de noche
+// (ensayo) y tijera (cortar). La escena no decide nada: el parent engancha
+// sus manejadores reales sobre esos `data-action`. No crea el editor real
+// (el parent monta el #canvas en `editorSlot`), cables, llaves, juicio o
+// lógica. En inmersivo el parent monta `#palette` y herramientas en
+// `keysSlot` y muda su nodo de estado a `hudSlot` (con `append`: la ranura
+// viaja vacía para no duplicar la línea); el `statusSlot` clásico queda
+// como ranura vacía de compatibilidad.
+// El resorte sigue siendo un modo del inventario, no un prop.
+// Las alas de día/noche y los glifos de bifurcador y resorte usan los
+// assets finales del manifiesto (`data-status="final"` con `data-asset` +
+// `data-src`); la lámpara (`levels.03.lamp`, missing) sigue como
+// placeholder CSS/SVG con `data-status="a producir"` (solo en atributo,
+// nunca en texto visible).
 
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
@@ -36,7 +47,7 @@ function markPlaceholder(element, asset) {
 
 // Slot integrado con asset final: conserva el slot del manifiesto y la
 // ruta usada para trazabilidad. `src` va en relativo al documento
-// (`assets/...`), como consume el manifiesto.
+// (`assets/...`, como consume el manifiesto).
 function markFinal(element, asset, src) {
   element.setAttribute('data-asset', asset);
   element.setAttribute('data-status', 'final');
@@ -104,6 +115,55 @@ function springGlyph() {
   return svg;
 }
 
+// Tijera del conservador: dos anillas y hojas cruzadas.
+function scissorsGlyph() {
+  const svg = svgNode('svg', {
+    viewBox: '0 0 40 40',
+    class: 'museum-cut-art',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.append(svgNode('path', {
+    d: 'M8 32 L30 10 M10 10 L28 28',
+    fill: 'none',
+    stroke: 'currentColor',
+    'stroke-width': '2.4',
+    'stroke-linecap': 'round',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '9', cy: '33', r: '4',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '9', cy: '12', r: '4',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+  }));
+  return svg;
+}
+
+// Interruptor de la sala de noche: palanca de latón sobre base.
+function switchGlyph() {
+  const svg = svgNode('svg', {
+    viewBox: '0 0 32 40',
+    class: 'museum-assault-art',
+    'aria-hidden': 'true',
+    focusable: 'false',
+  });
+  svg.append(svgNode('rect', {
+    x: '6', y: '30', width: '20', height: '6', rx: '2',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+  }));
+  svg.append(svgNode('line', {
+    x1: '16', y1: '30', x2: '23', y2: '12',
+    stroke: 'currentColor', 'stroke-width': '2.4', 'stroke-linecap': 'round',
+  }));
+  svg.append(svgNode('circle', {
+    cx: '24', cy: '10', r: '3.4',
+    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
+  }));
+  return svg;
+}
+
 // Lámpara de sala: campana + halo. Placeholder del asset final.
 function lampFigure(variant) {
   const figure = node('div', `museum-lamp museum-lamp--${variant}`);
@@ -150,6 +210,24 @@ function lampFigure(variant) {
   return figure;
 }
 
+function paperProp(name, src, asset, action, label) {
+  const item = node('li', 'museum-paper-item');
+  const button = node('button', 'museum-paper');
+  button.type = 'button';
+  button.setAttribute('data-action', action);
+  button.setAttribute('aria-label', label);
+  const photo = node('img', 'museum-paper-photo');
+  photo.setAttribute('src', src);
+  photo.setAttribute('alt', '');
+  photo.setAttribute('aria-hidden', 'true');
+  markFinal(photo, asset, src);
+  button.append(photo);
+  const name_ = node('span', 'museum-paper-name', name);
+  button.append(name_);
+  item.append(button);
+  return item;
+}
+
 export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } = {}) {
   const contract = level.contract ?? '03';
   const client = level.client ?? 'Museo del Llano';
@@ -178,13 +256,8 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   nightWing.append(node('span', 'museum-wing-name', 'Sala de noche'));
   nightWing.append(node('span', 'museum-moon'));
 
-  const lamps = node('div', 'museum-lamps');
-  lamps.append(lampFigure('day'));
-  lamps.append(lampFigure('night'));
-
   backdrop.append(dayWing);
   backdrop.append(nightWing);
-  backdrop.append(lamps);
 
   // Mesa de nogal del taller.
   const bench = node('div', 'museum-bench');
@@ -213,14 +286,12 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
     'aria-label',
     'Mecanismo del museo: aquí se monta el editor real de 5 a 8 casillas',
   );
-  editorSlot.append(
-    node('p', 'museum-editor-note', 'La placa aloja el editor real de 5 a 8 casillas.'),
-  );
 
   const glyphs = node('div', 'museum-glyphs');
 
   const fork = node('div', 'museum-glyph museum-glyph--fork');
   fork.setAttribute('aria-label', 'Bifurcador');
+  fork.setAttribute('title', 'Bifurcador: una misma llave puede salir dos veces de la misma casilla.');
   markFinal(fork, 'shared.prop.fork', 'assets/shared/props/fork.svg');
   const forkImg = node('img', 'museum-glyph-art');
   forkImg.setAttribute('src', 'assets/shared/props/fork.svg');
@@ -228,16 +299,11 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   forkImg.setAttribute('aria-hidden', 'true');
   fork.append(forkImg);
   fork.append(forkGlyph());
-  fork.append(
-    node(
-      'p',
-      'museum-glyph-caption',
-      'Bifurcador: una misma llave puede salir dos veces de la misma casilla.',
-    ),
-  );
+  fork.append(node('span', 'museum-glyph-plate', 'Bifurcador'));
 
   const spring = node('div', 'museum-glyph museum-glyph--spring');
   spring.setAttribute('aria-label', 'Resorte');
+  spring.setAttribute('title', 'Resorte: une dos salas sin pedir llave.');
   markFinal(spring, 'shared.prop.spring', 'assets/shared/props/spring.svg');
   const springImg = node('img', 'museum-glyph-art');
   springImg.setAttribute('src', 'assets/shared/props/spring.svg');
@@ -245,9 +311,7 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   springImg.setAttribute('aria-hidden', 'true');
   spring.append(springImg);
   spring.append(springGlyph());
-  spring.append(
-    node('p', 'museum-glyph-caption', 'Resorte: une dos salas sin pedir llave.'),
-  );
+  spring.append(node('span', 'museum-glyph-plate', 'Resorte'));
 
   glyphs.append(fork);
   glyphs.append(spring);
@@ -256,7 +320,7 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   plate.append(tags);
   plate.append(editorSlot);
   plate.append(glyphs);
-  plate.append(node('span', 'museum-plate-serial', 'Sala 03 · N.º 0303'));
+  plate.append(node('span', 'museum-plate-serial', 'Placa 03 · N.º 0303'));
   plate.append(node('span', 'museum-plate-alarm', 'Alarma'));
 
   const rivets = node('div', 'museum-rivets');
@@ -266,14 +330,13 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   }
   plate.append(rivets);
 
-  // Estado de la prueba: el parent muestra aquí el paso de la llave.
-  const statusSlot = node('aside', 'museum-status');
-  statusSlot.setAttribute('data-slot', 'status');
-  statusSlot.setAttribute('aria-live', 'polite');
-  statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
-  statusSlot.append(
-    node('p', 'museum-status-note', 'Aquí el taller muestra la marcha de la prueba.'),
-  );
+// Estado de la prueba: el parent muestra aquí la marcha de la llave en
+// modo clásico. En inmersivo la línea vive en `hudSlot` (último renglón
+// de la banda) y este slot queda vacío y colapsado (`:empty`).
+const statusSlot = node('aside', 'museum-status');
+statusSlot.setAttribute('data-slot', 'status');
+statusSlot.setAttribute('aria-live', 'polite');
+statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
 
   // Sala: columna flexible que contiene placa y marcha dentro del alto
   // del stage. El fondo y la mesa son decorado absoluto y no participan.
@@ -281,9 +344,75 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   room.append(plate);
   room.append(statusSlot);
 
+  // Props diegéticos sobre la mesa: el parent engancha sus manejadores
+  // reales sobre cada `data-action`. Sin lógica en la escena. Los papeles
+  // usan los assets finales del conservador (`levels.01.*`).
+  const papers = node('ul', 'museum-papers');
+  papers.setAttribute('aria-label', 'Papeles del conservador sobre la mesa');
+  papers.append(paperProp('Contrato', 'assets/levels/01/props/contract.webp', 'levels.01.contract', 'contract', 'Abrir el contrato'));
+  papers.append(paperProp('Pista', 'assets/levels/01/props/hint.webp', 'levels.01.hint', 'hint', 'Pedir una pista'));
+  papers.append(paperProp('Bitácora', 'assets/levels/01/props/log.webp', 'levels.01.log', 'log', 'Abrir la bitácora'));
+
+  const lamps = node('div', 'museum-lamps');
+  lamps.append(lampFigure('day'));
+
+  // La lámpara de la sala de noche es la consola de alarma: probar.
+  const probe = node('button', 'museum-lamp-btn');
+  probe.type = 'button';
+  probe.setAttribute('data-action', 'probe');
+  probe.setAttribute('aria-label', 'Probar la llave en la sala');
+  probe.append(lampFigure('night'));
+  probe.append(node('span', 'museum-prop-name', 'Probar'));
+
+  // El interruptor de la sala de noche: ensayo del asalto. Junto a
+  // PROBAR (a su izquierda, mismo grupo) sobre el borde derecho de la placa.
+  const assault = node('button', 'museum-assault');
+  assault.type = 'button';
+  assault.setAttribute('data-action', 'assault');
+  assault.setAttribute('aria-label', 'Ensayar el asalto en la sala de noche');
+  assault.append(switchGlyph());
+  assault.append(node('span', 'museum-prop-name', 'Ensayo'));
+
+  const alarmGroup = node('div', 'museum-alarm-group');
+  alarmGroup.append(assault);
+  alarmGroup.append(probe);
+  lamps.append(alarmGroup);
+
+  // La tijera sobre la mesa: cortar.
+  const cut = node('button', 'museum-cut');
+  cut.type = 'button';
+  cut.setAttribute('data-action', 'cut');
+  cut.setAttribute('aria-label', 'Cortar un cable con la tijera');
+  cut.append(scissorsGlyph());
+  cut.append(node('span', 'museum-prop-name', 'Tijera'));
+
+  // Banda de mesa en flujo (nunca absoluta): una sola fila sin solapes
+  // (papeles a la izquierda, `keysSlot` al centro-derecha, tijera a la
+  // derecha) y el estado como último renglón. ENSAYO va junto a PROBAR en
+  // el grupo de alarma, no en la banda. El parent monta `#palette` y
+  // herramientas en `keysSlot` y muda su nodo de estado a `hudSlot` (siempre vacío en
+  // la escena: el parent lo llena con `append`); la escena no decide nada.
+  const keysSlot = node('div', 'museum-keys');
+  keysSlot.setAttribute('data-slot', 'keys');
+  keysSlot.setAttribute('role', 'group');
+  keysSlot.setAttribute('aria-label', 'Carretes y herramientas del conservador');
+
+  const hudSlot = node('aside', 'museum-hud');
+  hudSlot.setAttribute('data-slot', 'hud');
+  hudSlot.setAttribute('aria-live', 'polite');
+  hudSlot.setAttribute('aria-label', 'La marcha de la prueba del taller en la mesa');
+
+  const dock = node('div', 'museum-dock');
+  dock.append(papers);
+  dock.append(keysSlot);
+  dock.append(cut);
+  dock.append(hudSlot);
+
   element.append(backdrop);
   element.append(bench);
   element.append(room);
+  element.append(dock);
+  element.append(lamps);
 
   let disposed = false;
   function dispose() {
@@ -299,5 +428,13 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
     }
   }
 
-  return { element, editorSlot, statusSlot, dispose };
+  return {
+    element,
+    editorSlot,
+    statusSlot,
+    keysSlot,
+    hudSlot,
+    actions: ['contract', 'hint', 'log', 'probe', 'assault', 'cut'],
+    dispose,
+  };
 }

@@ -111,17 +111,28 @@ test('fase repair/build en placa y raíz', () => {
 test('no crea editor, cables, llaves, juicio ni lógica', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
-  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 4, 'solo glifos SVG propios (Y, resorte, 2 lámparas)');
+  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 6, 'glifos SVG propios (Y, resorte, 2 lámparas, tijera, interruptor)');
   const imgs = nodes.filter((node) => node.tag === 'img');
-  assert.equal(imgs.length, 2, 'solo las fotos finales de bifurcador y resorte');
+  assert.equal(imgs.length, 5, 'fotos finales: bifurcador, resorte y papeles del conservador');
+  const paperSrcs = [
+    'assets/levels/01/props/contract.webp',
+    'assets/levels/01/props/hint.webp',
+    'assets/levels/01/props/log.webp',
+  ];
   for (const img of imgs) {
     assert.ok(
-      ['assets/shared/props/fork.svg', 'assets/shared/props/spring.svg'].includes(
-        img.getAttribute('src'),
-      ),
+      [
+        'assets/shared/props/fork.svg',
+        'assets/shared/props/spring.svg',
+        ...paperSrcs,
+      ].includes(img.getAttribute('src')),
       `img con asset final: ${img.getAttribute('src')}`,
     );
-    assert.equal(img.getAttribute('aria-hidden'), 'true', 'los glifos con foto siguen decorativos');
+    assert.equal(img.getAttribute('aria-hidden'), 'true', 'las fotos siguen decorativas');
+    assert.equal(img.getAttribute('alt'), '', 'las fotos no duplican el nombre del prop');
+  }
+  for (const src of paperSrcs) {
+    assert.ok(existsSync(join(repoRoot, src)), `el papel existe en disco: ${src}`);
   }
   assert.equal(nodes.filter((node) => node.tag === 'canvas').length, 0);
   const classed = nodes.flatMap((node) => classes(node));
@@ -153,6 +164,9 @@ test('slots finales con asset del manifiesto y lámpara a producir', () => {
     'levels.03.backgroundNight': 'assets/levels/03/night.webp',
     'shared.prop.fork': 'assets/shared/props/fork.svg',
     'shared.prop.spring': 'assets/shared/props/spring.svg',
+    'levels.01.contract': 'assets/levels/01/props/contract.webp',
+    'levels.01.hint': 'assets/levels/01/props/hint.webp',
+    'levels.01.log': 'assets/levels/01/props/log.webp',
   };
   for (const [slot, src] of Object.entries(expected)) {
     const found = finals.find((node) => node.getAttribute('data-asset') === slot);
@@ -214,18 +228,26 @@ test('las alas usan la foto final visible: respaldo, velo y luz translúcidos', 
   assert.ok(/text-shadow/.test(sceneCss), 'la etiqueta de sala se lee sobre la foto');
 });
 
-test('bifurcador y resorte conservan glifo, tamaño y nombre con foto final', () => {
+test('bifurcador y resorte: placas grabadas con glifo, tamaño, nombre y tooltip', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
   for (const [slot, label] of [['shared.prop.fork', 'Bifurcador'], ['shared.prop.spring', 'Resorte']]) {
     const holder = nodes.find((node) => node.getAttribute('data-asset') === slot);
     assert.ok(holder, `contenedor de ${slot}`);
     assert.equal(holder.getAttribute('aria-label'), label, `el contenedor nombra: ${label}`);
+    assert.ok(holder.getAttribute('title'), `${slot} explica en title, sin párrafo visible`);
     const tags = holder.children.map((child) => child.tag);
     assert.ok(tags.includes('img'), `${slot} usa <img> final`);
     assert.ok(tags.includes('svg'), `${slot} conserva el glifo con topes/bocas`);
     const img = holder.children.find((child) => child.tag === 'img');
     assert.ok(classes(img).includes('museum-glyph-art'), `${slot} conserva el tamaño del glifo`);
+    const plate = holder.children.find(
+      (child) => child.tag === 'span' && classes(child).includes('museum-glyph-plate'),
+    );
+    assert.ok(plate, `${slot} rotula la placa grabada`);
+    assert.equal(plate.textContent, label, `${slot} nombra sin explicar`);
+    assert.ok(!tags.includes('p'), `${slot} ya no usa párrafo explicativo`);
+    assert.ok(!holder.children.some((child) => classes(child).includes('museum-glyph-caption')), `${slot} sin leyenda de producción`);
     assert.ok(/\.museum-glyph img\.museum-glyph-art/.test(sceneCss), 'el CSS fija el tamaño de la foto del glifo');
   }
 });
@@ -233,8 +255,12 @@ test('bifurcador y resorte conservan glifo, tamaño y nombre con foto final', ()
 test('alas de día y noche, lámparas y glifos con vocabulario de taller', () => {
   const scene = createLevelScene({});
   const text = texts(scene).join(' · ');
+  const aria = all(scene)
+    .map((node) => node.getAttribute('aria-label') ?? '')
+    .join(' · ');
+  const voice = `${text} · ${aria}`.toLowerCase();
   for (const word of ['Sala de día', 'Sala de noche', 'Bifurcador', 'Resorte', 'placa', 'taller']) {
-    assert.ok(text.includes(word), `la escena nombra: ${word}`);
+    assert.ok(voice.includes(word.toLowerCase()), `la escena nombra: ${word}`);
   }
   for (const node of all(scene)) {
     const hay = `${node.textContent ?? ''} ${node.getAttribute('aria-label') ?? ''}`.toLowerCase();
@@ -294,7 +320,7 @@ test('el editor real cabe: #canvas dentro del slot para 5–8 casillas a 1440 y 
   }
   const root = bodyFor('.level-scene[data-level="3"]');
   assert.ok(/display\s*:\s*grid/.test(root), 'la raíz es grilla del stage');
-  assert.ok(/grid-template-rows\s*:\s*minmax\(0,\s*1fr\)/.test(root), 'la raíz limita su fila al alto del stage');
+  assert.ok(/grid-template-rows\s*:\s*minmax\(0,\s*1fr\)\s+auto/.test(root), 'la raíz reserva fila flexible a la sala y fila natural a la banda');
   assert.ok(/height\s*:\s*100%/.test(root), 'la raíz ocupa el alto del stage');
   assert.ok(/max-height\s*:\s*100%/.test(root), 'la raíz no supera el alto del stage');
   assert.ok(/min-height\s*:\s*0/.test(root), 'la raíz puede encogerse');
@@ -336,8 +362,8 @@ test('el editor real cabe: #canvas dentro del slot para 5–8 casillas a 1440 y 
     'los glifos salen del flujo a 900 px o menos para darle el alto al editor',
   );
   assert.ok(
-    /@media[^{]*max-height\s*:\s*900px[\s\S]*?\.museum-editor-note[\s\S]*?display\s*:\s*none/.test(sceneCss),
-    'la nota de ayuda sale del flujo a 900 px o menos',
+    !/\.museum-editor-note/.test(sceneCss),
+    'la nota de producción ya no existe en el CSS',
   );
 });
 
@@ -360,9 +386,13 @@ test('CSS con alcance, foco, 44 px y movimiento reducido', () => {
       continue;
     }
     for (const selector of selectorPart.split(',')) {
+      const trimmed = selector.trim();
+      if (/^(\d+%|from|to)$/.test(trimmed)) {
+        continue;
+      }
       assert.ok(
-        selector.trim().includes('.level-scene'),
-        `selector con alcance de escena: ${selector.trim()}`,
+        trimmed.includes('.level-scene'),
+        `selector con alcance de escena: ${trimmed}`,
       );
     }
   }
@@ -370,4 +400,315 @@ test('CSS con alcance, foco, 44 px y movimiento reducido', () => {
   assert.ok(sceneCss.includes('prefers-reduced-motion'), 'respeta movimiento reducido');
   assert.ok(sceneCss.includes('44px'), 'blancos táctiles de 44 px');
   assert.ok(!/url\(\s*['"]?https?:/i.test(sceneCss), 'sin imágenes externas en CSS');
+});
+
+test('props diegéticos: papeles, lámpara, interruptor y tijera como botones reales', () => {
+  const scene = createLevelScene({});
+  const nodes = all(scene);
+  const byAction = {};
+  for (const node of nodes) {
+    const action = node.getAttribute('data-action');
+    if (action) {
+      byAction[action] = node;
+    }
+  }
+  for (const action of ['contract', 'hint', 'log', 'probe', 'assault', 'cut']) {
+    const prop = byAction[action];
+    assert.ok(prop, `prop con data-action="${action}"`);
+    assert.equal(prop.tag, 'button', `${action} es un botón real`);
+    assert.equal(prop.type, 'button', `${action} no envía formularios`);
+    assert.ok(prop.getAttribute('aria-label'), `${action} tiene nombre accesible`);
+  }
+  function propText(prop) {
+    return [...walk(prop)]
+      .map((node) => node.textContent)
+      .filter((text) => typeof text === 'string' && text.length > 0)
+      .join(' ');
+  }
+  assert.equal(propText(byAction.contract).includes('Contrato'), true, 'el contrato se lee en marfil');
+  assert.equal(propText(byAction.hint).includes('Pista'), true, 'la pista se lee en marfil');
+  assert.equal(propText(byAction.log).includes('Bitácora'), true, 'la bitácora se lee en marfil');
+  assert.ok(classes(byAction.probe).includes('museum-lamp-btn'), 'probar vive en la lámpara');
+  assert.ok(classes(byAction.assault).includes('museum-assault'), 'el ensayo vive en el interruptor');
+  assert.ok(classes(byAction.cut).includes('museum-cut'), 'cortar vive en la tijera');
+  for (const action of ['contract', 'hint', 'log', 'probe', 'assault', 'cut']) {
+    const svgInside = [...walk(byAction[action])].some((node) => node.tag === 'svg' || node.tag === 'span');
+    assert.ok(svgInside, `${action} muestra su objeto, no una caja`);
+  }
+  assert.ok(
+    /\.museum-paper\s*\{[^}]*background\s*:\s*transparent/.test(sceneCss),
+    'los papeles no usan caja de botón',
+  );
+  assert.ok(
+    /\.museum-cut\s*\{[^}]*background\s*:\s*transparent/.test(sceneCss),
+    'la tijera no usa caja de botón',
+  );
+  assert.ok(
+    sceneCss.includes('.museum-paper:focus-visible') && sceneCss.includes('.museum-cut:focus-visible'),
+    'los props mantienen foco visible',
+  );
+});
+
+test('fuera los textos de producción: nada de "a producir" visible', () => {
+  const scene = createLevelScene({});
+  const text = texts(scene).join(' · ');
+  assert.ok(
+    !text.includes('La placa aloja el editor real de 5 a 8 casillas.'),
+    'fuera la nota del editor',
+  );
+  assert.ok(
+    !text.toLowerCase().includes('aquí el taller muestra la marcha de la prueba.'),
+    'fuera la nota de la marcha',
+  );
+  assert.ok(!text.includes('a producir'), 'ningún aviso visible dice a producir');
+  assert.ok(
+    !sceneSource.includes('La placa aloja el editor real de 5 a 8 casillas.'),
+    'la fuente ya no trae la nota del editor',
+  );
+  assert.ok(
+    !sceneSource.toLowerCase().includes('aquí el taller muestra la marcha de la prueba.'),
+    'la fuente ya no trae la nota de la marcha',
+  );
+  const placeholders = all(scene).filter((node) => node.getAttribute('data-status') === 'a producir');
+  assert.ok(placeholders.length > 0, 'la lámpara sigue pendiente en data-status');
+  for (const node of placeholders) {
+    assert.ok(node.getAttribute('data-asset'), 'cada pendiente nombra su slot de asset');
+  }
+});
+
+test('escena inmersiva: pantalla completa, alas con cover y placa protagonista', () => {
+  function bodyFor(exact) {
+    const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
+    const found = clean
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }))
+      .find((rule) => rule.selector.split(',').map((part) => part.trim()).includes(exact));
+    assert.ok(found, `hay regla para ${exact}`);
+    return found.body;
+  }
+  const root = bodyFor('.level-scene[data-level="3"]');
+  assert.ok(/position\s*:\s*absolute/.test(root), 'la escena flota sobre todo el stage');
+  assert.ok(/inset\s*:\s*0/.test(root), 'la escena cubre todo el stage');
+  assert.ok(/height\s*:\s*100%/.test(root), 'la escena ocupa el alto del stage');
+  assert.ok(/border\s*:\s*0/.test(root), 'sin marcos: fuera el borde');
+  assert.ok(/border-radius\s*:\s*0/.test(root), 'sin marcos: fuera el recuadro');
+  assert.ok(
+    /\.wb-scene\.is-immersive\s+\.level-scene\[data-level="3"\]/.test(sceneCss),
+    'el CSS acompaña al shell inmersivo sin romperse solo',
+  );
+  for (const wing of ['.museum-wing--day', '.museum-wing--night']) {
+    const body = bodyFor(`.level-scene[data-level="3"] ${wing}`);
+    assert.ok(/background-size\s*:\s*cover/.test(body), `${wing} cubre con cover`);
+  }
+  const title = bodyFor('.level-scene[data-level="3"] .museum-plate-title');
+  assert.ok(/font-size\s*:\s*2[24]px/.test(title), 'la placa queda centrada y más grande');
+});
+
+test('estado sin franja: hud vacío que el parent llena, 14 px y colapso', () => {
+  const scene = createLevelScene({});
+  assert.ok(scene.hudSlot, 'el slot hud existe para el parent');
+  assert.equal(scene.hudSlot.getAttribute('data-slot'), 'hud');
+  assert.equal(scene.hudSlot.children.length, 0, 'la ranura viaja vacía: el parent la llena con append y nada se duplica');
+  // El parent muda su nodo de estado: cae al último renglón de la banda.
+  const moved = { tag: 'div', className: 'wb-status', children: [], parentNode: null, attributes: {}, textContent: 'Carrete 3' };
+  scene.hudSlot.children.push(moved);
+  assert.equal(scene.hudSlot.children.at(-1), moved, 'lo mudado queda último en la banda');
+  assert.equal(scene.statusSlot.children.length, 0, 'el statusSlot clásico queda vacío en inmersivo');
+  const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  const found = clean
+    .split('}')
+    .map((chunk) => chunk.split('{'))
+    .filter((parts) => parts.length === 2)
+    .map(([selector, body]) => ({ selector: selector.trim(), body }))
+    .find((rule) =>
+      rule.selector.split(',').map((part) => part.trim()).includes('.level-scene[data-level="3"] .museum-hud'),
+    );
+  assert.ok(found, 'hay regla para la ranura hud');
+  assert.ok(/font-size\s*:\s*14px/.test(found.body), 'el estado mudado se lee a 14 px');
+  assert.ok(/text-shadow/.test(found.body), 'la línea mudada se lee sobre la foto');
+  assert.ok(
+    /\.level-scene\[data-level="3"\] \.museum-hud:empty[\s\S]*?display\s*:\s*none/.test(clean),
+    'el hud vacío colapsa: sin renglón fantasma antes de la muda',
+  );
+  assert.ok(
+    /\.level-scene\[data-level="3"\] \.museum-status:empty[\s\S]*?display\s*:\s*none/.test(clean),
+    'el slot clásico colapsa cuando queda vacío',
+  );
+});
+
+test('animaciones de ambiente bajo movimiento permitido', () => {
+  assert.ok(
+    /@media[^{]*prefers-reduced-motion\s*:\s*no-preference/.test(sceneCss),
+    'las animaciones solo corren con movimiento permitido',
+  );
+  assert.ok(/museum-lamp-flicker/.test(sceneCss), 'la lámpara parpadea');
+  assert.ok(/museum-vitrine-glow/.test(sceneCss), 'las vitrinas respiran con brillo tenue');
+  assert.ok(/museum-spring-sway/.test(sceneCss), 'el glifo del resorte tiene vaivén');
+});
+
+test('ranuras keys y hud en la banda de mesa para el parent', () => {
+  const scene = createLevelScene({});
+  assert.ok(scene.keysSlot, 'el slot de carretes existe para el parent');
+  assert.equal(scene.keysSlot.getAttribute('data-slot'), 'keys');
+  assert.equal(scene.keysSlot.getAttribute('role'), 'group');
+  assert.ok(scene.keysSlot.getAttribute('aria-label'), 'los carretes se nombran');
+  assert.equal(scene.keysSlot.children.length, 0, 'el parent monta #palette y herramientas');
+  assert.ok(scene.hudSlot, 'el slot hud existe para el parent');
+  assert.equal(scene.hudSlot.getAttribute('data-slot'), 'hud');
+  assert.equal(scene.hudSlot.getAttribute('aria-live'), 'polite');
+  assert.ok(scene.hudSlot.getAttribute('aria-label'), 'la marcha del taller en mesa se nombra');
+  const dock = all(scene).find((node) => classes(node).includes('museum-dock'));
+  assert.ok(dock, 'hay banda de mesa');
+  assert.equal(scene.keysSlot.parentNode, dock, 'keysSlot vive en la banda');
+  assert.equal(scene.hudSlot.parentNode, dock, 'hudSlot vive en la banda');
+  const order = dock.children.map((child) => child.className);
+  assert.deepEqual(
+    order,
+    ['museum-papers', 'museum-keys', 'museum-cut', 'museum-hud'],
+    'la banda ordena papeles, carretes, tijera y estado último (ENSAYO va con PROBAR)',
+  );
+});
+
+test('banda inferior ordenada sin solapes declarados', () => {
+  function rulesOf(css) {
+    return css
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }));
+  }
+  function bodyFor(exact) {
+    const found = rulesOf(sceneCss).find((rule) =>
+      rule.selector.split(',').map((part) => part.trim()).includes(exact),
+    );
+    assert.ok(found, `hay regla para ${exact}`);
+    return found.body;
+  }
+  const dock = bodyFor('.level-scene[data-level="3"] .museum-dock');
+  assert.ok(/position\s*:\s*static/.test(dock), 'la banda va en flujo: la placa termina donde la banda empieza');
+  assert.ok(!/position\s*:\s*absolute/.test(dock), 'la banda nunca flota sobre la placa ni el tablero');
+  assert.ok(/display\s*:\s*grid/.test(dock), 'la banda es grilla, no pila absoluta');
+  assert.ok(
+    /grid-template-areas\s*:[^;]*"papers keys cut"[^;]*"hud hud hud"/s.test(dock),
+    'papeles a la izquierda, keys al centro-derecha, tijera a la derecha, estado último por encima del borde',
+  );
+  for (const prop of ['.museum-papers', '.museum-cut']) {
+    const body = bodyFor(`.level-scene[data-level="3"] ${prop}`);
+    assert.ok(!/position\s*:\s*absolute/.test(body), `${prop} ya no flota: lo ordena la grilla`);
+  }
+  const assaultBody = bodyFor('.level-scene[data-level="3"] .museum-assault');
+  assert.ok(!/grid-area/.test(assaultBody), 'ENSAYO sale de la banda: vive en el grupo de alarma');
+  assert.ok(!/position\s*:\s*absolute/.test(assaultBody), 'ENSAYO no flota solo: lo posiciona el grupo');
+  const keys = bodyFor('.level-scene[data-level="3"] .museum-keys');
+  assert.ok(/justify-self\s*:\s*end/.test(keys), 'keysSlot al centro-derecha');
+  assert.ok(/min-width\s*:\s*0/.test(keys), 'keysSlot puede encogerse sin empujar');
+  assert.ok(
+    /\.museum-keys button\s*\{[^}]*min-width\s*:\s*44px[^}]*min-height\s*:\s*44px/.test(sceneCss),
+    'lo que monte el parent en keys mantiene 44 px',
+  );
+  assert.ok(
+    /\.museum-keys\s*>\s*\*\s*\{[^}]*flex\s*:\s*0\s+0\s+auto/.test(sceneCss),
+    'los hijos de keys no se encogen: el rack desplaza en horizontal en vez de aplastar carretes',
+  );
+  const keysMin = keys.match(/min-height\s*:\s*(\d+)px/);
+  assert.ok(keysMin && Number(keysMin[1]) >= 104, 'keysSlot reserva el alto del carrete + chapa (≈104 px)');
+  assert.ok(!/overflow\s*:\s*hidden/.test(keys), 'keysSlot no recorta en vertical');
+  assert.ok(!/overflow-y\s*:\s*hidden/.test(keys), 'la chapa del símbolo nunca se corta');
+  assert.ok(!/overflow\s*:\s*hidden/.test(dock), 'ningún contenedor intermedio corta la chapa');
+  const hud = bodyFor('.level-scene[data-level="3"] .museum-hud');
+  assert.ok(/grid-area\s*:\s*hud/.test(hud), 'hudSlot cierra la banda como último renglón');
+  assert.ok(
+    /@media[^{]*max-width\s*:\s*700px[\s\S]*?\.museum-dock[\s\S]*?"hud hud"/.test(sceneCss),
+    'en 390 la banda reordena a dos columnas con el estado último y sin scroll horizontal',
+  );
+});
+
+test('inmersivo: sin encabezado duplicado y placa entre header y banda', () => {
+  function rulesOf(css) {
+    return css
+      .replace(/\/\*[\s\S]*?\*\//g, '')
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }));
+  }
+  function immersiveBodies(exact) {
+    return rulesOf(sceneCss)
+      .filter((rule) =>
+        rule.selector.split(',').map((part) => part.trim()).includes(exact),
+      )
+      .map((rule) => rule.body);
+  }
+  const head = '.wb-scene.is-immersive .level-scene[data-level="3"] .museum-plate-head';
+  const tags = '.wb-scene.is-immersive .level-scene[data-level="3"] .museum-wing-tags';
+  for (const [exact, what] of [[head, 'encabezado interno'], [tags, 'badges de ala']]) {
+    const bodies = immersiveBodies(exact);
+    assert.ok(bodies.length > 0, `hay regla inmersiva para ${what}`);
+    assert.ok(bodies.some((body) => /display\s*:\s*none/.test(body)), `${what} se oculta: el título ya lo da el shell`);
+  }
+  const roomBodies = immersiveBodies('.wb-scene.is-immersive .level-scene[data-level="3"] .museum-room');
+  assert.ok(roomBodies.length > 0, 'la sala reserva el alto del header flotante en inmersivo');
+  const top = roomBodies.join(' ').match(/padding-top\s*:\s*(\d+)px/);
+  assert.ok(top && Number(top[1]) >= 96, 'la placa empieza debajo del header con aire');
+});
+
+test('ENSAYO junto a PROBAR: mismo grupo sobre el borde derecho', () => {
+  const scene = createLevelScene({});
+  const nodes = all(scene);
+  const byAction = {};
+  for (const node of nodes) {
+    const action = node.getAttribute('data-action');
+    if (action) {
+      byAction[action] = node;
+    }
+  }
+  const group = all(scene).find((node) => classes(node).includes('museum-alarm-group'));
+  assert.ok(group, 'hay grupo de alarma');
+  assert.equal(byAction.assault.parentNode, group, 'ENSAYO vive en el grupo');
+  assert.equal(byAction.probe.parentNode, group, 'PROBAR vive en el grupo');
+  const order = group.children.map((child) => child.getAttribute('data-action'));
+  assert.deepEqual(order, ['assault', 'probe'], 'ENSAYO a la izquierda de PROBAR');
+  const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  const found = clean
+    .split('}')
+    .map((chunk) => chunk.split('{'))
+    .filter((parts) => parts.length === 2)
+    .map(([selector, body]) => ({ selector: selector.trim(), body }))
+    .find((rule) =>
+      rule.selector.split(',').map((part) => part.trim()).includes('.level-scene[data-level="3"] .museum-alarm-group'),
+    );
+  assert.ok(found, 'hay regla para el grupo de alarma');
+  assert.ok(/position\s*:\s*absolute/.test(found.body), 'el grupo flota junto sobre el borde derecho');
+  assert.ok(/right\s*:/.test(found.body), 'el grupo va a la derecha');
+  assert.ok(/display\s*:\s*flex/.test(found.body), 'ENSAYO y PROBAR comparten fila sin pisarse');
+});
+
+test('keysSlot: alto para la chapa del carrete y sin recorte vertical', () => {
+  const scene = createLevelScene({});
+  assert.ok(scene.keysSlot, 'la ranura existe para el parent');
+  const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  function bodyFor(exact) {
+    const found = clean
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }))
+      .find((rule) => rule.selector.split(',').map((part) => part.trim()).includes(exact));
+    assert.ok(found, `hay regla para ${exact}`);
+    return found.body;
+  }
+  const keys = bodyFor('.level-scene[data-level="3"] .museum-keys');
+  const min = keys.match(/min-height\s*:\s*(\d+)px/);
+  assert.ok(min && Number(min[1]) >= 104, 'la ranura contiene el carrete completo + chapa (≈104 px)');
+  assert.ok(!/overflow\s*:\s*hidden/.test(keys), 'la ranura no recorta');
+  assert.ok(!/overflow-y\s*:\s*hidden/.test(keys), 'el eje vertical no corta el símbolo');
+  const dock = bodyFor('.level-scene[data-level="3"] .museum-dock');
+  assert.ok(!/overflow\s*:\s*hidden/.test(dock), 'la banda no corta la chapa camino a la mesa');
+  assert.ok(
+    /@media[^{]*max-width\s*:\s*700px[\s\S]*?\.museum-keys[\s\S]*?min-height\s*:\s*104px/.test(clean),
+    'en 390 la ranura conserva el alto del símbolo',
+  );
 });

@@ -1,9 +1,13 @@
 /* El Cerrajero — escena del nivel 3 (Museo del Llano).
    Alcance estricto: .level-scene[data-level="3"]. No toca el shell.
-   La escena vive contenida en el alto del .wb-stage: la raíz es una
-   grilla de una fila y la sala es una columna flexible; el desborde,
-   si aparece, vive dentro del slot del editor. Placeholders CSS/SVG;
-   los assets finales están en docs/ASSET-MANIFEST.md. */
+   Escena inmersiva a pantalla completa: la raíz cubre todo el stage
+   (`position: absolute; inset: 0`), sin marco ni borde; las alas cubren
+   con `cover` y la placa queda centrada y protagonista sobre la mesa.
+   Funciona sola y bajo `.wb-scene.is-immersive` (el shell la activa).
+   Los props (papeles, lámpara, interruptor, tijera) son los controles
+   reales: botones sin caja con foco teal y área ≥44 px; el parent engancha
+   sus manejadores sobre cada `data-action`. Placeholders CSS/SVG; los
+   assets finales están en docs/ASSET-MANIFEST.md. */
 
 .level-scene[data-level="3"] {
   --museum-brass: #d4a72c;
@@ -16,21 +20,45 @@
   --museum-paper-2: #e4d8c3;
   --museum-night: #0a2027;
   --museum-day: #3a2c14;
-  position: relative;
+  position: absolute;
+  inset: 0;
+  width: 100%;
   box-sizing: border-box;
   display: grid;
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) auto;
   height: 100%;
   max-height: 100%;
   min-height: 0;
   overflow: hidden;
-  border: 1px solid #2a3646;
-  border-radius: 16px;
+  border: 0;
+  border-radius: 0;
   background: #05080c;
   color: var(--museum-ink);
   font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
   font-size: 16px;
   line-height: 1.5;
+}
+
+/* Bajo el shell inmersivo: mismo lleno, sin marco heredado. El título ya
+   lo muestra el header flotante del shell: el encabezado interno de la
+   placa y los badges de ala se ocultan para no duplicar ni tapar
+   Volver/Sonido. Siguen en el DOM para el lector y los tests. */
+.wb-scene.is-immersive .level-scene[data-level="3"] {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+.wb-scene.is-immersive .level-scene[data-level="3"] .museum-plate-head,
+.wb-scene.is-immersive .level-scene[data-level="3"] .museum-wing-tags {
+  display: none;
+}
+
+/* La placa empieza debajo del header flotante del shell (~96 px) con aire,
+   y termina por encima de la banda de mesa: la banda va en flujo. */
+.wb-scene.is-immersive .level-scene[data-level="3"] .museum-room {
+  padding-top: 112px;
 }
 
 .level-scene[data-level="3"] *,
@@ -124,6 +152,7 @@
 .level-scene[data-level="3"] .museum-lamps {
   position: absolute;
   inset: 0;
+  z-index: 2;
   pointer-events: none;
 }
 
@@ -169,13 +198,57 @@
   filter: drop-shadow(0 0 10px currentColor);
 }
 
+/* Grupo de alarma sobre el borde derecho de la placa: ENSAYO junto a
+   PROBAR (ensayo a la izquierda, prueba a la derecha). */
+.level-scene[data-level="3"] .museum-alarm-group {
+  position: absolute;
+  right: 4%;
+  bottom: 26%;
+  z-index: 2;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="3"] .museum-alarm-group button {
+  pointer-events: auto;
+}
+
+/* La lámpara de noche es la consola de alarma: el control de probar. */
+.level-scene[data-level="3"] .museum-lamp-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--museum-teal);
+}
+
+.level-scene[data-level="3"] .museum-lamp-btn .museum-lamp {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  width: 34px;
+}
+
 /* Mesa de nogal del taller. */
 .level-scene[data-level="3"] .museum-bench {
   position: absolute;
   left: 0;
   right: 0;
   bottom: 0;
-  height: 22%;
+  height: 26%;
   background:
     repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px),
     linear-gradient(180deg, #31221a 0%, #1c130e 55%, #0d0907 100%);
@@ -207,7 +280,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  width: min(100%, 860px);
+  width: min(100%, 920px);
   margin: 0 auto;
   padding: 12px 16px 26px;
   overflow: hidden;
@@ -242,7 +315,7 @@
   flex: 1 1 auto;
   color: var(--museum-ink);
   font-family: "Cinzel", Georgia, serif;
-  font-size: 20px;
+  font-size: 22px;
   line-height: 1.2;
 }
 
@@ -331,15 +404,6 @@
   border: 0;
   border-radius: 0;
   box-shadow: none;
-}
-
-.level-scene[data-level="3"] .museum-editor-note {
-  flex: 0 0 auto;
-  margin: 0 0 8px;
-  color: var(--museum-muted);
-  font-family: "Special Elite", "Courier New", monospace;
-  font-size: 14px;
-  line-height: 1.5;
 }
 
 .level-scene[data-level="3"] .museum-plate-serial {
@@ -441,38 +505,231 @@
   object-fit: contain;
 }
 
-.level-scene[data-level="3"] .museum-glyph-caption {
+/* Placas grabadas: el nombre del glifo, sin párrafo explicativo
+   (la explicación vive en `title`). */
+.level-scene[data-level="3"] .museum-glyph-plate {
   margin: 0;
   color: var(--museum-ink);
+  font-family: "Special Elite", "Courier New", monospace;
   font-size: 14px;
-  line-height: 1.5;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
 }
 
+/* Ranura clásica de estado: vacía en inmersivo (el parent muda su nodo
+   a `hudSlot`). Colapsa para no reservar alto fantasma en la sala. */
 .level-scene[data-level="3"] .museum-status {
   position: relative;
   z-index: 1;
   flex: 0 0 auto;
-  width: min(100%, 860px);
+  width: min(100%, 920px);
   margin: 0 auto;
-  padding: 8px 14px;
-  border: 1px solid #2a3646;
-  border-radius: 999px;
-  background: rgba(7, 11, 16, 0.82);
+  padding: 2px 14px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
 }
 
-.level-scene[data-level="3"] .museum-status-note {
+/* Banda de mesa en flujo (nunca absoluta: la placa termina donde la
+   banda empieza, con aire, y nada pisa los rótulos de la placa). Papeles
+   y tijera a la izquierda, `keysSlot` al centro-derecha, ENSAYO a la
+   izquierda y PROBAR arriba a la derecha; el estado (`hudSlot`) es el
+   último renglón, por encima del borde inferior, nunca en el tablero. */
+.level-scene[data-level="3"] .museum-dock {
+  position: static;
+  z-index: 3;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  grid-template-areas:
+    "papers keys cut"
+    "hud hud hud";
+  align-items: end;
+  gap: 4px 16px;
+  padding: 12px 2% 12px;
+}
+
+/* Papeles del conservador sobre la mesa: marfil CSS, sin caja de botón. */
+.level-scene[data-level="3"] .museum-papers {
+  grid-area: papers;
+  align-self: end;
+  display: flex;
+  align-items: flex-end;
+  gap: 14px;
   margin: 0;
-  color: var(--museum-muted);
+  padding: 0;
+  list-style: none;
+}
+
+.level-scene[data-level="3"] .museum-paper-item {
+  margin: 0;
+  padding: 0;
+}
+
+.level-scene[data-level="3"] .museum-paper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px 8px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.level-scene[data-level="3"] .museum-paper-photo {
+  display: block;
+  width: 56px;
+  height: auto;
+  border-radius: 2px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.5);
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+.level-scene[data-level="3"] .museum-paper-item:nth-child(2) .museum-paper-photo {
+  transform: rotate(1.5deg);
+}
+
+.level-scene[data-level="3"] .museum-paper-item:nth-child(3) .museum-paper-photo {
+  transform: rotate(-1deg);
+}
+
+.level-scene[data-level="3"] .museum-paper-name,
+.level-scene[data-level="3"] .museum-prop-name {
+  margin: 0;
+  color: var(--museum-paper);
   font-size: 12px;
-  letter-spacing: 0.1em;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
   text-transform: uppercase;
   text-align: center;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+  pointer-events: none;
 }
 
-/* Foco visible y blancos táctiles de 44 px. */
+/* Interruptor de la sala de noche: el control del ensayo. Vive en el
+   grupo de alarma junto a PROBAR (a su izquierda), no en la banda. */
+.level-scene[data-level="3"] .museum-assault {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--museum-brass-2);
+}
+
+.level-scene[data-level="3"] .museum-assault-art {
+  display: block;
+  width: 30px;
+  height: auto;
+  filter: drop-shadow(0 0 8px currentColor);
+}
+
+/* Tijera sobre la mesa: el control de cortar. */
+.level-scene[data-level="3"] .museum-cut {
+  grid-area: cut;
+  align-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 6px;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: #c9c9c9;
+}
+
+.level-scene[data-level="3"] .museum-cut-art {
+  display: block;
+  width: 40px;
+  height: auto;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
+}
+
+/* Ranura de carretes y herramientas: el parent monta aquí `#palette`.
+   Reserva el alto del carrete completo + chapa del símbolo (≈104 px) y
+   nunca recorta en vertical: el número debe leerse. Los hijos no se
+   encogen (flex none): si el rack sobra a lo ancho, la ranura desplaza
+   en horizontal en vez de aplastar los carretes a círculos. */
+.level-scene[data-level="3"] .museum-keys {
+  grid-area: keys;
+  align-self: end;
+  justify-self: end;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 8px;
+  min-width: 0;
+  min-height: 104px;
+  max-width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: thin;
+  scrollbar-color: #4a3614 #0b0f14;
+}
+
+.level-scene[data-level="3"] .museum-keys > * {
+  flex: 0 0 auto;
+}
+
+.level-scene[data-level="3"] .museum-keys button {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* Ranura de estado: último renglón de la banda, siempre al pie, nunca en
+   el tablero. El parent muda aquí su nodo (con `append`); la escena no
+   pinta línea propia para no duplicarla. Vacía colapsa para que la banda
+   no reserve un renglón fantasma. */
+.level-scene[data-level="3"] .museum-hud {
+  grid-area: hud;
+  min-width: 0;
+  margin: 0;
+  padding: 2px 14px;
+  border: 0;
+  background: transparent;
+  color: var(--museum-ink);
+  font-size: 14px;
+  text-align: center;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.9);
+}
+
+.level-scene[data-level="3"] .museum-hud:empty {
+  display: none;
+}
+
+.level-scene[data-level="3"] .museum-status:empty {
+  display: none;
+}
+
+/* Foco visible teal y blancos táctiles de 44 px. */
 .level-scene[data-level="3"] :focus-visible {
   outline: 2px solid var(--museum-teal);
   outline-offset: 2px;
+}
+
+.level-scene[data-level="3"] .museum-paper:focus-visible,
+.level-scene[data-level="3"] .museum-lamp-btn:focus-visible,
+.level-scene[data-level="3"] .museum-assault:focus-visible,
+.level-scene[data-level="3"] .museum-cut:focus-visible {
+  outline: 2px solid var(--museum-teal);
+  outline-offset: 3px;
 }
 
 .level-scene[data-level="3"] .museum-editor-slot #canvas:focus-visible {
@@ -493,24 +750,24 @@
   }
 
   .level-scene[data-level="3"] .museum-plate {
-    width: min(100%, 900px);
+    width: min(100%, 960px);
   }
 
   .level-scene[data-level="3"] .museum-status {
-    width: min(100%, 900px);
+    width: min(100%, 960px);
+  }
+
+  .level-scene[data-level="3"] .museum-plate-title {
+    font-size: 24px;
   }
 }
 
-/* Ventanas de 900 px o menos: los glifos y la nota salen del flujo para
+/* Ventanas de 900 px o menos: los glifos salen del flujo para
    dejarle el alto al editor (tablero ≥ 480×300 a 1440×900). */
 @media (max-height: 900px) {
   .level-scene[data-level="3"] .museum-room {
     gap: 6px;
     padding: 10px 16px;
-  }
-
-  .level-scene[data-level="3"] .museum-editor-note {
-    display: none;
   }
 
   .level-scene[data-level="3"] .museum-wing-tags {
@@ -575,8 +832,89 @@
     width: 28px;
   }
 
-  .level-scene[data-level="3"] .museum-status {
-    border-radius: 12px;
+  .level-scene[data-level="3"] .museum-paper-photo {
+    width: 44px;
+  }
+
+  /* Angosto: la banda pasa a dos columnas sin scroll horizontal; el
+     estado sigue como último renglón y todo queda visible. */
+  .level-scene[data-level="3"] .museum-dock {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "papers cut"
+      "keys keys"
+      "hud hud";
+    gap: 4px 8px;
+    padding: 8px 8px 8px;
+  }
+
+  /* En inmersivo el header flotante es más compacto: la placa baja menos. */
+  .wb-scene.is-immersive .level-scene[data-level="3"] .museum-room {
+    padding: 96px 8px 8px;
+  }
+
+  .level-scene[data-level="3"] .museum-papers {
+    gap: 8px;
+  }
+
+  .level-scene[data-level="3"] .museum-keys {
+    justify-self: stretch;
+    min-height: 104px;
+  }
+}
+
+/* Ambiente: parpadeo de lámpara, brillo tenue de vitrinas y vaivén del
+   glifo del resorte. Solo con movimiento permitido; sin distraer del
+   tablero (la tijera y los papeles no se animan). */
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes museum-lamp-flicker {
+    0%,
+    100% {
+      opacity: 1;
+    }
+    92% {
+      opacity: 1;
+    }
+    94% {
+      opacity: 0.72;
+    }
+    96% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes museum-vitrine-glow {
+    0%,
+    100% {
+      opacity: 0.85;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+
+  @keyframes museum-spring-sway {
+    0%,
+    100% {
+      transform: rotate(-1.2deg);
+    }
+    50% {
+      transform: rotate(1.2deg);
+    }
+  }
+
+  .level-scene[data-level="3"] .museum-lamp-art {
+    animation: museum-lamp-flicker 4.5s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="3"] .museum-skylight,
+  .level-scene[data-level="3"] .museum-moon {
+    animation: museum-vitrine-glow 6s ease-in-out infinite;
+  }
+
+  .level-scene[data-level="3"] .museum-glyph--spring .museum-glyph-art {
+    animation: museum-spring-sway 5s ease-in-out infinite;
+    transform-origin: 50% 50%;
   }
 }
 
