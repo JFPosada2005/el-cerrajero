@@ -7,15 +7,24 @@
  * real (`#canvas`) en `editorSlot` y la pila real (`#stack-panel`) en
  * `statusSlot`, y conserva los botones y selectores verdaderos.
  *
- * Los placeholders visuales llevan `data-placeholder="a-producir"`,
- * `data-status="a producir"` y `data-asset` con el slot de
- * `docs/ASSET-MANIFEST.md`. Los datos del nivel solo viajan por
- * `textContent`, nunca como marcas parseadas.
+ * Los slots finales llevan `data-status="final"` con `data-asset` y
+ * `data-src` (`n4.background`, `n4.selectors`, `n4.levers`). Las fichas y
+ * la base de muestra de la columna siguen como placeholders
+ * (`data-placeholder="a-producir"`, `data-status="a producir"`); la pila
+ * real que monta el parent se viste por CSS. Los datos del nivel solo
+ * viajan por `textContent`, nunca como marcas parseadas.
  */
 
 const ALARM_NOTE = 'Cualquier otra combinación deja la alarma encendida.';
 const KEY_FALLBACK = '▲ Subir · ▼ Bajar';
 const LEVER_FALLBACK = ['▲ Subir', '▼ Bajar'];
+
+// Slots finales del manifiesto (docs/ASSET-MANIFEST.md §N4): fondo,
+// selectores y palancas. Las fichas y la base de la columna siguen como
+// muestra a producir; la pila real se viste por CSS en level4.css.
+const ASSET_BACKGROUND = 'assets/levels/04/background.webp';
+const ASSET_SELECTORS = 'assets/levels/04/selectors.svg';
+const ASSET_LEVERS = ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'];
 
 function make(tag, className, text) {
   const node = document.createElement(tag);
@@ -32,6 +41,21 @@ function markPlaceholder(node, asset) {
   node.setAttribute('data-placeholder', 'a-producir');
   node.setAttribute('data-status', 'a producir');
   node.setAttribute('data-asset', asset);
+  return node;
+}
+
+function markFinal(node, asset, src) {
+  node.setAttribute('data-status', 'final');
+  node.setAttribute('data-asset', asset);
+  node.setAttribute('data-src', src);
+  return node;
+}
+
+function decorImage(src, className) {
+  const node = make('img', className);
+  node.setAttribute('src', src);
+  node.setAttribute('alt', '');
+  node.setAttribute('draggable', 'false');
   return node;
 }
 
@@ -63,10 +87,11 @@ export function createLevelScene(options = {}) {
   element.setAttribute('data-level', '4');
   element.setAttribute('aria-label', 'Tramoya del Teatro Municipal');
 
-  // --- Fondo: terciopelo granate (placeholder a producir) ---
+  // --- Fondo final (n4.background): la foto vive en el CSS, con el
+  // terciopelo como fallback; el nodo solo traza el slot. ---
   const backdrop = make('div', 'l4-backdrop');
   backdrop.setAttribute('aria-hidden', 'true');
-  markPlaceholder(backdrop, 'n4.background');
+  markFinal(backdrop, 'n4.background', ASSET_BACKGROUND);
   const rail = make('div', 'l4-rail-top');
   const curtainLeft = make('div', 'l4-curtain is-left');
   const curtainRight = make('div', 'l4-curtain is-right');
@@ -97,17 +122,18 @@ export function createLevelScene(options = {}) {
   const serial = make('p', 'l4-serial', 'Montacargas n.º 04');
   titles.append(kicker, serial);
 
-  // Palancas decorativas de las llaves (placeholder a producir: n4.levers).
+  // Palancas finales de las llaves (n4.levers: lever-up/lever-down según
+  // la posición: subir/bajar). Láminas decorativas, sin botones ni listeners.
   // La leyenda de abajo expone los mismos nombres al lector de pantalla.
   const levers = make('div', 'l4-levers');
   levers.setAttribute('aria-hidden', 'true');
-  markPlaceholder(levers, 'n4.levers');
-  for (const label of keyLabels(level)) {
+  markFinal(levers, 'n4.levers', ASSET_LEVERS.join(', '));
+  keyLabels(level).forEach((label, index) => {
     const lever = make('div', 'l4-lever');
-    lever.append(make('span', 'l4-lever-handle'));
+    lever.append(decorImage(ASSET_LEVERS[index % ASSET_LEVERS.length], 'l4-lever-icon'));
     lever.append(make('span', 'l4-lever-tag', label));
     levers.append(lever);
-  }
+  });
   head.append(titles, levers);
 
   const editorSlot = make('div', 'l4-editor-slot');
@@ -146,27 +172,12 @@ export function createLevelScene(options = {}) {
   markPlaceholder(base, 'n4.stackBase');
   counterweights.append(base);
 
+  // Selectores finales (n4.selectors): una lámina decorativa en lugar de
+  // los diales. El contenedor queda fuera de lectores y la imagen sin texto.
   const selectors = make('div', 'l4-selectors');
-  selectors.setAttribute('role', 'img');
-  selectors.setAttribute(
-    'aria-label',
-    'Selectores de la pila (placeholder a producir): si arriba hay y acción',
-  );
-  markPlaceholder(selectors, 'n4.selectors');
-  for (const [title, optionsText] of [
-    ['Si arriba hay', 'Da igual · Base · Ficha'],
-    ['Acción', 'No tocar · Cargar · Soltar'],
-  ]) {
-    const dial = make('div', 'l4-dial');
-    dial.setAttribute('aria-hidden', 'true');
-    const dialTitle = make('span', 'l4-dial-title', title);
-    const dialFace = make('span', 'l4-dial-face');
-    const needle = make('span', 'l4-dial-needle');
-    dialFace.append(needle);
-    const dialOptions = make('span', 'l4-dial-options', optionsText);
-    dial.append(dialTitle, dialFace, dialOptions);
-    selectors.append(dial);
-  }
+  selectors.setAttribute('aria-hidden', 'true');
+  markFinal(selectors, 'n4.selectors', ASSET_SELECTORS);
+  selectors.append(decorImage(ASSET_SELECTORS, 'l4-selectors-img'));
 
   const statusSlot = make('div', 'l4-status-slot');
   statusSlot.setAttribute('data-slot', 'status');
@@ -179,7 +190,7 @@ export function createLevelScene(options = {}) {
   const note = make(
     'p',
     'l4-note',
-    'Decorado de tramoya: fondo, fichas, base, selectores y palancas son placeholders a producir.',
+    'Decorado de tramoya: fondo, selectores y palancas del teatro; fichas y base de muestra a producir.',
   );
 
   rig.append(body, note);

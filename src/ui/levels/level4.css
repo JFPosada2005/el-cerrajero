@@ -35,18 +35,25 @@
   font-family: "Oswald", "Segoe UI", system-ui, sans-serif;
 }
 
-/* Fondo de terciopelo (placeholder a producir: n4.background). */
+/* Fondo final del teatro (n4.background): foto con oscurecimiento para el
+   contraste del tablero; los pliegues y el terciopelo de la raíz quedan
+   como fallback si el webp falta. */
 .level-scene[data-level="4"] .l4-backdrop {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
+    linear-gradient(rgb(0 0 0 / 0.55), rgb(0 0 0 / 0.55)),
+    url("../../../assets/levels/04/background.webp"),
     repeating-linear-gradient(
       90deg,
       rgb(0 0 0 / 0.22) 0 26px,
       rgb(255 255 255 / 0.04) 26px 40px,
       rgb(0 0 0 / 0.22) 40px 78px
     );
+  background-size: auto, cover, auto;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 
 .level-scene[data-level="4"] .l4-rail-top {
@@ -204,7 +211,7 @@
   opacity: 0.8;
 }
 
-/* Palancas decorativas de las llaves (placeholder a producir: n4.levers). */
+/* Palancas decorativas de las llaves (final: n4.levers). */
 .level-scene[data-level="4"] .l4-levers {
   display: flex;
   flex: 2 1 220px;
@@ -226,25 +233,11 @@
   background: rgb(0 0 0 / 0.3);
 }
 
-.level-scene[data-level="4"] .l4-lever-handle {
-  position: relative;
+/* Lámina final de cada palanca (n4.levers: subir/bajar según la llave). */
+.level-scene[data-level="4"] .l4-lever-icon {
   flex: 0 0 auto;
-  width: 10px;
-  height: 26px;
-  border-radius: 5px;
-  background: linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 55%, var(--l4-brass-dark) 100%);
-}
-
-.level-scene[data-level="4"] .l4-lever-handle::before {
-  content: "";
-  position: absolute;
-  top: -7px;
-  left: 50%;
-  width: 16px;
-  height: 16px;
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, var(--l4-brass-2) 0%, var(--l4-brass-dark) 70%);
-  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
 }
 
 .level-scene[data-level="4"] .l4-lever-tag {
@@ -391,7 +384,7 @@
   color: var(--l4-paper);
 }
 
-/* Selectores giratorios compactos (placeholder a producir: n4.selectors). */
+/* Selectores finales (n4.selectors): lámina única, compacta en la columna. */
 .level-scene[data-level="4"] .l4-selectors {
   display: flex;
   flex: 0 0 auto;
@@ -399,48 +392,12 @@
   gap: 8px;
 }
 
-.level-scene[data-level="4"] .l4-dial {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 6px;
-  border: 1px solid var(--l4-brass-dark);
-  border-radius: 8px;
-}
-
-.level-scene[data-level="4"] .l4-dial-title {
-  font-size: 12px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--l4-brass-2);
-}
-
-.level-scene[data-level="4"] .l4-dial-face {
-  position: relative;
-  width: 52px;
-  height: 52px;
-  border: 3px solid var(--l4-brass);
-  border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%, #2e3742 0%, #12161c 70%);
-}
-
-.level-scene[data-level="4"] .l4-dial-needle {
-  position: absolute;
-  top: 5px;
-  left: calc(50% - 2px);
-  width: 4px;
-  height: 18px;
-  border-radius: 2px;
-  background: var(--l4-brass-2);
-  transform: rotate(24deg);
-  transform-origin: 50% 21px;
-}
-
-.level-scene[data-level="4"] .l4-dial-options {
-  font-size: 12px;
-  text-align: center;
-  opacity: 0.85;
+.level-scene[data-level="4"] .l4-selectors-img {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  margin-inline: auto;
 }
 
 /* Hueco donde el parent monta la pila real (#stack-panel). */
@@ -503,14 +460,24 @@
   min-height: 44px;
   padding: 0 16px;
   border-radius: 999px;
-  background: linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 60%, var(--l4-brass-dark) 100%);
+  background:
+    url("../../../assets/levels/04/chip.webp"),
+    linear-gradient(180deg, var(--l4-brass-2) 0%, var(--l4-brass) 60%, var(--l4-brass-dark) 100%);
+  background-size: contain, auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
   font-size: 14px;
   color: var(--l4-ink);
 }
 
 .level-scene[data-level="4"] .l4-status-slot .stack-chip.is-base {
   border-radius: 4px;
-  background: linear-gradient(180deg, #3a434e 0%, #1a1f26 100%);
+  background:
+    url("../../../assets/levels/04/stack-base.webp"),
+    linear-gradient(180deg, #3a434e 0%, #1a1f26 100%);
+  background-size: contain, auto;
+  background-position: center, 0 0;
+  background-repeat: no-repeat, repeat;
   border: 1px solid var(--l4-brass-dark);
   color: var(--l4-paper);
 }

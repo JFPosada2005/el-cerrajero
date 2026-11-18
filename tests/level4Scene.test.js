@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { createLevelScene } from '../src/ui/levels/level4Scene.js';
@@ -142,16 +142,46 @@ test('la escena no crea editor, cables, llaves ni lógica', () => {
   assert.equal(findAll(scene.element, (n) => n.listenerTypes().length > 0).length, 0, 'sin listeners: decorado puro');
 });
 
-test('placeholders marcados a producir con su asset', () => {
+test('slots finales con data-src y archivo en disco', () => {
   const scene = setup();
-  const placeholders = findAll(scene.element, (n) => n.attributes['data-placeholder'] === 'a-producir');
-  const assets = placeholders.map((n) => n.attributes['data-asset']);
-  for (const slot of ['n4.background', 'n4.chip', 'n4.stackBase', 'n4.selectors', 'n4.levers']) {
-    assert.ok(assets.includes(slot), `falta placeholder de ${slot}`);
+  const final = findAll(scene.element, (n) => n.attributes['data-status'] === 'final');
+  assert.ok(final.length >= 3, 'fondo, selectores y palancas marcados como final');
+  const assets = final.map((n) => n.attributes['data-asset']).join(' ');
+  const srcs = final.map((n) => n.attributes['data-src']).join(' ');
+  const expected = {
+    'n4.background': ['assets/levels/04/background.webp'],
+    'n4.selectors': ['assets/levels/04/selectors.svg'],
+    'n4.levers': ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
+  };
+  for (const [slot, files] of Object.entries(expected)) {
+    assert.ok(assets.includes(slot), `slot final ${slot}`);
+    for (const src of files) {
+      assert.ok(srcs.includes(src), `data-src con ${src}`);
+      assert.ok(existsSync(join(here, '..', src)), `${src} existe en disco`);
+    }
   }
-  assert.ok(assets.filter((a) => a === 'n4.chip').length >= 3, 'la columna trae fichas de muestra');
-  for (const node of placeholders) {
-    assert.equal(node.attributes['data-status'], 'a producir', 'cada placeholder avisa su estado');
+  assert.ok(
+    !final.some((n) => n.attributes['data-placeholder'] === 'a-producir'),
+    'lo final ya no lleva marca a-producir',
+  );
+  const spoken = findAll(
+    scene.element,
+    (n) => typeof n.textContent === 'string' && n.textContent !== '' && n.children.length === 0,
+  )
+    .map((n) => n.textContent)
+    .join(' ');
+  assert.ok(!spoken.includes('final'), 'el aviso vive en atributos, no en texto visible');
+});
+
+test('fichas y base de muestra siguen a producir', () => {
+  const scene = setup();
+  const pending = findAll(scene.element, (n) => n.attributes['data-status'] === 'a producir');
+  assert.equal(pending.length, 4, 'solo las 3 fichas y la base de muestra siguen sin asset');
+  const assets = pending.map((n) => n.attributes['data-asset']);
+  assert.equal(assets.filter((a) => a === 'n4.chip').length, 3, 'la columna trae fichas de muestra');
+  assert.ok(assets.includes('n4.stackBase'), 'la base de muestra sigue pendiente');
+  for (const node of pending) {
+    assert.equal(node.attributes['data-placeholder'], 'a-producir', 'cada pendiente avisa su estado');
   }
   const decor = findAll(scene.element, (n) => n.attributes['aria-hidden'] === 'true');
   assert.ok(decor.length > 0, 'el decorado visual queda fuera de lectores');
@@ -166,15 +196,87 @@ test('mesa de trabajo y luz cálida como decorado estructural', () => {
   assert.equal(bench.getAttribute('data-placeholder'), null, 'la mesa es CSS, no un asset pendiente');
 });
 
-test('palancas decorativas con las etiquetas de las llaves', () => {
+test('palancas decorativas con las etiquetas de las llaves y svg finales', () => {
   const scene = setup();
   const levers = findOne(scene.element, (n) => classes(n).includes('l4-levers'));
   assert.equal(levers.attributes['data-asset'], 'n4.levers');
+  assert.equal(levers.attributes['data-status'], 'final', 'las palancas ya usan asset final');
+  assert.equal(levers.attributes['aria-hidden'], 'true', 'las palancas quedan fuera de lectores');
+  assert.ok(
+    String(levers.attributes['data-src']).includes('assets/levels/04/lever-up.svg'),
+    'data-src con la palanca de subir',
+  );
+  assert.ok(
+    String(levers.attributes['data-src']).includes('assets/levels/04/lever-down.svg'),
+    'data-src con la palanca de bajar',
+  );
   const tags = findAll(levers, (n) => classes(n).includes('l4-lever-tag'));
   assert.deepEqual(tags.map((n) => n.textContent), ['▲ Subir', '▼ Bajar']);
+  const icons = findAll(levers, (n) => classes(n).includes('l4-lever-icon'));
+  assert.equal(icons.length, 2, 'una palanca por llave');
+  assert.deepEqual(
+    icons.map((icon) => icon.getAttribute('src')),
+    ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
+  );
+  for (const icon of icons) {
+    assert.equal(icon.tag, 'img', 'las palancas usan imagen, no botones');
+    assert.equal(icon.getAttribute('alt'), '', 'imagen decorativa sin texto alternativo');
+    assert.ok(
+      existsSync(join(here, '..', String(icon.getAttribute('src')))),
+      `${icon.getAttribute('src')} existe en disco`,
+    );
+  }
   const fallback = setup({ level: {} });
   const fallbackTags = findAll(fallback.element, (n) => classes(n).includes('l4-lever-tag'));
   assert.deepEqual(fallbackTags.map((n) => n.textContent), ['▲ Subir', '▼ Bajar']);
+  const fallbackIcons = findAll(fallback.element, (n) => classes(n).includes('l4-lever-icon'));
+  assert.deepEqual(
+    fallbackIcons.map((icon) => icon.getAttribute('src')),
+    ['assets/levels/04/lever-up.svg', 'assets/levels/04/lever-down.svg'],
+  );
+});
+
+test('selectores en lámina final fuera del lector', () => {
+  const scene = setup();
+  const selectors = findOne(scene.element, (n) => classes(n).includes('l4-selectors'));
+  assert.equal(selectors.attributes['aria-hidden'], 'true', 'los selectores quedan fuera de lectores');
+  assert.equal(selectors.attributes['data-asset'], 'n4.selectors');
+  assert.equal(selectors.attributes['data-status'], 'final');
+  assert.equal(selectors.attributes['data-src'], 'assets/levels/04/selectors.svg');
+  assert.ok(
+    existsSync(join(here, '..', 'assets/levels/04/selectors.svg')),
+    'la lámina existe en disco',
+  );
+  const image = findOne(selectors, (n) => classes(n).includes('l4-selectors-img'));
+  assert.equal(image.tag, 'img');
+  assert.equal(image.getAttribute('src'), 'assets/levels/04/selectors.svg');
+  assert.equal(image.getAttribute('alt'), '', 'lámina decorativa sin texto alternativo');
+  assert.equal(
+    findAll(selectors, (n) => classes(n).includes('l4-dial')).length,
+    0,
+    'los diales decorativos ya no se dibujan',
+  );
+});
+
+test('fondo final con cover, oscurecimiento y terciopelo de fallback', () => {
+  const scene = setup();
+  const backdrop = findOne(scene.element, (n) => classes(n).includes('l4-backdrop'));
+  assert.equal(backdrop.attributes['data-asset'], 'n4.background');
+  assert.equal(backdrop.attributes['data-status'], 'final');
+  assert.equal(backdrop.attributes['data-src'], 'assets/levels/04/background.webp');
+  assert.ok(
+    existsSync(join(here, '..', 'assets/levels/04/background.webp')),
+    'el fondo existe en disco',
+  );
+  assert.ok(
+    cssSource.includes('url("../../../assets/levels/04/background.webp")'),
+    'el css viste la tramoya con el fondo',
+  );
+  const [block] = cssBlocks('.level-scene[data-level="4"] .l4-backdrop');
+  assert.ok(block, 'existe la regla del backdrop');
+  assert.ok(cssHas(block, 'cover'), 'el fondo cubre la tramoya');
+  assert.ok(cssHas(block, 'repeating-linear-gradient'), 'los pliegues quedan como fallback');
+  assert.ok(cssSource.includes('--l4-velvet'), 'el terciopelo de la raíz sigue como fallback');
 });
 
 test('leyenda de una línea con el texto completo en el title', () => {
@@ -269,7 +371,7 @@ test('editor flexible y canvas confinado sin estirar', () => {
   assert.ok(!cssSource.includes('min-height: 320px'), 'sin hueco mínimo heredado');
 });
 
-test('pila con techo y scroll interno, targets de 44 px', () => {
+test('pila con techo y scroll interno, targets de 44 px y sprites finales', () => {
   const [status] = cssBlocks('.level-scene[data-level="4"] .l4-status-slot');
   assert.ok(cssHas(status, 'flex: 0 0 auto'), 'el status no crece');
   for (const sel of ['.level-scene[data-level="4"] .l4-status-slot #stack-panel', '.level-scene[data-level="4"] .l4-status-slot .stack-panel']) {
@@ -280,13 +382,28 @@ test('pila con techo y scroll interno, targets de 44 px', () => {
   }
   const [chip] = cssBlocks('.level-scene[data-level="4"] .l4-status-slot .stack-chip');
   assert.ok(cssHas(chip, 'min-height: 44px'), 'fichas tocables de 44 px');
+  assert.ok(cssHas(chip, 'chip.webp'), 'la ficha viste la pila real');
+  const [base] = cssBlocks('.level-scene[data-level="4"] .l4-status-slot .stack-chip.is-base');
+  assert.ok(cssHas(base, 'stack-base.webp'), 'la base viste la pila real');
+  assert.ok(
+    cssSource.includes('url("../../../assets/levels/04/chip.webp")'),
+    'la ficha viste la pila real por css',
+  );
+  assert.ok(
+    cssSource.includes('url("../../../assets/levels/04/stack-base.webp")'),
+    'la base viste la pila real por css',
+  );
+  for (const src of ['assets/levels/04/chip.webp', 'assets/levels/04/stack-base.webp']) {
+    assert.ok(existsSync(join(here, '..', src)), `${src} existe en disco`);
+  }
 });
 
-test('cabecera y diales compactos: el editor manda', () => {
+test('cabecera compacta y lámina de selectores: el editor manda', () => {
   const [head] = cssBlocks('.level-scene[data-level="4"] .l4-head');
   assert.ok(cssHas(head, 'flex: 0 0 auto'), 'la cabecera no crece');
-  const [face] = cssBlocks('.level-scene[data-level="4"] .l4-dial-face');
-  assert.ok(cssHas(face, 'width: 52px'), 'diales compactos en la columna');
+  const [image] = cssBlocks('.level-scene[data-level="4"] .l4-selectors-img');
+  assert.ok(image, 'existe la regla de la lámina de selectores');
+  assert.ok(cssHas(image, 'width: 100%'), 'la lámina llena la columna');
 });
 
 test('en celular la escena queda contenida al stage, sin scroll horizontal', () => {
