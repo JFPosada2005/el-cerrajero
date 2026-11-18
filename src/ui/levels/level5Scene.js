@@ -6,14 +6,16 @@
  * en `editorSlot`; esta escena no crea editor, púas, juicio ni lógica, y
  * no toca la protección de la sección "Listo".
  *
- * Sin maquetas de cinta ni de tambor: el riel del cabezal es solo
- * atmósfera (sin casillas ni púas) para no duplicar el mecanismo real.
+ * La atmósfera trae luz cálida, remaches y rótulo de caja en la placa, más
+ * un riel de cabezal con cinta perforada decorativa (orificios sin casillas
+ * ni símbolos) que marca el lugar del mecanismo real sin duplicarlo.
  *
  * Placeholders CSS/DOM marcados "a producir" (ver `docs/ASSET-MANIFEST.md`):
  * n5.background, n5.tape, n5.head, n5.drum, n5.pin, n5.depositSlip.
  */
 
 const PHASE_WORDS = { repair: 'Reparación', build: 'Construcción' };
+const STAMP_WORDS = { repair: 'En reparación', build: 'En construcción' };
 
 function phaseWord(phase, puzzle) {
   if (phase === 'repair' || phase === 'Reparación') {
@@ -62,6 +64,8 @@ export function createLevelScene(options = {}) {
   const backdrop = make('div', 'counting-backdrop');
   backdrop.setAttribute('aria-hidden', 'true');
   markProducing(backdrop, 'n5.background');
+  const light = make('div', 'counting-light');
+  light.setAttribute('aria-hidden', 'true');
   const bench = make('div', 'counting-bench');
   bench.setAttribute('aria-hidden', 'true');
 
@@ -76,26 +80,48 @@ export function createLevelScene(options = {}) {
 
   const benchPlate = make('div', 'counting-bench-plate');
   markProducing(benchPlate, 'n5.tape, n5.head, n5.drum, n5.pin');
+  const rivets = make('div', 'plate-rivets');
+  rivets.setAttribute('aria-hidden', 'true');
+  for (let index = 0; index < 4; index += 1) {
+    rivets.append(make('span', 'plate-rivet'));
+  }
+  const plateTop = make('div', 'plate-top');
+  plateTop.setAttribute('aria-hidden', 'true');
+  plateTop.append(
+    make('span', 'plate-label', 'Banco Central · Caja 05'),
+    make('span', 'plate-serial', 'N.º 0501'),
+  );
   const rail = make('div', 'plate-rail');
   rail.setAttribute('aria-hidden', 'true');
-  rail.append(make('span', 'plate-rail-notch'));
+  const holesLeft = make('div', 'rail-holes');
+  const holesRight = make('div', 'rail-holes');
+  for (let index = 0; index < 7; index += 1) {
+    holesLeft.append(make('span', 'rail-hole'));
+    holesRight.append(make('span', 'rail-hole'));
+  }
+  const notch = make('span', 'plate-rail-notch');
+  rail.append(holesLeft, notch, holesRight);
   const plateCaption = make(
     'p',
     'plate-caption',
-    'El tambor y la cinta del taller trabajan sobre esta placa.',
+    'La cinta corre y el tambor lleva la cuenta de la caja 05.',
   );
 
   const editorSlot = make('div', 'counting-editor');
   editorSlot.setAttribute('data-slot', 'editor');
   editorSlot.setAttribute('aria-label', 'Tambor y cinta del taller');
 
-  benchPlate.append(rail, plateCaption, editorSlot);
+  benchPlate.append(rivets, plateTop, rail, plateCaption, editorSlot);
 
   const side = make('div', 'counting-side');
 
   const slip = make('aside', 'counting-slip');
   slip.setAttribute('aria-label', 'Boleta de depósito');
   markProducing(slip, 'n5.depositSlip');
+  const seal = make('span', 'slip-seal');
+  seal.setAttribute('aria-hidden', 'true');
+  const stamp = make('span', 'slip-stamp', STAMP_WORDS[phase] ?? phaseWord(phase, puzzle));
+  stamp.setAttribute('aria-hidden', 'true');
   slip.append(make('p', 'slip-kicker', 'Boleta de depósito'));
   slip.append(make('p', 'slip-client', client));
   if (puzzle.goal !== undefined) {
@@ -107,6 +133,9 @@ export function createLevelScene(options = {}) {
     slip.append(make('p', 'slip-sample', `La cinta ${sample.input} debe dejar ${sample.output}.`));
   }
   slip.append(make('p', 'slip-note', 'Si el contador marca otra cuenta, la alarma queda encendida.'));
+  slip.append(stamp);
+  slip.append(make('p', 'slip-foot', 'Caja 05 · N.º 0501'));
+  slip.append(seal);
 
   const statusSlot = make('div', 'counting-status');
   statusSlot.setAttribute('data-slot', 'status');
@@ -115,10 +144,11 @@ export function createLevelScene(options = {}) {
   side.append(slip, statusSlot);
   body.append(benchPlate, side);
 
-  element.append(backdrop, bench, head, body);
+  element.append(backdrop, light, bench, head, body);
 
   function setPhase(next) {
     phaseBadge.textContent = PHASE_WORDS[next] ?? String(next);
+    stamp.textContent = STAMP_WORDS[next] ?? PHASE_WORDS[next] ?? String(next);
   }
 
   function dispose() {

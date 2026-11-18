@@ -223,3 +223,100 @@ test('css integra el editor real en la placa y limita el alto al marco', () => {
   assert.ok(css.includes('overflow'), 'el desborde queda contenido');
   assert.ok(css.includes('max-height: 100%'), 'la escena no supera el marco del taller');
 });
+
+test('atmósfera de sala: luz cálida y herrajes sin duplicar el mecanismo', () => {
+  const scene = setup();
+  const light = findAll(scene.element, (node) => classes(node).includes('counting-light'))[0];
+  assert.ok(light, 'hay una capa de luz cálida');
+  assert.equal(light.getAttribute('aria-hidden'), 'true', 'la luz queda fuera del lector');
+  const plate = findAll(scene.element, (node) => classes(node).includes('counting-bench-plate'))[0];
+  const top = findAll(plate, (node) => classes(node).includes('plate-top'))[0];
+  assert.ok(top, 'la placa trae rótulo de taller');
+  assert.ok(textOf(top).includes('Caja 05'), 'el rótulo nombra la caja');
+  const rivets = findAll(plate, (node) => classes(node).includes('plate-rivet'));
+  assert.ok(rivets.length >= 4, 'la placa trae remaches de latón');
+  const rail = findAll(scene.element, (node) => classes(node).includes('plate-rail'))[0];
+  const holes = findAll(rail, (node) => classes(node).includes('rail-hole'));
+  assert.ok(holes.length >= 8, 'el riel trae cinta perforada de atmósfera');
+  for (const banned of ['drum-pin', 'drum-section', 'pin-editor', 'tape-cell', 'tape-mock-cell']) {
+    assert.equal(
+      findAll(rail, (node) => classes(node).includes(banned)).length,
+      0,
+      `el riel no trae .${banned}`,
+    );
+  }
+});
+
+test('la boleta es papel ivory con sello, cuño y pie', () => {
+  const scene = setup();
+  const slip = findAll(scene.element, (node) => classes(node).includes('counting-slip'))[0];
+  assert.ok(slip, 'hay boleta de depósito');
+  const seal = findAll(slip, (node) => classes(node).includes('slip-seal'))[0];
+  assert.ok(seal, 'la boleta trae lacre');
+  assert.equal(seal.getAttribute('aria-hidden'), 'true', 'el lacre queda fuera del lector');
+  const stamp = findAll(slip, (node) => classes(node).includes('slip-stamp'))[0];
+  assert.ok(stamp, 'la boleta trae cuño de fase');
+  assert.ok(stamp.textContent.includes('reparaci'), 'el cuño marca la reparación');
+  scene.setPhase('build');
+  assert.ok(stamp.textContent.includes('construcci'), 'el cuño sigue a la fase');
+  const foot = findAll(slip, (node) => classes(node).includes('slip-foot'))[0];
+  assert.ok(foot, 'la boleta trae pie de caja');
+  assert.ok(textOf(scene.element).includes('Banco Central'), 'la boleta nombra al cliente');
+});
+
+test('css cálido de sala de recuento, sin texto bajo 12 px', () => {
+  for (const selector of ['.counting-light', '.plate-rivet', '.rail-hole', '.slip-seal', '.slip-stamp', '.slip-foot']) {
+    assert.ok(css.includes(selector), `la atmósfera pinta ${selector}`);
+  }
+  const sizes = [...css.matchAll(/font-size\s*:\s*([^;]+);/g)].map((match) => match[1].trim());
+  const tooSmall = sizes.filter((value) => {
+    const match = value.match(/^(\d+(?:\.\d+)?)px$/);
+    return match !== null && Number(match[1]) < 12;
+  });
+  assert.deepEqual(tooSmall, []);
+});
+
+function blocksFor(fragment) {
+  return css.split('}').filter((chunk) => chunk.includes(fragment));
+}
+
+test('la boleta fluye en su columna sin scroll horizontal', () => {
+  const side = blocksFor('.counting-side').join('\n');
+  assert.ok(/overflow-x\s*:\s*(hidden|clip)/.test(side), 'la columna recorta el eje x');
+  assert.ok(/overflow-y\s*:\s*auto/.test(side), 'la columna conserva scroll vertical');
+  const slip = blocksFor('.counting-slip {').join('\n');
+  assert.ok(slip.includes('max-width: 100%'), 'la boleta no supera su columna');
+  assert.ok(!slip.includes('rotate('), 'el papel no se rota dentro del contenedor con scroll');
+});
+
+test('el cuño no tapa el título: vive en flujo antes del pie', () => {
+  const scene = setup();
+  const slip = findAll(scene.element, (node) => classes(node).includes('counting-slip'))[0];
+  const order = slip.children.map((child) => child.className);
+  const stampAt = order.indexOf('slip-stamp');
+  const footAt = order.indexOf('slip-foot');
+  const kickerAt = order.indexOf('slip-kicker');
+  assert.ok(stampAt > kickerAt, 'el cuño va después del título');
+  assert.ok(stampAt < footAt, 'el cuño va antes del pie');
+  const stampBlocks = blocksFor('.slip-stamp {').join('\n');
+  assert.ok(!stampBlocks.includes('position: absolute'), 'el cuño no flota sobre el texto');
+});
+
+test('el marco del editor entra en ~460 px sin cortar tarjetas', () => {
+  const editor = blocksFor('.counting-editor').join('\n');
+  assert.ok(/overflow\s*:\s*auto/.test(editor), 'red de seguridad con scroll interno');
+  const rail = blocksFor('.plate-rail {').join('\n');
+  const railMin = rail.match(/min-height\s*:\s*(\d+)px/);
+  assert.ok(railMin !== null && Number(railMin[1]) <= 40, 'riel compacto');
+  const caption = blocksFor('.plate-caption {').join('\n');
+  const captionMargin = caption.match(/margin\s*:\s*(\d+)px/);
+  assert.ok(captionMargin !== null && Number(captionMargin[1]) <= 8, 'leyenda compacta');
+});
+
+test('la leyenda de la placa habla en personaje', () => {
+  const scene = setup();
+  const caption = findAll(scene.element, (node) => classes(node).includes('plate-caption'))[0];
+  assert.ok(caption, 'hay leyenda sobre la placa');
+  assert.ok(caption.textContent.includes('cinta'), 'la leyenda habla de la cinta');
+  assert.ok(!caption.textContent.includes('trabajan sobre esta placa'), 'fuera la nota de producción');
+});

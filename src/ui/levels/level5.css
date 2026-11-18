@@ -1,15 +1,29 @@
 /* Nivel 5 — Banco Central, sala de recuento. Alcance estricto a la escena.
  * Un solo taller: la placa enmarca el editor real (#tape-panel y #drum
- * que monta el parent). Sin maquetas de cinta ni de tambor. El alto queda
- * limitado al marco del wb-stage: la escena no desplaza la página; si el
- * tambor crece, el desplazamiento vive dentro de .counting-editor.
+ * que monta el parent). Sin maquetas de cinta ni de tambor: el riel trae
+ * cinta perforada decorativa (orificios sin casillas ni símbolos) como
+ * atmósfera. El alto queda limitado al marco del wb-stage: la escena no
+ * desplaza la página; si el tambor crece, el desplazamiento vive dentro
+ * de .counting-editor.
+ *
+ * Materiales del mockup (precision noir, sala cálida): latón, nogal,
+ * papel ivory con lacre, luz cálida arriba a la izquierda y filo teal a
+ * la derecha. Placeholders CSS, sin imágenes externas.
  */
 
 .level-scene[data-level="5"] {
   --counting-ink: var(--ink, #f2ede3);
+  --counting-muted: var(--muted, #a7b0be);
   --counting-brass: var(--brass, #d4a72c);
+  --counting-brass-2: var(--brass-2, #f0cf6a);
+  --counting-brass-dark: var(--brass-dark, #7a5a12);
   --counting-teal: var(--teal, #38c6b8);
   --counting-paper: #f4ecd9;
+  --counting-paper-2: #e4d8c3;
+  --counting-wax: #8e2f2a;
+  --counting-display: var(--font-display, "Cinzel", Georgia, "Times New Roman", serif);
+  --counting-ui: var(--font-ui, "Oswald", "Segoe UI", system-ui, sans-serif);
+  --counting-paper-font: var(--font-paper, "Special Elite", "Courier New", monospace);
   position: relative;
   box-sizing: border-box;
   display: grid;
@@ -23,26 +37,46 @@
   border: 1px solid var(--line, #2a3646);
   border-radius: 12px;
   background:
-    radial-gradient(120% 90% at 20% 0%, rgba(212, 167, 44, 0.14), transparent 55%),
-    linear-gradient(160deg, #2b3138 0%, #151a21 55%, #0b0f14 100%);
+    radial-gradient(120% 90% at 16% 0%, rgba(240, 207, 106, 0.16), transparent 55%),
+    radial-gradient(90% 70% at 98% 30%, rgba(56, 198, 184, 0.1), transparent 55%),
+    linear-gradient(165deg, #26222c 0%, #161419 55%, #0b0f14 100%);
   color: var(--counting-ink);
+  font-family: var(--counting-ui);
 }
 
+/* Fondo de sala: paneles verticales tenues + viñeta, fuera del lector. */
 .level-scene[data-level="5"] .counting-backdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(90deg, transparent 62%, rgba(56, 198, 184, 0.08) 100%),
-    repeating-linear-gradient(90deg, rgba(242, 237, 227, 0.03) 0 2px, transparent 2px 72px);
+    linear-gradient(90deg, transparent 60%, rgba(56, 198, 184, 0.08) 100%),
+    repeating-linear-gradient(90deg, rgba(242, 237, 227, 0.035) 0 2px, transparent 2px 76px),
+    radial-gradient(120% 100% at 50% 110%, rgba(0, 0, 0, 0.5), transparent 60%);
   pointer-events: none;
 }
 
+/* Luz cálida de sala: brillo de lámpara arriba a la izquierda. */
+.level-scene[data-level="5"] .counting-light {
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 22% 4%, rgba(240, 207, 106, 0.2) 0%, transparent 30%),
+    radial-gradient(circle at 84% 74%, rgba(56, 198, 184, 0.07) 0%, transparent 32%),
+    radial-gradient(circle at 50% 48%, transparent 46%, rgba(0, 0, 0, 0.42) 100%);
+  pointer-events: none;
+}
+
+/* Mesa de nogal con vetas y filo de latón. */
 .level-scene[data-level="5"] .counting-bench {
   position: absolute;
   inset: auto 0 0 0;
   height: 96px;
-  background: linear-gradient(180deg, #6b4a2c 0%, #463019 100%);
-  border-top: 2px solid rgba(212, 167, 44, 0.5);
+  background:
+    repeating-linear-gradient(90deg, rgba(0, 0, 0, 0.22) 0 2px, transparent 2px 88px),
+    repeating-linear-gradient(0deg, rgba(255, 235, 190, 0.03) 0 3px, transparent 3px 7px),
+    linear-gradient(180deg, #7a5433 0%, #4a3018 55%, #2c1e0e 100%);
+  border-top: 3px solid rgba(240, 207, 106, 0.55);
+  box-shadow: 0 -12px 32px rgba(0, 0, 0, 0.45);
   pointer-events: none;
 }
 
@@ -61,14 +95,21 @@
 
 .level-scene[data-level="5"] .counting-kicker {
   margin: 0;
+  color: var(--counting-brass-2);
   font-size: 12px;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .level-scene[data-level="5"] .counting-title {
   margin: 0;
-  font-size: 20px;
-  line-height: 1.2;
+  color: var(--counting-brass-2);
+  font-family: var(--counting-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.02em;
 }
 
 .level-scene[data-level="5"] .counting-phase {
@@ -77,6 +118,8 @@
   padding: 8px 12px;
   border: 1px solid var(--counting-brass);
   border-radius: 999px;
+  background: rgba(212, 167, 44, 0.1);
+  color: var(--counting-brass-2);
   font-size: 14px;
   line-height: 1;
 }
@@ -84,8 +127,10 @@
 .level-scene[data-level="5"] .counting-plate {
   flex-basis: 100%;
   margin: 0;
+  color: var(--counting-muted);
   font-size: 12px;
-  opacity: 0.85;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
 }
 
 /* --- Cuerpo: placa del editor + costado (boleta y contador) --- */
@@ -97,45 +142,162 @@
   overflow: hidden;
 }
 
-/* --- Placa única del taller: riel de cabezal + editor real --- */
+/* --- Placa única del taller: marco de latón, interior oscuro --- */
 .level-scene[data-level="5"] .counting-bench-plate {
+  position: relative;
   display: flex;
   flex-direction: column;
   min-height: 0;
   min-width: 0;
   overflow: hidden;
-  border: 1px solid rgba(212, 167, 44, 0.55);
+  border: 1px solid rgba(240, 207, 106, 0.65);
   border-radius: 12px;
-  padding: 10px 12px;
-  background: rgba(11, 15, 20, 0.55);
+  padding: 12px 14px;
+  background:
+    linear-gradient(170deg, #221f1a 0%, #121317 70%),
+    #101216;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.09),
+    inset 0 0 0 4px rgba(0, 0, 0, 0.25),
+    0 18px 40px rgba(0, 0, 0, 0.5);
 }
 
+.level-scene[data-level="5"] .plate-rivets {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-rivet {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #f6dc92 0%, #c79a32 45%, #4a3412 100%);
+  box-shadow:
+    0 1px 2px rgba(0, 0, 0, 0.7),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.5);
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(1) {
+  top: 7px;
+  left: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(2) {
+  top: 7px;
+  right: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(3) {
+  bottom: 7px;
+  left: 7px;
+}
+
+.level-scene[data-level="5"] .plate-rivet:nth-child(4) {
+  right: 7px;
+  bottom: 7px;
+}
+
+.level-scene[data-level="5"] .plate-top {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 2px 12px;
+  padding: 0 18px 6px;
+  pointer-events: none;
+}
+
+.level-scene[data-level="5"] .plate-label,
+.level-scene[data-level="5"] .plate-serial {
+  color: #c9a24a;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  line-height: 1;
+  text-transform: uppercase;
+  text-shadow: 0 1px 0 rgba(0, 0, 0, 0.85);
+}
+
+/* --- Riel del cabezal: carcasa de latón con cinta perforada ---
+ * Atmósfera compacta (38 px): deja ~460 px libres al editor cuando el
+ * stage crece a ~690 px, para tres secciones sin tarjetas cortadas. */
 .level-scene[data-level="5"] .plate-rail {
   position: relative;
+  display: flex;
   flex: none;
-  height: 14px;
-  border-radius: 7px;
-  background: linear-gradient(180deg, #f0cf6a 0%, #7a5a12 60%, #4a380c 100%);
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 4px 12px;
+  border-radius: 8px;
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), transparent 40%),
+    linear-gradient(180deg, #f0cf6a 0%, #a88032 45%, #4a3412 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.5),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  pointer-events: none;
 }
 
+.level-scene[data-level="5"] .rail-holes {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: space-evenly;
+  gap: 8px;
+  min-width: 0;
+}
+
+.level-scene[data-level="5"] .rail-hole {
+  flex: none;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 40% 35%, #000 0%, #1a1408 70%);
+  box-shadow:
+    inset 0 1px 2px rgba(0, 0, 0, 0.9),
+    0 1px 0 rgba(255, 240, 200, 0.35);
+}
+
+/* Ventana del cabezal: el ojo teal que lee la cinta real. */
 .level-scene[data-level="5"] .plate-rail-notch {
-  position: absolute;
-  top: -4px;
-  left: 50%;
-  width: 26px;
-  height: 22px;
-  transform: translateX(-50%);
+  position: relative;
+  flex: none;
+  width: 34px;
+  height: 28px;
   border: 2px solid var(--counting-teal);
   border-radius: 4px;
-  background: rgba(11, 15, 20, 0.35);
+  background: linear-gradient(180deg, #0d141b 0%, #05080c 100%);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.3),
+    0 0 12px rgba(56, 198, 184, 0.35),
+    inset 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.level-scene[data-level="5"] .plate-rail-notch::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 3px;
+  bottom: 3px;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--counting-teal);
+  box-shadow: 0 0 6px rgba(56, 198, 184, 0.9);
+  transform: translateX(-50%);
 }
 
 .level-scene[data-level="5"] .plate-caption {
   flex: none;
-  margin: 8px 0;
+  margin: 6px 0;
   font-size: 13px;
   line-height: 1.4;
-  opacity: 0.9;
+  color: var(--counting-muted);
 }
 
 /* El editor real vive aquí; su desborde nunca sale de la placa. */
@@ -143,10 +305,11 @@
   flex: 1 1 auto;
   min-height: 0;
   overflow: auto;
-  border: 1px dashed rgba(242, 237, 227, 0.4);
+  border: 1px dashed rgba(240, 207, 106, 0.4);
   border-radius: 12px;
   padding: 12px;
-  background: rgba(20, 27, 36, 0.6);
+  background: rgba(11, 15, 20, 0.72);
+  box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.55);
 }
 
 /* --- Costado: boleta de depósito + contador --- */
@@ -156,41 +319,138 @@
   gap: 10px;
   min-height: 0;
   min-width: 0;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
+/* Boleta de depósito: papel ivory con lacre y cuño, como el mockup.
+ * Sin rotación: el papel rotado desborda la columna con scroll y abre
+ * una barra horizontal (la columna ya recorta el eje x). */
 .level-scene[data-level="5"] .counting-slip {
+  position: relative;
   flex: none;
-  padding: 12px 14px;
-  border-radius: 4px;
-  background: var(--counting-paper);
+  min-width: 0;
+  max-width: 100%;
+  padding: 20px 18px 16px;
+  border: 1px solid #c9b78e;
+  border-radius: 5px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.45), transparent 42%),
+    repeating-linear-gradient(0deg, rgba(122, 90, 18, 0.04) 0 1px, transparent 1px 5px),
+    linear-gradient(160deg, #faf4e6 0%, var(--counting-paper) 55%, var(--counting-paper-2) 100%);
   color: #17130a;
-  transform: rotate(-0.4deg);
+  box-shadow:
+    0 18px 40px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.8);
+}
+
+.level-scene[data-level="5"] .counting-slip::after {
+  content: "";
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(122, 90, 18, 0.14);
+  border-radius: 3px;
+  pointer-events: none;
 }
 
 .level-scene[data-level="5"] .slip-kicker {
-  margin: 0;
+  margin: 0 0 3px;
+  color: var(--counting-brass-dark);
   font-size: 12px;
-  letter-spacing: 0.08em;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
 }
 
 .level-scene[data-level="5"] .slip-client {
-  margin: 4px 0;
-  font-size: 18px;
+  margin: 0 0 10px;
+  font-family: var(--counting-display);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.1;
+  overflow-wrap: break-word;
 }
 
 .level-scene[data-level="5"] .slip-rule,
-.level-scene[data-level="5"] .slip-sample,
-.level-scene[data-level="5"] .slip-note {
+.level-scene[data-level="5"] .slip-sample {
   margin: 8px 0;
+  font-family: var(--counting-paper-font);
   font-size: 14px;
-  line-height: 1.5;
+  line-height: 1.55;
+}
+
+.level-scene[data-level="5"] .slip-note {
+  margin: 8px 0 12px;
+  color: #5a5348;
+  font-family: var(--counting-paper-font);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.level-scene[data-level="5"] .slip-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 0;
+  padding-top: 8px;
+  padding-right: 58px;
+  border-top: 1px dashed rgba(122, 90, 18, 0.35);
+  color: var(--counting-brass-dark);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="5"] .slip-seal {
+  position: absolute;
+  right: 20px;
+  bottom: 18px;
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #b34a3c 0%, var(--counting-wax) 55%, #5a1b17 100%);
+  box-shadow:
+    0 4px 8px rgba(0, 0, 0, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 0.22),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.35);
+}
+
+.level-scene[data-level="5"] .slip-seal::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: #5a1b17;
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+}
+
+/* Cuño de fase: vive en flujo entre la nota y el pie, así nunca tapa
+ * el título ni ningún texto; el lacre absoluto queda a la derecha. */
+.level-scene[data-level="5"] .slip-stamp {
+  display: inline-block;
+  max-width: calc(100% - 70px);
+  margin: 2px 0 10px;
+  padding: 4px 7px 3px;
+  border: 2px solid #a33a26;
+  border-radius: 3px;
+  color: #a33a26;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  transform: rotate(-2deg);
 }
 
 .level-scene[data-level="5"] .counting-status {
   flex: none;
   min-height: 44px;
-  border-top: 1px solid var(--line, #2a3646);
+  border-top: 1px solid rgba(240, 207, 106, 0.4);
   padding-top: 10px;
   font-size: 14px;
 }
@@ -205,7 +465,7 @@
   margin: 0 0 6px;
   font-size: 13px;
   letter-spacing: 0.06em;
-  color: var(--counting-brass);
+  color: var(--counting-brass-2);
 }
 
 .level-scene[data-level="5"] #tape-panel .tape-cells {
@@ -220,14 +480,23 @@
   min-height: 44px;
 }
 
+/* Casillas como tarjetas perforadas de papel sobre la placa oscura. */
 .level-scene[data-level="5"] #tape-panel .tape-cell {
-  border-color: rgba(212, 167, 44, 0.55);
-  background: rgba(244, 236, 217, 0.08);
+  border: 1px solid rgba(240, 207, 106, 0.6);
+  border-radius: 6px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.5), transparent 45%),
+    linear-gradient(160deg, #faf4e6 0%, var(--counting-paper) 60%, var(--counting-paper-2) 100%);
+  color: #17130a;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  transition: box-shadow 120ms ease-out, border-color 120ms ease-out;
 }
 
 .level-scene[data-level="5"] #tape-panel .tape-cell.is-head {
   border: 2px solid var(--counting-teal);
-  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.35);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.35),
+    0 0 12px rgba(56, 198, 184, 0.35);
 }
 
 .level-scene[data-level="5"] #drum {
@@ -235,22 +504,58 @@
 }
 
 .level-scene[data-level="5"] #drum .drum {
-  gap: 8px;
+  gap: 6px;
 }
 
+/* Anillos del tambor: aros oscuros con filo de latón. */
 .level-scene[data-level="5"] #drum .drum-section,
 .level-scene[data-level="5"] .drum-section {
-  border-color: rgba(212, 167, 44, 0.45);
-  background: rgba(242, 237, 227, 0.04);
+  border: 1px solid rgba(240, 207, 106, 0.5);
+  border-radius: 10px;
+  padding: 8px 10px;
+  background:
+    linear-gradient(170deg, rgba(255, 255, 255, 0.06), transparent 40%),
+    linear-gradient(170deg, #1d1b18 0%, #101216 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.07),
+    0 4px 14px rgba(0, 0, 0, 0.45);
 }
 
 .level-scene[data-level="5"] #drum .drum-section.is-lit {
   border-color: var(--counting-teal);
-  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.35);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.35),
+    0 0 14px rgba(56, 198, 184, 0.3);
+}
+
+/* Cabecera de sección compacta: título y marca en una línea. */
+.level-scene[data-level="5"] #drum .drum-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin: 0 0 4px;
+}
+
+.level-scene[data-level="5"] #drum .drum-title {
+  margin: 0;
+  color: var(--counting-brass-2);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.level-scene[data-level="5"] #drum .drum-badge {
+  color: var(--counting-muted);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  line-height: 1.3;
 }
 
 .level-scene[data-level="5"] #drum .drum-pins {
-  gap: 8px;
+  gap: 6px;
 }
 
 .level-scene[data-level="5"] #drum .drum-pin,
@@ -259,19 +564,34 @@
   min-height: 44px;
 }
 
+/* Púas como teclas de latón del tambor. */
 .level-scene[data-level="5"] #drum .drum-pin {
-  border-color: rgba(212, 167, 44, 0.45);
-  background: rgba(20, 27, 36, 0.85);
-  color: var(--counting-ink);
+  border: 1px solid rgba(240, 207, 106, 0.55);
+  border-radius: 8px;
+  background: linear-gradient(180deg, #f0cf6a 0%, #c79a32 45%, #6b4c0d 100%);
+  color: #17130a;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.55),
+    0 2px 6px rgba(0, 0, 0, 0.5);
+  transition: box-shadow 120ms ease-out, border-color 120ms ease-out, transform 120ms ease-out;
 }
 
 .level-scene[data-level="5"] #drum .drum-pin:hover {
-  border-color: var(--counting-brass);
+  border-color: var(--counting-brass-2);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.6),
+    0 0 10px rgba(240, 207, 106, 0.4);
+}
+
+.level-scene[data-level="5"] #drum .drum-pin:active {
+  transform: scale(0.98);
 }
 
 .level-scene[data-level="5"] #drum .drum-pin.is-lit {
   border-color: var(--counting-teal);
-  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.45);
+  box-shadow:
+    0 0 0 2px rgba(56, 198, 184, 0.45),
+    0 0 12px rgba(56, 198, 184, 0.4);
 }
 
 .level-scene[data-level="5"] #drum .drum-pin.is-final {
@@ -279,9 +599,19 @@
   cursor: not-allowed;
 }
 
+/* Contenido de púa en una línea compacta: símbolo + regla. */
+.level-scene[data-level="5"] #drum .drum-read,
+.level-scene[data-level="5"] #drum .drum-rule {
+  font-size: 12px;
+  line-height: 1.3;
+  overflow-wrap: break-word;
+}
+
 .level-scene[data-level="5"] #drum .pin-editor {
-  border-color: rgba(212, 167, 44, 0.55);
-  background: rgba(20, 27, 36, 0.9);
+  border: 1px solid rgba(240, 207, 106, 0.55);
+  border-radius: 10px;
+  background: rgba(11, 15, 20, 0.92);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.55);
 }
 
 .level-scene[data-level="5"] #drum .pin-choice {
@@ -291,6 +621,7 @@
 
 .level-scene[data-level="5"] #drum .pin-choice.is-selected {
   border-color: var(--counting-teal);
+  box-shadow: 0 0 0 2px rgba(56, 198, 184, 0.4);
 }
 
 .level-scene[data-level="5"] button {
@@ -313,6 +644,10 @@
     font-size: 18px;
   }
 
+  .level-scene[data-level="5"] .plate-top {
+    padding: 2px 12px 6px;
+  }
+
   .level-scene[data-level="5"] .counting-body {
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: minmax(0, 1fr) auto;
@@ -320,12 +655,8 @@
 
   .level-scene[data-level="5"] .counting-side {
     max-height: 32%;
-    border-top: 1px solid rgba(212, 167, 44, 0.35);
+    border-top: 1px solid rgba(240, 207, 106, 0.4);
     padding-top: 8px;
-  }
-
-  .level-scene[data-level="5"] .counting-slip {
-    transform: none;
   }
 }
 
@@ -337,7 +668,7 @@
     transition: none;
   }
 
-  .level-scene[data-level="5"] .counting-slip {
+  .level-scene[data-level="5"] .slip-stamp {
     transform: none;
   }
 }
