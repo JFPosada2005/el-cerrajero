@@ -119,6 +119,32 @@ test('la fase se lee en la placa y en la marcha', () => {
   assert.ok(buildTexts.some((text) => text.includes('Construcción')));
 });
 
+test('el sello de la placa marca la fase', () => {
+  const scene = setup({ phase: 'build' });
+  const seal = findOne(scene.element, (n) => classes(n).includes('l2-plate-seal'), 'sello');
+  assert.match(seal.textContent, /construcción/i);
+  assert.match(seal.getAttribute('aria-label') ?? '', /construcción/i);
+});
+
+test('el encabezado usa los datos del nivel', () => {
+  const scene = setup({ level: { contract: '02', client: 'Hotel Mirador' } });
+  const kicker = findOne(scene.element, (n) => classes(n).includes('l2-kicker'), 'kicker');
+  assert.match(kicker.textContent, /Contrato 02/);
+  assert.match(kicker.textContent, /Hotel Mirador/);
+  const fallback = setup({ level: {} });
+  const fallbackKicker = findOne(fallback.element, (n) => classes(n).includes('l2-kicker'), 'kicker');
+  assert.match(fallbackKicker.textContent, /Hotel Mirador/);
+});
+
+test('mesa de nogal y luz cálida como decorado', () => {
+  const scene = setup();
+  const bench = findOne(scene.element, (n) => classes(n).includes('l2-bench'), 'mesa');
+  const light = findOne(scene.element, (n) => classes(n).includes('l2-light'), 'luz');
+  assert.equal(bench.getAttribute('aria-hidden'), 'true');
+  assert.equal(light.getAttribute('aria-hidden'), 'true');
+  assert.equal(bench.getAttribute('data-slot'), null, 'la mesa no es un slot');
+});
+
 test('la escena no crea editor, cables, llaves ni juicio', () => {
   assert.ok(!source.includes('graphEditor'), 'sin importar el editor de grafos');
   assert.ok(!source.includes('drumEditor'), 'sin importar el editor de tambor');
@@ -152,6 +178,16 @@ test('placeholders de sala sin imágenes externas y con aria', () => {
   assert.ok(findAll(scene.element, (n) => classes(n).includes('l2-relay')).length >= 1);
   const captions = findAll(scene.element, () => true).map((n) => n.textContent);
   assert.ok(captions.some((text) => /a producir/i.test(text)), 'marca qué falta por producir');
+});
+
+test('cada placeholder declara su slot del manifiesto', () => {
+  const scene = setup();
+  const pending = byAttr(scene.element, 'data-status', 'a producir');
+  assert.ok(pending.length >= 4, 'fondo, indicador, relés y piñón marcados');
+  const assets = pending.map((node) => node.getAttribute('data-asset'));
+  for (const expected of ['n2.background', 'n2.floorIndicator', 'n2.relay', 'n2.pinion']) {
+    assert.ok(assets.includes(expected), `slot ${expected} declarado`);
+  }
 });
 
 test('los datos viajan por textContent, sin innerHTML', () => {
@@ -197,6 +233,130 @@ test('el CSS vive bajo .level-scene[data-level="2"], con foco y movimiento reduc
   for (const selector of selectors) {
     assert.ok(selector.includes('.level-scene'), `regla con alcance: ${selector}`);
   }
+});
+
+test('el CSS usa las tipografías del mockup', () => {
+  for (const font of ['Cinzel', 'Oswald', 'Special Elite']) {
+    assert.ok(css.includes(font), `fuente ${font} declarada`);
+  }
+});
+
+test('la raíz vive dentro del stage sin desplazar la página', () => {
+  assert.match(
+    css,
+    /\.level-scene\[data-level="2"\]\s*\{[^}]*display:\s*grid[^}]*grid-template-rows:\s*minmax\(0,\s*1fr\)/,
+    'raíz en grid de una fila flexible',
+  );
+  assert.match(css, /\.level-scene\[data-level="2"\]\s*\{[^}]*height:\s*100%/, 'raíz con height 100%');
+  assert.match(
+    css,
+    /\.level-scene\[data-level="2"\]\s*\{[^}]*max-height:\s*100%/,
+    'raíz con max-height 100%',
+  );
+  assert.match(css, /\.level-scene\[data-level="2"\]\s*\{[^}]*min-height:\s*0/, 'raíz con min-height 0');
+  assert.match(
+    css,
+    /\.level-scene\[data-level="2"\]\s*\{[^}]*overflow:\s*hidden/,
+    'raíz con overflow hidden',
+  );
+  assert.match(
+    css,
+    /\.level-scene\[data-level="2"\]\s*\{[^}]*box-sizing:\s*border-box/,
+    'raíz con border-box',
+  );
+});
+
+test('la placa crece con el stage y el desplazamiento vive en el slot', () => {
+  assert.match(
+    css,
+    /\.l2-room[\s\S]*?display:\s*flex[\s\S]*?flex-direction:\s*column/,
+    'sala en columna flexible',
+  );
+  assert.match(css, /\.l2-room[\s\S]*?min-height:\s*0/, 'sala con min-height 0');
+  assert.match(css, /\.l2-plate[\s\S]*?flex:\s*1 1 auto/, 'la placa recibe el alto libre');
+  assert.match(css, /\.l2-plate[\s\S]*?min-height:\s*0/, 'la placa no pelea con el flex');
+  assert.match(css, /\.l2-editor-slot[\s\S]*?flex:\s*1 1 auto/, 'el slot crece con la placa');
+  assert.match(css, /\.l2-editor-slot[\s\S]*?overflow:\s*auto/, 'el desborde vive dentro del slot');
+  assert.ok(!css.includes('min-height: 280px'), 'sin mínimo fijo de escritorio que pelee');
+  assert.ok(!css.includes('min-height: 320px'), 'sin mínimo fijo grande que pelee');
+});
+
+test('el tablero real escala por alto, centrado y sin estirarse', () => {
+  assert.match(css, /\.l2-editor-slot #canvas[\s\S]*?height:\s*100%/, '#canvas a lo alto del hueco');
+  assert.match(css, /\.l2-editor-slot #canvas[\s\S]*?width:\s*auto/, '#canvas sin estirarse a lo ancho');
+  assert.match(
+    css,
+    /\.l2-editor-slot #canvas[\s\S]*?max-width:\s*100%/,
+    '#canvas sin pasarse del hueco',
+  );
+  assert.match(
+    css,
+    /\.l2-editor-slot #canvas[\s\S]*?margin-inline:\s*auto/,
+    '#canvas centrado',
+  );
+  assert.match(
+    css,
+    /\.l2-editor-slot #canvas[\s\S]*?max-height:\s*100%/,
+    '#canvas sin pasarse del hueco',
+  );
+  assert.match(
+    css,
+    /\.l2-editor-slot #canvas[\s\S]*?background:\s*transparent/,
+    '#canvas con fondo transparente',
+  );
+  assert.match(css, /\.l2-editor-slot #canvas[\s\S]*?border:\s*0/, '#canvas sin borde');
+  assert.ok(css.includes('.l2-editor-slot:empty::after'), 'guía visible cuando está vacío');
+});
+
+test('solo el tablero vive en el flujo de la placa', () => {
+  const scene = setup();
+  const plate = findOne(scene.element, (n) => classes(n).includes('l2-plate'), 'placa');
+  const flow = plate.children.map((child) => (child.attributes.class ?? '').split(' ')[0]);
+  assert.ok(!flow.includes('l2-props'), 'los relés salen del flujo de la placa');
+  const props = findOne(scene.element, (n) => classes(n).includes('l2-props'), 'props');
+  assert.strictEqual(
+    props.parentNode,
+    scene.statusSlot,
+    'los relés acompañan la fila de marcha',
+  );
+  const pinion = findOne(scene.element, (n) => classes(n).includes('l2-pinion'), 'piñón');
+  assert.strictEqual(pinion.parentNode, plate, 'el piñón decora la placa');
+  assert.match(css, /\.l2-pinion[\s\S]*?position:\s*absolute/, 'piñón fuera del flujo');
+  assert.ok(css.includes('@media (max-height:'), 'la nota se esconde en ventanas bajas');
+});
+
+test('la placa abraza el tablero en vez de estirar un marco vacío', () => {
+  assert.match(css, /\.l2-plate[\s\S]*?width:\s*min\(100%, 640px\)/, 'placa acotada al contenido');
+  assert.match(css, /\.l2-plate[\s\S]*?margin-inline:\s*auto/, 'placa centrada en la sala');
+});
+
+test('el encabezado compacto deja la placa con aire en desktop', () => {
+  assert.match(css, /\.l2-gauge-svg[\s\S]*?width:\s*90px/, 'indicador compacto en desktop');
+  assert.match(css, /\.l2-title[\s\S]*?font-size:\s*20px/, 'título compacto en desktop');
+  assert.match(
+    css,
+    /@media \(min-width: 701px\)[\s\S]*?\.l2-title[\s\S]*?white-space:\s*nowrap/,
+    'título en una línea en desktop',
+  );
+  assert.match(css, /\.l2-pinion[\s\S]*?width:\s*44px/, 'piñón compacto en desktop');
+});
+
+test('en celular la escena no supera al stage ni genera scroll horizontal', () => {
+  assert.ok(css.includes('@media (max-width: 700px)'), 'quiebre de celular');
+  assert.ok(
+    !/@media \(max-width: 700px\)[\s\S]*?#canvas[\s\S]*?height:\s*auto/.test(css),
+    'el tablero no vuelve a alto automático en celular',
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 700px\)[\s\S]*?\.l2-room[\s\S]*?padding:\s*8px/,
+    'sala con padding recortado en celular',
+  );
+  assert.match(
+    css,
+    /@media \(max-width: 700px\)[\s\S]*?\.l2-editor-slot[\s\S]*?overflow-x:\s*hidden/,
+    'slot sin desborde horizontal en celular',
+  );
 });
 
 test('dispose suelta la escena y vacía los slots', () => {

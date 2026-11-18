@@ -1,5 +1,11 @@
 /* Escena del nivel 2 — Hotel Mirador, sala de máquinas del ascensor.
    Alcance estricto: .level-scene[data-level="2"].
+   Precisión noir del mockup (mockups/nivel-1-taller): Cinzel para
+   títulos, Oswald para la interfaz, Special Elite para papeles y
+   sellos; latón, nogal y papel sobre níquel.
+   Contención como el N5: la escena vive dentro del wb-stage sin
+   desplazar la página; si el tablero crece, el desplazamiento vive
+   dentro de .l2-editor-slot.
    Placeholders en CSS/SVG; finales a producir: n2.background,
    n2.pinion, n2.floorIndicator (ver docs/ASSET-MANIFEST.md). */
 
@@ -8,62 +14,105 @@
   --l2-nickel-deep: #12161c;
   --l2-brass: #d4a72c;
   --l2-brass-2: #f0cf6a;
+  --l2-brass-dark: #7a5a12;
   --l2-ink: #f2ede3;
   --l2-muted: #a7b0be;
   --l2-teal: #38c6b8;
+  --l2-wood: #2b1d16;
+  --l2-wood-2: #3d2a1e;
+  --l2-paper: #f2ede3;
+  --l2-font-display: "Cinzel", "Palatino Linotype", Georgia, serif;
+  --l2-font-ui: "Oswald", "Segoe UI", system-ui, sans-serif;
+  --l2-font-paper: "Special Elite", "Courier New", monospace;
   position: relative;
-  display: block;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
   overflow: hidden;
-  border: 1px solid rgba(212, 167, 44, 0.35);
+  border: 1px solid rgba(42, 54, 70, 0.75);
   border-radius: 12px;
-  background:
-    radial-gradient(circle at 22% 4%, rgba(240, 207, 106, 0.14) 0%, transparent 30%),
-    radial-gradient(circle at 85% 70%, rgba(56, 198, 184, 0.07) 0%, transparent 32%),
-    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px),
-    linear-gradient(165deg, #2b333e 0%, var(--l2-nickel) 45%, var(--l2-nickel-deep) 100%);
+  background: linear-gradient(165deg, #2b333e 0%, var(--l2-nickel) 45%, var(--l2-nickel-deep) 100%);
   color: var(--l2-ink);
+  font-family: var(--l2-font-ui);
   font-size: 16px;
   line-height: 1.5;
 }
 
+/* Pared de níquel con retícula de latón (placeholder de n2.background). */
 .level-scene[data-level="2"] .l2-background {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background:
     linear-gradient(rgba(212, 167, 44, 0.05) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(212, 167, 44, 0.05) 1px, transparent 1px);
-  background-size: 48px 48px;
+    linear-gradient(90deg, rgba(212, 167, 44, 0.05) 1px, transparent 1px),
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 9px);
+  background-size: 48px 48px, 48px 48px, auto;
   mask-image: radial-gradient(circle at 50% 38%, #000 0%, transparent 78%);
+}
+
+/* Luz cálida desde arriba a la izquierda y filo teal a la derecha. */
+.level-scene[data-level="2"] .l2-light {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 24% 6%, rgba(240, 207, 106, 0.16) 0%, transparent 28%),
+    radial-gradient(circle at 82% 72%, rgba(56, 198, 184, 0.08) 0%, transparent 34%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.4) 100%);
+}
+
+/* Mesa de nogal donde descansa la placa. */
+.level-scene[data-level="2"] .l2-bench {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 34%;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(240, 207, 106, 0.12) 0%, transparent 6%),
+    repeating-linear-gradient(93deg, rgba(0, 0, 0, 0.16) 0 2px, transparent 2px 26px),
+    linear-gradient(180deg, var(--l2-wood-2) 0%, var(--l2-wood) 60%, #1a110c 100%);
+  border-top: 1px solid rgba(240, 207, 106, 0.28);
 }
 
 .level-scene[data-level="2"] .l2-room {
   position: relative;
   z-index: 1;
-  display: grid;
-  gap: 16px;
-  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  padding: 10px 14px;
 }
 
 .level-scene[data-level="2"] .l2-top {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
-  gap: 24px;
-  flex-wrap: wrap;
+  gap: 14px;
+  min-width: 0;
 }
 
 .level-scene[data-level="2"] .l2-gauge {
+  flex: 0 0 auto;
   margin: 0;
-  padding: 12px 16px 8px;
+  padding: 6px 8px 4px;
   border: 1px solid rgba(212, 167, 44, 0.45);
-  border-radius: 120px 120px 12px 12px;
+  border-radius: 56px 56px 8px 8px;
   background: linear-gradient(180deg, #313b47 0%, #171c23 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08), 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
 .level-scene[data-level="2"] .l2-gauge-svg {
   display: block;
-  width: 200px;
+  width: 90px;
   max-width: 100%;
   height: auto;
 }
@@ -80,6 +129,7 @@
 
 .level-scene[data-level="2"] .l2-gauge-label {
   fill: var(--l2-ink);
+  font-family: var(--l2-font-ui);
   font-size: 13px;
   letter-spacing: 0.08em;
 }
@@ -97,17 +147,23 @@
 }
 
 .level-scene[data-level="2"] .l2-gauge-caption {
-  margin-top: 4px;
+  margin-top: 2px;
   color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
   font-size: 12px;
   letter-spacing: 0.18em;
   text-align: center;
   text-transform: uppercase;
 }
 
+.level-scene[data-level="2"] .l2-heading {
+  min-width: 0;
+}
+
 .level-scene[data-level="2"] .l2-kicker {
-  margin: 0 0 4px;
+  margin: 0 0 2px;
   color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.18em;
@@ -115,10 +171,18 @@
 }
 
 .level-scene[data-level="2"] .l2-title {
-  margin: 0 0 8px;
-  font-size: 28px;
+  margin: 0 0 6px;
+  font-family: var(--l2-font-display);
+  font-size: 20px;
   font-weight: 600;
   line-height: 1.2;
+}
+
+@media (min-width: 701px) {
+  /* En escritorio el título va en una línea para no robarle alto a la placa. */
+  .level-scene[data-level="2"] .l2-title {
+    white-space: nowrap;
+  }
 }
 
 .level-scene[data-level="2"] .l2-phase {
@@ -128,74 +192,147 @@
   border: 1px solid rgba(212, 167, 44, 0.5);
   border-radius: 999px;
   color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
   font-size: 12px;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
+/* Placa de níquel y latón sobre la mesa: crece con el stage pero no más
+   ancha que el contenido, para que el marco abrace el tablero y la
+   pared/mesa de la sala se vea alrededor. Solo el tablero vive en su
+   flujo; el piñón decora desde una esquina y la nota se esconde en
+   ventanas bajas para no robarle alto al editor. */
 .level-scene[data-level="2"] .l2-plate {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  width: min(100%, 640px);
+  margin-inline: auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
   border: 1px solid rgba(212, 167, 44, 0.55);
   border-radius: 12px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent 30%), linear-gradient(180deg, #1a212b 0%, #0e1218 100%);
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.5);
-  padding: 20px;
+  padding: 8px 12px;
 }
 
-.level-scene[data-level="2"] .l2-plate-title {
+.level-scene[data-level="2"] .l2-plate-label {
   margin: 0;
   color: var(--l2-brass-2);
+  font-family: var(--l2-font-ui);
   font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.2em;
   text-transform: uppercase;
 }
 
-.level-scene[data-level="2"] .l2-plate-sub {
-  margin: 4px 0 12px;
-  color: var(--l2-muted);
-  font-size: 14px;
+.level-scene[data-level="2"] .l2-plate-serial {
+  margin: 2px 0 0;
+  color: #a88032;
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  line-height: 1.2;
+  text-transform: uppercase;
 }
 
+.level-scene[data-level="2"] .l2-plate-seal {
+  position: absolute;
+  right: 14px;
+  top: 10px;
+  margin: 0;
+  padding: 4px 8px;
+  border: 2px solid #a33a26;
+  border-radius: 3px;
+  color: #c14e36;
+  font-family: var(--l2-font-paper);
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  transform: rotate(4deg);
+  opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Hueco donde el parent monta el tablero real: fondo transparente,
+   sin borde de panel, con desplazamiento propio. El tablero manda;
+   la placa solo lo enmarca. */
 .level-scene[data-level="2"] .l2-editor-slot {
-  min-height: 200px;
-  border: 1px dashed rgba(212, 167, 44, 0.4);
-  border-radius: 8px;
-  background: rgba(7, 11, 16, 0.55);
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  background-image: none;
+  box-shadow: none;
   padding: 8px;
 }
 
+.level-scene[data-level="2"] .l2-editor-slot:empty::after {
+  content: "Aquí trabaja el tablero de cables";
+  display: block;
+  padding: 24px 16px;
+  font-family: var(--l2-font-paper);
+  font-size: 14px;
+  text-align: center;
+  color: var(--l2-muted);
+  opacity: 0.7;
+}
+
+/* El tablero real llena el hueco escalando por alto: el viewBox del
+   editor se conserva y el navegador lo encaja entero y centrado, sin
+   estirarlo a lo ancho de la placa. */
 .level-scene[data-level="2"] .l2-editor-slot svg,
 .level-scene[data-level="2"] .l2-editor-slot #canvas {
   display: block;
-  width: 100%;
-  height: auto;
+  height: 100%;
+  width: auto;
+  max-width: 100%;
+  max-height: 100%;
+  margin-inline: auto;
+  background: transparent;
+  background-image: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
 }
 
 .level-scene[data-level="2"] .l2-editor-slot:focus-within {
-  border-style: solid;
-  border-color: var(--l2-teal);
+  outline: 2px solid var(--l2-teal);
+  outline-offset: 3px;
 }
 
+/* Fila de marcha: fase y relés compactos, sin robarle alto al tablero. */
 .level-scene[data-level="2"] .l2-props {
   display: flex;
+  flex: 0 1 auto;
   align-items: center;
-  gap: 16px;
-  margin-top: 16px;
+  gap: 8px;
+  min-width: 0;
+  margin-left: auto;
 }
 
 .level-scene[data-level="2"] .l2-relay {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 12px;
+  gap: 6px;
+  padding: 4px 8px;
   border: 1px solid #3a4656;
   border-radius: 8px;
   background: linear-gradient(180deg, #232c36, #12161c);
 }
 
 .level-scene[data-level="2"] .l2-relay-visor {
-  width: 20px;
-  height: 20px;
+  width: 14px;
+  height: 14px;
   border-radius: 50%;
   background: radial-gradient(circle at 40% 35%, #d6fff9, var(--l2-teal) 60%, #0b6b63);
   box-shadow: 0 0 0 2px #0a0d11, 0 0 8px rgba(56, 198, 184, 0.5);
@@ -203,14 +340,21 @@
 
 .level-scene[data-level="2"] .l2-relay-tag {
   color: var(--l2-muted);
-  font-size: 13px;
+  font-family: var(--l2-font-ui);
+  font-size: 12px;
   letter-spacing: 0.06em;
 }
 
+/* Piñón fuera del flujo: decora la esquina de la placa sin comer editor. */
 .level-scene[data-level="2"] .l2-pinion {
-  margin-left: auto;
-  width: 96px;
-  height: 96px;
+  position: absolute;
+  right: 12px;
+  bottom: 12px;
+  width: 44px;
+  height: 44px;
+  flex: none;
+  opacity: 0.85;
+  pointer-events: none;
 }
 
 .level-scene[data-level="2"] .l2-pinion-svg {
@@ -238,19 +382,35 @@
 }
 
 .level-scene[data-level="2"] .l2-caption {
-  margin: 12px 0 0;
+  flex: 0 0 auto;
+  margin: 6px 0 0;
   color: var(--l2-muted);
-  font-size: 13px;
+  font-family: var(--l2-font-paper);
+  font-size: 12px;
+}
+
+@media (max-height: 899px) {
+  /* En ventanas bajas la nota sale del flujo para darle su alto al editor. */
+  .level-scene[data-level="2"] .l2-caption {
+    display: none;
+  }
 }
 
 .level-scene[data-level="2"] .l2-status {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px 12px;
+  min-width: 0;
   border-top: 1px dashed rgba(212, 167, 44, 0.3);
-  padding-top: 12px;
+  padding-top: 6px;
 }
 
 .level-scene[data-level="2"] .l2-status-text {
   margin: 0;
+  flex: 0 1 auto;
   color: var(--l2-muted);
+  font-family: var(--l2-font-ui);
   font-size: 14px;
   letter-spacing: 0.04em;
 }
@@ -267,17 +427,53 @@
 }
 
 @media (max-width: 700px) {
+  /* En celular vale el mismo criterio: la escena no supera al stage y el
+     editor scrollea dentro del slot. Recorte de ~21 px frente a la
+     medición de 544 contra un stage de 523. */
   .level-scene[data-level="2"] .l2-room {
-    padding: 16px;
+    padding: 8px 10px;
+    gap: 4px;
+  }
+
+  .level-scene[data-level="2"] .l2-top {
+    flex-wrap: wrap;
+    gap: 6px;
   }
 
   .level-scene[data-level="2"] .l2-gauge-svg {
-    width: 160px;
+    width: 88px;
+  }
+
+  .level-scene[data-level="2"] .l2-title {
+    font-size: 18px;
+  }
+
+  .level-scene[data-level="2"] .l2-plate {
+    padding: 6px 10px;
+  }
+
+  .level-scene[data-level="2"] .l2-editor-slot {
+    overflow: auto;
+    overflow-x: hidden;
+  }
+
+  .level-scene[data-level="2"] .l2-plate-seal {
+    position: static;
+    display: inline-block;
+    margin-top: 4px;
+    transform: rotate(2deg);
   }
 
   .level-scene[data-level="2"] .l2-pinion {
-    width: 72px;
-    height: 72px;
+    width: 36px;
+    height: 36px;
+    right: 8px;
+    bottom: 8px;
+  }
+
+  .level-scene[data-level="2"] .l2-status {
+    flex-wrap: wrap;
+    padding-top: 4px;
   }
 }
 
