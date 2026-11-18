@@ -497,14 +497,14 @@ test('a 1440 las tres secciones entran sin scroll: presupuesto declarado', () =>
   const bottom = plate.match(/bottom\s*:\s*(\d+)px/);
   assert.ok(top !== null && bottom !== null, 'placa anclada arriba y abajo');
   const offsets = Number(top[1]) + Number(bottom[1]);
-  // Cromo de la placa: paddings 12 + rótulo 21 + riel 34 + leyenda 20 + línea 26 + editor 14.
-  const chrome = 12 + 21 + 34 + 20 + 26 + 14;
-  // Contenido: cinta compacta 69 + tres secciones (76 cada una + gaps 8).
-  const content = 69 + (76 * 3 + 8);
+  // Cromo de la placa: paddings 12 + rótulo 21 + riel 34 + leyenda 20 + línea 26 + editor 10.
+  const chrome = 12 + 21 + 34 + 20 + 26 + 10;
+  // Contenido: cinta compacta 67 + tres secciones (74 cada una + gaps 4).
+  const content = 67 + (74 * 3 + 4);
   // Con stage drum-room de 605 px (1440×900) sobran píxeles: LISTO visible.
   assert.ok(605 - offsets >= chrome + content, `placa útil ${605 - offsets} px para ${chrome + content} px`);
   const editorCss = blocksFor('.counting-editor').join('\n');
-  assert.ok(editorCss.includes('padding: 6px'), 'marco del editor compacto');
+  assert.ok(editorCss.includes('padding: 4px'), 'marco del editor compacto');
   assert.ok(editorCss.includes('overflow: auto'), 'el scroll queda solo como red');
   const sectionCss = blocksFor('.drum-section').join('\n');
   assert.ok(sectionCss.includes('padding: 6px'), 'secciones compactas');
@@ -512,7 +512,7 @@ test('a 1440 las tres secciones entran sin scroll: presupuesto declarado', () =>
   const drumCss = blocksFor('#drum .drum {').join('\n');
   assert.ok(drumCss.includes('flex-direction: column'), 'secciones apiladas en orden');
   const tapeCss = blocksFor('#tape-panel {').join('\n');
-  assert.ok(tapeCss.includes('margin-bottom: 4px'), 'cinta compacta sobre el tambor');
+  assert.ok(tapeCss.includes('margin-bottom: 2px'), 'cinta compacta sobre el tambor');
 });
 
 test('setPhase mueve la línea grabada y el cuño', () => {

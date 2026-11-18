@@ -328,7 +328,7 @@
   overflow: auto;
   border: 1px dashed rgba(240, 207, 106, 0.4);
   border-radius: 12px;
-  padding: 6px;
+  padding: 4px;
   background: rgba(11, 15, 20, 0.72);
   box-shadow: inset 0 2px 12px rgba(0, 0, 0, 0.55);
 }
@@ -718,7 +718,7 @@
  * Marco compacto: a 1440×900 las tres secciones entran sin scroll. */
 .level-scene[data-level="5"] #tape-panel {
   min-width: 0;
-  margin-bottom: 4px;
+  margin-bottom: 2px;
 }
 
 .level-scene[data-level="5"] #tape-panel .tape-section {
@@ -783,7 +783,7 @@
 .level-scene[data-level="5"] #drum .drum {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
 }
 
 /* Anillos del tambor: aros oscuros con filo de latón, compactos para que
