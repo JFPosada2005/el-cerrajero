@@ -1,6 +1,6 @@
 # Plan de assets P0 — remaster
 
-**Estado:** plan listo para ejecución. No se han producido ni subido assets todavía.
+**Estado:** P0-1 ejecutado en local (Nivel 1, iconos y licencias). P0-2 y P0-3 pendientes. Sin push todavía.
 **Rama de trabajo:** `feat/remaster-assets`, creada desde `origin/feat/remaster-integration` (`53339d3`).
 **Alcance:** `assets/`, `docs/` y `CREDITS.md`. No se toca `src/`, `src/game`, `tests/`, `index.html` ni `styles.css` del juego.
 **Contrato:** [`docs/ASSET-MANIFEST.md`](ASSET-MANIFEST.md) y [`assets/manifest.json`](../assets/manifest.json).
@@ -32,8 +32,8 @@ La columna **Ya tenemos** se refiere a lo que existe en `mockups/nivel-1-taller/
 |---|---|---|---|---|
 | `font.display` | `assets/fonts/Cinzel-Variable.woff2` | WOFF2, 25,3 KB; total de fuentes ≤150 KB | Sí, disponible | Descargar `OFL.txt` de Google Fonts |
 | `font.ui` | `assets/fonts/Oswald-Variable.woff2` | WOFF2, 27,8 KB | Sí, disponible | Descargar `OFL.txt` |
-| `font.paper` | `assets/fonts/SpecialElite-Regular.woff2` | WOFF2, 52 KB | Sí, disponible | Descargar `OFL.txt` |
-| Licencias de fuentes | `assets/fonts/OFL-Cinzel.txt`, `OFL-Oswald.txt`, `OFL-SpecialElite.txt` | Texto | No | Google Fonts GitHub, carpeta `ofl/<familia>/OFL.txt` |
+| `font.paper` | `assets/fonts/SpecialElite-Regular.woff2` | WOFF2, 52 KB | Sí, disponible | Descargar `LICENSE.txt` (Apache 2.0) |
+| Licencias de fuentes | `assets/fonts/OFL-Cinzel.txt`, `OFL-Oswald.txt`, `LICENSE-SpecialElite.txt` | Texto | Sí | Google Fonts GitHub |
 
 ### 3.2 UI compartida
 
@@ -291,7 +291,22 @@ Actualizar `updated` al final de cada lote. No cambiar los `final` ya acordados.
 
 ## 9. Estado
 
-- Plan escrito.
+### Checkpoint 2026-11-17 — P0-1
+
 - Rama `feat/remaster-assets` creada desde `origin/feat/remaster-integration`.
-- Sin assets producidos ni pusheados todavía.
-- Siguiente lote recomendado: **P0-1**, N1 + fuentes/licencias + iconos.
+- Nivel 1 reexportado a `assets/levels/01/` en WebP.
+- Las 4 llaves se editaron para retirar el “1” grabado y se conservaron sus colores.
+- `assets/shared/ui/sound.svg`, `close.svg` y `lock.svg` creados.
+- Licencias: `OFL-Cinzel.txt`, `OFL-Oswald.txt` y `LICENSE-SpecialElite.txt`.
+- `assets/manifest.json` actualizado: N1, fuentes e iconos P0 en `available`.
+- `CREDITS.md` creado.
+- Total de imágenes N1: **496.224 bytes** (≤1,5 MB).
+- `npm test`: **253/253**.
+- Sin push todavía.
+
+### Pendiente
+
+- **P0-2:** relé, bifurcador, resorte, piñón, base/ficha de pila, cinta, cabezal, tambor y púa.
+- **P0-3:** los ocho SFX.
+- Confirmar con Felipe el tamaño final del workbench y `n1.gear` vs. celda-relé.
+- Los assets de IA que faltan se generan con los prompts de la sección 5.

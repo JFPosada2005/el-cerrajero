@@ -15,34 +15,93 @@
       "kind": "font",
       "priority": "P0",
       "status": "available",
-      "license": "OFL pendiente de archivo"
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/OFL-Cinzel.txt"
     },
     "ui": {
       "final": "assets/fonts/Oswald-Variable.woff2",
       "kind": "font",
       "priority": "P0",
       "status": "available",
-      "license": "OFL pendiente de archivo"
+      "license": "OFL-1.1",
+      "licenseFile": "assets/fonts/OFL-Oswald.txt"
     },
     "paper": {
       "final": "assets/fonts/SpecialElite-Regular.woff2",
       "kind": "font",
       "priority": "P0",
       "status": "available",
-      "license": "OFL pendiente de archivo"
+      "license": "Apache-2.0",
+      "licenseFile": "assets/fonts/LICENSE-SpecialElite.txt"
     }
   },
   "shared": {
-    "ui.sound": { "final": "assets/shared/ui/sound.svg", "kind": "icon", "priority": "P0", "status": "missing" },
-    "ui.close": { "final": "assets/shared/ui/close.svg", "kind": "icon", "priority": "P0", "status": "missing" },
-    "ui.lock": { "final": "assets/shared/ui/lock.svg", "kind": "icon", "priority": "P0", "status": "missing" },
-    "ui.speed": { "final": "assets/shared/ui/speed.svg", "kind": "icon", "priority": "P1", "status": "missing" },
-    "paper.contract": { "final": "assets/shared/paper/contract.webp", "kind": "image", "priority": "P1", "status": "missing" },
-    "paper.hint": { "final": "assets/shared/paper/hint.webp", "kind": "image", "priority": "P1", "status": "missing" },
-    "paper.log": { "final": "assets/shared/paper/log.webp", "kind": "image", "priority": "P1", "status": "missing" },
-    "prop.relay": { "final": "assets/shared/props/relay.webp", "kind": "image", "priority": "P0", "status": "missing" },
-    "prop.fork": { "final": "assets/shared/props/fork.svg", "kind": "icon", "priority": "P0", "status": "missing" },
-    "prop.spring": { "final": "assets/shared/props/spring.svg", "kind": "icon", "priority": "P0", "status": "missing" }
+    "ui.sound": {
+      "final": "assets/shared/ui/sound.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.close": {
+      "final": "assets/shared/ui/close.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.lock": {
+      "final": "assets/shared/ui/lock.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "available",
+      "license": "ISC — Lucide (adaptado)",
+      "source": "https://lucide.dev"
+    },
+    "ui.speed": {
+      "final": "assets/shared/ui/speed.svg",
+      "kind": "icon",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "paper.contract": {
+      "final": "assets/shared/paper/contract.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "paper.hint": {
+      "final": "assets/shared/paper/hint.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "paper.log": {
+      "final": "assets/shared/paper/log.webp",
+      "kind": "image",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "prop.relay": {
+      "final": "assets/shared/props/relay.webp",
+      "kind": "image",
+      "priority": "P0",
+      "status": "missing"
+    },
+    "prop.fork": {
+      "final": "assets/shared/props/fork.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "missing"
+    },
+    "prop.spring": {
+      "final": "assets/shared/props/spring.svg",
+      "kind": "icon",
+      "priority": "P0",
+      "status": "missing"
+    }
   },
   "levels": {
     "01": {
@@ -51,122 +110,212 @@
         "placeholder": "mockups/nivel-1-taller/assets/sprites/fondo-banco.jpg",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "thief": {
         "final": "assets/levels/01/thief.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/ladron.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "contract": {
         "final": "assets/levels/01/props/contract.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/contrato.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "hint": {
         "final": "assets/levels/01/props/hint.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/nota-pista.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "log": {
         "final": "assets/levels/01/props/log.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/libreta.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "entry": {
         "final": "assets/levels/01/props/entry.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/bocallave-entrada.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "lock": {
         "final": "assets/levels/01/props/lock.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/cilindro-cerradura.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "spool": {
         "final": "assets/levels/01/props/spool.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/carrete-cobre.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "gear": {
         "final": "assets/levels/01/props/gear.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/rueda-engranaje.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "bell": {
         "final": "assets/levels/01/props/bell.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/campana-alarma.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "scissors": {
         "final": "assets/levels/01/props/scissors.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/tijeras.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "key1": {
         "final": "assets/levels/01/props/key-1.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-1.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "key2": {
         "final": "assets/levels/01/props/key-2.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-2.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "key3": {
         "final": "assets/levels/01/props/key-3.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-3.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       },
       "key4": {
         "final": "assets/levels/01/props/key-4.webp",
         "placeholder": "mockups/nivel-1-taller/assets/sprites/llave-4.png",
         "kind": "image",
         "priority": "P0",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA",
+        "source": "mockup 153ee7d, reexportado a WebP"
       }
     },
     "02": {
-      "background": { "final": "assets/levels/02/background.webp", "placeholder": null, "kind": "image", "priority": "P1", "status": "missing" },
-      "pinion": { "final": "assets/levels/02/pinion.webp", "placeholder": null, "kind": "image", "priority": "P0", "status": "missing" },
-      "floorIndicator": { "final": "assets/levels/02/floor-indicator.svg", "placeholder": null, "kind": "icon", "priority": "P1", "status": "missing" }
+      "background": {
+        "final": "assets/levels/02/background.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "missing"
+      },
+      "pinion": {
+        "final": "assets/levels/02/pinion.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "floorIndicator": {
+        "final": "assets/levels/02/floor-indicator.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "missing"
+      }
     },
     "03": {
-      "backgroundDay": { "final": "assets/levels/03/day.webp", "placeholder": null, "kind": "image", "priority": "P1", "status": "missing" },
-      "backgroundNight": { "final": "assets/levels/03/night.webp", "placeholder": null, "kind": "image", "priority": "P1", "status": "missing" },
-      "lamp": { "final": "assets/levels/03/lamp.svg", "placeholder": null, "kind": "icon", "priority": "P2", "status": "missing" }
+      "backgroundDay": {
+        "final": "assets/levels/03/day.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "missing"
+      },
+      "backgroundNight": {
+        "final": "assets/levels/03/night.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "missing"
+      },
+      "lamp": {
+        "final": "assets/levels/03/lamp.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P2",
+        "status": "missing"
+      }
     },
     "04": {
-      "background": { "final": "assets/levels/04/background.webp", "placeholder": null, "kind": "image", "priority": "P1", "status": "missing" },
-      "stackBase": { "final": "assets/levels/04/stack-base.webp", "placeholder": null, "kind": "image", "priority": "P0", "status": "missing" },
-      "chip": { "final": "assets/levels/04/chip.webp", "placeholder": null, "kind": "image", "priority": "P0", "status": "missing" },
-      "selectors": { "final": "assets/levels/04/selectors.svg", "placeholder": null, "kind": "icon", "priority": "P1", "status": "missing" }
+      "background": {
+        "final": "assets/levels/04/background.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "missing"
+      },
+      "stackBase": {
+        "final": "assets/levels/04/stack-base.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "chip": {
+        "final": "assets/levels/04/chip.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "selectors": {
+        "final": "assets/levels/04/selectors.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P1",
+        "status": "missing"
+      }
     },
     "05": {
       "background": {
@@ -176,34 +325,159 @@
         "priority": "P1",
         "status": "placeholder"
       },
-      "tape": { "final": "assets/levels/05/tape.svg", "placeholder": null, "kind": "icon", "priority": "P0", "status": "missing" },
-      "head": { "final": "assets/levels/05/head.webp", "placeholder": null, "kind": "image", "priority": "P0", "status": "missing" },
-      "drum": { "final": "assets/levels/05/drum.webp", "placeholder": null, "kind": "image", "priority": "P0", "status": "missing" },
-      "pin": { "final": "assets/levels/05/pin.svg", "placeholder": null, "kind": "icon", "priority": "P0", "status": "missing" },
-      "depositSlip": { "final": "assets/levels/05/deposit-slip.webp", "placeholder": null, "kind": "image", "priority": "P1", "status": "missing" }
+      "tape": {
+        "final": "assets/levels/05/tape.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "head": {
+        "final": "assets/levels/05/head.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "drum": {
+        "final": "assets/levels/05/drum.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "pin": {
+        "final": "assets/levels/05/pin.svg",
+        "placeholder": null,
+        "kind": "icon",
+        "priority": "P0",
+        "status": "missing"
+      },
+      "depositSlip": {
+        "final": "assets/levels/05/deposit-slip.webp",
+        "placeholder": null,
+        "kind": "image",
+        "priority": "P1",
+        "status": "missing"
+      }
     }
   },
   "sfx": {
-    "click": { "final": "assets/audio/sfx/click.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "cable": { "final": "assets/audio/sfx/cable.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "cut": { "final": "assets/audio/sfx/cut.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "gear": { "final": "assets/audio/sfx/gear.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "lock": { "final": "assets/audio/sfx/lock.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "bell": { "final": "assets/audio/sfx/bell.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "paper": { "final": "assets/audio/sfx/paper.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "error": { "final": "assets/audio/sfx/error.ogg", "kind": "audio", "priority": "P0", "status": "synthetic" },
-    "success": { "final": "assets/audio/sfx/success.ogg", "kind": "audio", "priority": "P1", "status": "missing" },
-    "spring": { "final": "assets/audio/sfx/spring.ogg", "kind": "audio", "priority": "P1", "status": "missing" },
-    "chip": { "final": "assets/audio/sfx/chip.ogg", "kind": "audio", "priority": "P1", "status": "missing" },
-    "tape": { "final": "assets/audio/sfx/tape.ogg", "kind": "audio", "priority": "P1", "status": "missing" },
-    "pin": { "final": "assets/audio/sfx/pin.ogg", "kind": "audio", "priority": "P1", "status": "missing" },
-    "steps": { "final": "assets/audio/sfx/steps.ogg", "kind": "audio", "priority": "P1", "status": "missing" }
+    "click": {
+      "final": "assets/audio/sfx/click.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "cable": {
+      "final": "assets/audio/sfx/cable.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "cut": {
+      "final": "assets/audio/sfx/cut.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "gear": {
+      "final": "assets/audio/sfx/gear.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "lock": {
+      "final": "assets/audio/sfx/lock.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "bell": {
+      "final": "assets/audio/sfx/bell.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "paper": {
+      "final": "assets/audio/sfx/paper.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "error": {
+      "final": "assets/audio/sfx/error.ogg",
+      "kind": "audio",
+      "priority": "P0",
+      "status": "synthetic"
+    },
+    "success": {
+      "final": "assets/audio/sfx/success.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "spring": {
+      "final": "assets/audio/sfx/spring.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "chip": {
+      "final": "assets/audio/sfx/chip.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "tape": {
+      "final": "assets/audio/sfx/tape.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "pin": {
+      "final": "assets/audio/sfx/pin.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    },
+    "steps": {
+      "final": "assets/audio/sfx/steps.ogg",
+      "kind": "audio",
+      "priority": "P1",
+      "status": "missing"
+    }
   },
   "music": {
-    "n1": { "final": "assets/audio/music/n1.ogg", "kind": "audio", "priority": "P2", "status": "missing" },
-    "n2": { "final": "assets/audio/music/n2.ogg", "kind": "audio", "priority": "P2", "status": "missing" },
-    "n3": { "final": "assets/audio/music/n3.ogg", "kind": "audio", "priority": "P2", "status": "missing" },
-    "n4": { "final": "assets/audio/music/n4.ogg", "kind": "audio", "priority": "P2", "status": "missing" },
-    "n5": { "final": "assets/audio/music/n5.ogg", "kind": "audio", "priority": "P2", "status": "missing" }
+    "n1": {
+      "final": "assets/audio/music/n1.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n2": {
+      "final": "assets/audio/music/n2.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n3": {
+      "final": "assets/audio/music/n3.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n4": {
+      "final": "assets/audio/music/n4.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    },
+    "n5": {
+      "final": "assets/audio/music/n5.ogg",
+      "kind": "audio",
+      "priority": "P2",
+      "status": "missing"
+    }
   }
 }
