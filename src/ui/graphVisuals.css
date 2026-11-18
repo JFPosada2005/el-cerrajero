@@ -127,3 +127,63 @@
     transform: none;
   }
 }
+
+/* Nivel 3: mecanismo más grande sin tocar el área de trabajo.
+ *
+ * Solo bajo `.level-scene[data-level="3"]` y `#canvas.gv-level-3`
+ * (clase que pone `decorateGraph` en el N3). Las piezas crecen sobre
+ * su propio centro (`transform-box: fill-box` en cada sprite: el
+ * `translate` del grupo no se toca), los cables engordan y las
+ * etiquetas suben de tamaño. La caja del tablero, la placa, el
+ * viewBox y la posición de cada celda no cambian: nada se recorta
+ * ni se mueve de celda.
+ */
+
+.level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .gv-sprite {
+  transform: scale(1.3);
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .wire:not(.is-cutting) .edge {
+  stroke-width: 7;
+}
+
+.level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .edge-label {
+  font-size: 17px;
+  stroke-width: 6px;
+}
+
+.level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .start-label {
+  font-size: 14px;
+}
+
+/* El giro del engranaje conserva la escala del N3: el `from`/`to`
+ * llevan la misma escala para que solo interpole el giro. */
+@media (prefers-reduced-motion: no-preference) {
+  .level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .state .gv-sprite-gear {
+    animation: gv-gear-turn-n3 60s linear infinite;
+  }
+
+  @keyframes gv-gear-turn-n3 {
+    from {
+      transform: rotate(0deg) scale(1.3);
+    }
+
+    to {
+      transform: rotate(360deg) scale(1.3);
+    }
+  }
+}
+
+/* El perno cede igual que en el resto, a escala del N3; quieto si
+ * el sistema pide movimiento reducido. */
+.level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .state.is-lit .gv-sprite-lock-bolt {
+  transform: translateX(12%) scale(1.3);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .level-scene[data-level="3"] #canvas.gv-decorated.gv-level-3 .state.is-lit .gv-sprite-lock-bolt {
+    transform: scale(1.3);
+  }
+}

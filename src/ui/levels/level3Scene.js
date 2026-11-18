@@ -317,12 +317,13 @@ statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
 
   // El interruptor de la sala de noche: ensayo del asalto. Junto a
   // PROBAR (a su izquierda, mismo grupo) sobre el borde derecho de la placa.
+  const assaultBuild = phaseId(phase) === 'build';
   const assault = node('button', 'museum-assault');
   assault.type = 'button';
   assault.setAttribute('data-action', 'assault');
-  assault.setAttribute('aria-label', 'Ensayar el asalto en la sala de noche');
+  assault.setAttribute('aria-label', assaultBuild ? 'Lanzar el asalto en la sala de noche' : 'Ensayar el asalto en la sala de noche');
   assault.append(switchGlyph());
-  assault.append(node('span', 'museum-prop-name', 'Ensayo'));
+  assault.append(node('span', 'museum-prop-name', assaultBuild ? 'Asalto' : 'Ensayo'));
 
   const alarmGroup = node('div', 'museum-alarm-group');
   alarmGroup.append(assault);

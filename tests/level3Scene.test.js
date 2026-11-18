@@ -691,6 +691,35 @@ test('ENSAYO junto a PROBAR: mismo grupo sobre el borde derecho', () => {
   assert.ok(/display\s*:\s*flex/.test(found.body), 'ENSAYO y PROBAR comparten fila sin pisarse');
 });
 
+test('ENSAYO refleja la fase: Ensayo en reparación, Asalto en construcción', () => {
+  function assaultOf(scene) {
+    const found = all(scene).find((node) => node.getAttribute('data-action') === 'assault');
+    assert.ok(found, 'hay control de ensayo/asalto');
+    return found;
+  }
+  function propName(prop) {
+    const name = [...walk(prop)].find((node) => classes(node).includes('museum-prop-name'));
+    assert.ok(name, 'el control rotula su nombre en la mesa');
+    return name.textContent;
+  }
+  const repair = createLevelScene({ phase: 'repair' });
+  assert.equal(propName(assaultOf(repair)), 'Ensayo', 'en reparación el interruptor pide el ensayo');
+  assert.ok(
+    (assaultOf(repair).getAttribute('aria-label') ?? '').includes('Ensayar'),
+    'en reparación el nombre accesible pide el ensayo',
+  );
+  const build = createLevelScene({ phase: 'build' });
+  assert.equal(propName(assaultOf(build)), 'Asalto', 'en construcción el interruptor lanza el asalto');
+  assert.ok(
+    (assaultOf(build).getAttribute('aria-label') ?? '').includes('asalto'),
+    'en construcción el nombre accesible lanza el asalto',
+  );
+  for (const scene of [repair, build]) {
+    const probe = all(scene).find((node) => node.getAttribute('data-action') === 'probe');
+    assert.ok(probe, 'PROBAR sigue en su grupo en ambas fases');
+  }
+});
+
 test('keysSlot: alto para la chapa del carrete y sin recorte vertical', () => {
   const scene = createLevelScene({});
   assert.ok(scene.keysSlot, 'la ranura existe para el parent');
