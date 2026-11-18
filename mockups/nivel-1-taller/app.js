@@ -4,13 +4,14 @@ const NS = 'http://www.w3.org/2000/svg';
 
 const stage = $('#stage');
 const gameShell = $('.game-shell');
+const stageViewport = $('#stage-viewport');
 const mechanism = $('#mechanism');
 const wireGroup = $('#wire-group');
 const wires = $('#wires');
 const pulseLayer = $('#pulse-layer');
 const previewLayer = $('#preview-layer');
-const toolCursor = $('#tool-cursor');
-const toolCursorImg = $('#tool-cursor-img');
+const toolStatus = $('.tool-status');
+const toolStatusText = $('#tool-status-text');
 const toastEl = $('#toast');
 const overlay = $('#overlay');
 const dossier = $('#dossier');
@@ -29,11 +30,11 @@ const PARTS = {
   bell: { x: 815, y: 470, r: 26, label: 'la campana' },
 };
 
-const KEY_COLORS = {
-  1: '#f0cf6a',
-  2: '#38c6b8',
-  3: '#f06a4a',
-  4: '#a18be0',
+const KEY_TONES = {
+  1: { base: '#2e2213', light: '#f0cf6a', dark: '#8a651f', cable: '#b08a3e' },
+  2: { base: '#0c2422', light: '#38c6b8', dark: '#1d6f67', cable: '#2b9a90' },
+  3: { base: '#2b1510', light: '#f06a4a', dark: '#8a3324', cable: '#c05a44' },
+  4: { base: '#1a1528', light: '#a18be0', dark: '#5a4a8a', cable: '#7d6cba' },
 };
 
 const HINTS = [
@@ -55,12 +56,6 @@ const state = {
   cables: new Map(),
 };
 
-const isFinePointer = window.matchMedia('(pointer: fine)').matches;
-const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-if (isFinePointer) {
-  document.body.classList.add('has-custom-cursor');
-}
-
 const spriteParam = new URLSearchParams(window.location.search).get('sprites');
 if (spriteParam === 'png') {
   $$('img[data-sprite]').forEach((image) => {
@@ -69,9 +64,6 @@ if (spriteParam === 'png') {
     const probe = new Image();
     probe.addEventListener('load', () => {
       image.src = probe.src;
-      if (toolCursorImg.src.includes(`${name}.svg`)) {
-        toolCursorImg.src = probe.src;
-      }
     });
     probe.addEventListener('error', () => {
       image.src = source;
@@ -104,29 +96,29 @@ function audio() {
   return audioContext;
 }
 
-function tone({ frequency = 220, duration = 0.06, type = 'sine', volume = 0.04, slide = 0 }) {
+function tone({ frequency = 220, duration = 0.06, type = 'sine', volume = 0.04, slide = 0, delay = 0 }) {
   const context = audio();
   if (context === null) {
     return;
   }
   const oscillator = context.createOscillator();
   const gain = context.createGain();
-  const now = context.currentTime;
+  const start = context.currentTime + delay;
   oscillator.type = type;
-  oscillator.frequency.setValueAtTime(frequency, now);
+  oscillator.frequency.setValueAtTime(frequency, start);
   if (slide !== 0) {
-    oscillator.frequency.exponentialRampToValueAtTime(Math.max(30, frequency + slide), now + duration);
+    oscillator.frequency.exponentialRampToValueAtTime(Math.max(30, frequency + slide), start + duration);
   }
-  gain.gain.setValueAtTime(0.0001, now);
-  gain.gain.exponentialRampToValueAtTime(volume, now + 0.008);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  gain.gain.setValueAtTime(0.0001, start);
+  gain.gain.exponentialRampToValueAtTime(volume, start + 0.008);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   oscillator.connect(gain);
   gain.connect(context.destination);
-  oscillator.start(now);
-  oscillator.stop(now + duration + 0.02);
+  oscillator.start(start);
+  oscillator.stop(start + duration + 0.02);
 }
 
-function noise({ duration = 0.08, volume = 0.03, frequency = 1800 }) {
+function noise({ duration = 0.08, volume = 0.03, frequency = 1800, delay = 0 }) {
   const context = audio();
   if (context === null) {
     return;
@@ -140,59 +132,80 @@ function noise({ duration = 0.08, volume = 0.03, frequency = 1800 }) {
   const source = context.createBufferSource();
   const filter = context.createBiquadFilter();
   const gain = context.createGain();
-  const now = context.currentTime;
+  const start = context.currentTime + delay;
   filter.type = 'bandpass';
   filter.frequency.value = frequency;
   filter.Q.value = 1.2;
-  gain.gain.setValueAtTime(volume, now);
-  gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+  gain.gain.setValueAtTime(volume, start);
+  gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
   source.buffer = buffer;
   source.connect(filter);
   filter.connect(gain);
   gain.connect(context.destination);
-  source.start(now);
+  source.start(start);
 }
 
 const sounds = {
   click() {
-    tone({ frequency: 420, duration: 0.035, type: 'triangle', volume: 0.025 });
+    noise({ duration: 0.012, volume: 0.012, frequency: 2600 });
+    tone({ frequency: 620, duration: 0.025, type: 'triangle', volume: 0.012, slide: -140 });
   },
   plug() {
-    tone({ frequency: 120, duration: 0.12, type: 'sine', volume: 0.05, slide: -40 });
-    noise({ duration: 0.045, volume: 0.018, frequency: 900 });
+    tone({ frequency: 150, duration: 0.1, type: 'triangle', volume: 0.05, slide: -55 });
+    tone({ frequency: 1100, duration: 0.035, type: 'square', volume: 0.01, slide: -350 });
+    noise({ duration: 0.03, volume: 0.014, frequency: 1700 });
   },
   snip() {
-    noise({ duration: 0.06, volume: 0.05, frequency: 3200 });
-    tone({ frequency: 1400, duration: 0.04, type: 'square', volume: 0.015, slide: -500 });
+    noise({ duration: 0.035, volume: 0.04, frequency: 5200 });
+    tone({ frequency: 2600, duration: 0.045, type: 'triangle', volume: 0.014, slide: -900 });
+    noise({ duration: 0.02, volume: 0.018, frequency: 3000, delay: 0.055 });
   },
   gear() {
-    tone({ frequency: 240, duration: 0.05, type: 'square', volume: 0.018 });
-    noise({ duration: 0.03, volume: 0.012, frequency: 2400 });
+    for (let index = 0; index < 5; index += 1) {
+      noise({ duration: 0.03, volume: 0.012, frequency: 1500 + index * 160, delay: index * 0.045 });
+      tone({ frequency: 86 + index * 4, duration: 0.04, type: 'triangle', volume: 0.012, delay: index * 0.045 });
+    }
+    tone({ frequency: 64, duration: 0.18, type: 'sine', volume: 0.025, slide: -8 });
   },
   lock() {
-    tone({ frequency: 95, duration: 0.18, type: 'sine', volume: 0.075, slide: -30 });
-    noise({ duration: 0.05, volume: 0.02, frequency: 500 });
+    noise({ duration: 0.05, volume: 0.025, frequency: 520 });
+    tone({ frequency: 74, duration: 0.24, type: 'sine', volume: 0.06, slide: -12 });
+    tone({ frequency: 300, duration: 0.08, type: 'triangle', volume: 0.018, slide: -90 });
   },
   bell() {
-    tone({ frequency: 880, duration: 0.6, type: 'sine', volume: 0.045, slide: -80 });
-    tone({ frequency: 1320, duration: 0.45, type: 'sine', volume: 0.025, slide: -60 });
+    const partials = [
+      [523, 0.032, 1.5],
+      [1248, 0.016, 1.05],
+      [1560, 0.012, 0.85],
+      [2184, 0.008, 0.65],
+      [2808, 0.005, 0.45],
+    ];
+    for (const [frequency, volume, duration] of partials) {
+      tone({ frequency, duration, type: 'sine', volume, slide: -10 });
+    }
+    tone({ frequency: 261, duration: 1.2, type: 'sine', volume: 0.015, slide: -3 });
+    noise({ duration: 0.025, volume: 0.016, frequency: 3200 });
   },
   paper() {
-    noise({ duration: 0.12, volume: 0.022, frequency: 1200 });
+    noise({ duration: 0.1, volume: 0.018, frequency: 1100 });
+    noise({ duration: 0.06, volume: 0.01, frequency: 2400, delay: 0.05 });
   },
   error() {
-    tone({ frequency: 180, duration: 0.12, type: 'sawtooth', volume: 0.025, slide: -30 });
+    tone({ frequency: 140, duration: 0.14, type: 'sawtooth', volume: 0.018, slide: -20 });
+    noise({ duration: 0.05, volume: 0.012, frequency: 420 });
+  },
+  approach() {
+    noise({ duration: 0.25, volume: 0.012, frequency: 650 });
+    tone({ frequency: 66, duration: 0.32, type: 'sine', volume: 0.018, slide: -4 });
+    noise({ duration: 0.12, volume: 0.008, frequency: 1200, delay: 0.12 });
+  },
+  verdict() {
+    tone({ frequency: 220, duration: 0.18, type: 'sine', volume: 0.018 });
+    tone({ frequency: 330, duration: 0.24, type: 'sine', volume: 0.014, delay: 0.08 });
   },
 };
 
-/* Cursor y herramienta. */
-function cursorSource(tool, key) {
-  if (tool === 'key') {
-    return $(`.inventory-key[data-key="${key}"]`);
-  }
-  return $(`.inventory-tool[data-tool="${tool}"]`);
-}
-
+/* Herramienta activa y estado del taller. */
 function setTool(tool, key = state.key) {
   if (tool === 'gear') {
     showToast('El engranaje se desbloquea en el contrato 02.');
@@ -204,32 +217,14 @@ function setTool(tool, key = state.key) {
   document.body.dataset.tool = tool;
   document.body.dataset.key = state.key;
   $$('.inventory-key').forEach((button) => {
-    button.classList.toggle('is-active', button.dataset.key === state.key);
+    button.classList.toggle('is-active', state.tool === 'key' && button.dataset.key === state.key);
   });
   $$('.inventory-tool').forEach((button) => {
     button.classList.toggle('is-active', button.dataset.tool === tool);
   });
   $$('.cable.is-targeted').forEach((cable) => cable.classList.remove('is-targeted'));
-  const source = cursorSource(tool, state.key);
-  if (source !== undefined && source !== null) {
-    const sourceImage = $('img', source);
-    toolCursorImg.src = source.dataset.cursor ?? sourceImage.src;
-  }
   clearSource();
-  hideStageHint();
-}
-
-function showCursor(x, y) {
-  if (isFinePointer === false) {
-    return;
-  }
-  toolCursor.hidden = false;
-  toolCursor.style.left = `${x}px`;
-  toolCursor.style.top = `${y}px`;
-}
-
-function hideCursor() {
-  toolCursor.hidden = true;
+  updateToolStatus();
 }
 
 function showToast(message, duration = 2400) {
@@ -241,11 +236,51 @@ function showToast(message, duration = 2400) {
   }, duration);
 }
 
-function hideStageHint() {
-  const hint = $('#stage-hint');
-  if (hint !== null) {
-    hint.classList.add('is-hidden');
+function updateToolStatus() {
+  if (toolStatusText === null) {
+    return;
   }
+  if (state.tool === 'key') {
+    const guidance = state.source === null
+      ? 'Selecciona origen y destino'
+      : `Origen: ${PARTS[state.source].label}. Selecciona el destino`;
+    toolStatusText.textContent = `Llave ${state.key} en mano — ${guidance}`;
+  } else if (state.tool === 'wire') {
+    const guidance = state.source === null
+      ? 'Selecciona origen y destino'
+      : `Origen: ${PARTS[state.source].label}. Selecciona el destino`;
+    toolStatusText.textContent = `Carrete de cobre en mano — ${guidance}`;
+  } else if (state.tool === 'scissors') {
+    toolStatusText.textContent = 'Tijeras en mano — Haz clic en un cable para cortarlo';
+  }
+  if (toolStatus !== null) {
+    toolStatus.classList.toggle('is-cutting', state.tool === 'scissors');
+  }
+}
+
+const STAGE_WIDTH = 1600;
+const STAGE_HEIGHT = 900;
+
+function fitStage() {
+  if (stageViewport === null) {
+    return;
+  }
+  if (window.matchMedia('(max-width: 900px)').matches) {
+    stage.style.removeProperty('--stage-scale');
+    return;
+  }
+  const rect = stageViewport.getBoundingClientRect();
+  if (rect.width === 0 || rect.height === 0) {
+    return;
+  }
+  const scale = Math.min(rect.width / STAGE_WIDTH, rect.height / STAGE_HEIGHT);
+  stage.style.setProperty('--stage-scale', String(scale));
+}
+
+window.addEventListener('resize', fitStage);
+window.addEventListener('load', fitStage);
+if (window.ResizeObserver !== undefined && stageViewport !== null) {
+  new ResizeObserver(fitStage).observe(stageViewport);
 }
 
 /* Piezas. */
@@ -264,6 +299,7 @@ function clearSource() {
   state.source = null;
   $$('.part.is-source').forEach((part) => part.classList.remove('is-source'));
   hideCablePreview();
+  updateToolStatus();
 }
 
 function rotateGear(element) {
@@ -275,24 +311,19 @@ function rotateGear(element) {
   element.dataset.angle = String(angle);
   sprite.style.transform = `rotate(${angle}deg)`;
   flashPart(element);
-  sounds.gear();
 }
 
-function toggleLock(element) {
-  const open = element.dataset.open !== 'true';
-  element.dataset.open = String(open);
-  flashPart(element);
-  sounds.lock();
-  showToast(open ? 'El perno se retrae con un golpe seco.' : 'El perno vuelve a cerrar la caja.');
-}
-
-function ringBell(element) {
+function ringBell(element, message = null) {
   element.classList.remove('is-ringing');
   void element.offsetWidth;
   element.classList.add('is-ringing');
-  sounds.bell();
-  showToast('La campana de alarma está lista.');
-  window.setTimeout(() => element.classList.remove('is-ringing'), 480);
+  if (state.sound) {
+    sounds.bell();
+  }
+  showToast(message ?? (state.sound
+    ? 'La campana de alarma está lista. Suena cuando una llave cae en un contacto vacío.'
+    : 'La campana de alarma está lista. Activa el sonido para escucharla.'));
+  window.setTimeout(() => element.classList.remove('is-ringing'), 700);
 }
 
 function applyToPart(element) {
@@ -306,17 +337,17 @@ function applyToPart(element) {
     return;
   }
   if (state.tool === 'key') {
+    flashPart(element);
+    sounds.click();
     if (id === 'lock') {
-      toggleLock(element);
+      showToast('El cerrojo solo cede cuando el mecanismo se desbloquea.');
       return;
     }
     if (id === 'entry') {
-      flashPart(element);
-      sounds.click();
-      showToast('La llave entra en la entrada.');
+      showToast('La llave entra en la entrada. Pulsa Probar para recorrer el mecanismo.');
       return;
     }
-    rotateGear(element);
+    showToast('La rueda recuerda la tecla cuando el pulso la atraviesa.');
     return;
   }
   if (state.tool === 'wire') {
@@ -324,7 +355,7 @@ function applyToPart(element) {
     return;
   }
   if (state.tool === 'scissors') {
-    showToast('Apunta a un cable para cortarlo.');
+    showToast('Ahí no hay un cable que cortar.');
     sounds.error();
   }
 }
@@ -334,7 +365,7 @@ function handleWireClick(id, element) {
     state.source = id;
     element.classList.add('is-source');
     sounds.click();
-    showToast(`Cable desde ${PARTS[id].label}. Elige el destino.`);
+    updateToolStatus();
     return;
   }
   if (state.source === id) {
@@ -375,7 +406,7 @@ function registerCable(element) {
     }
     event.preventDefault();
     if (state.tool !== 'scissors') {
-      showToast('Elegí las tijeras para cortar el cable.');
+      showToast('Elige las tijeras para cortar el cable.');
       sounds.error();
       return;
     }
@@ -404,16 +435,10 @@ function rimPoint(from, to, radius) {
   };
 }
 
-const CABLE_ART = {
-  href: 'assets/sprites/cable.png',
-  width: 1600,
-  height: 480,
-  eyeletX: 142,
-  eyeletY: 335,
-  eyeletSpan: 1314,
-  rise: 220,
-  tagHang: 24,
-  drawMs: 400,
+const CABLE_STYLE = {
+  rise: 0.17,
+  maxRise: 80,
+  amplitude: 2.9,
 };
 
 let cableSerial = 0;
@@ -456,11 +481,8 @@ function arcGeometry(start, end, bow) {
   const dx = end.x - start.x;
   const dy = end.y - start.y;
   const chord = Math.hypot(dx, dy) || 1;
-  const angle = (Math.atan2(dy, dx) * 180) / Math.PI;
-  const scaleX = chord / CABLE_ART.eyeletSpan;
-  const scaleY = scaleX * bow;
   const normal = { x: dy / chord, y: -dx / chord };
-  const rise = CABLE_ART.rise * scaleX * bow;
+  const rise = Math.min(CABLE_STYLE.maxRise, chord * CABLE_STYLE.rise) * bow;
   const control = {
     x: (start.x + end.x) / 2 + normal.x * rise * 2,
     y: (start.y + end.y) / 2 + normal.y * rise * 2,
@@ -469,44 +491,29 @@ function arcGeometry(start, end, bow) {
     start,
     end,
     chord,
-    angle,
-    scaleX,
-    scaleY,
-    rise,
+    angle: (Math.atan2(dy, dx) * 180) / Math.PI,
     control,
     path: `M${start.x} ${start.y}Q${control.x} ${control.y} ${end.x} ${end.y}`,
-    midpoint: curveMidpoint(start, control, end),
-    wrapperTransform: `translate(${start.x} ${start.y}) rotate(${angle})`,
-    imageTransform: `scale(${scaleX} ${scaleY}) translate(${-CABLE_ART.eyeletX} ${-CABLE_ART.eyeletY})`,
   };
 }
 
-function compressedTransform(geometry, amountX, amountY) {
-  return `scale(${geometry.scaleX * amountX} ${geometry.scaleY * amountY}) translate(${-CABLE_ART.eyeletX} ${-CABLE_ART.eyeletY})`;
-}
-
-function animateCableArc(image, geometry, onDone) {
-  if (prefersReducedMotion) {
-    image.setAttribute('transform', geometry.imageTransform);
-    onDone();
-    return;
+function braidPath(start, control, end, twists, phase) {
+  const steps = Math.max(30, Math.round(twists * 12));
+  const points = [];
+  for (let index = 0; index <= steps; index += 1) {
+    const t = index / steps;
+    const inverse = 1 - t;
+    const x = inverse * inverse * start.x + 2 * inverse * t * control.x + t * t * end.x;
+    const y = inverse * inverse * start.y + 2 * inverse * t * control.y + t * t * end.y;
+    const tangentX = 2 * inverse * (control.x - start.x) + 2 * t * (end.x - control.x);
+    const tangentY = 2 * inverse * (control.y - start.y) + 2 * t * (end.y - control.y);
+    const length = Math.hypot(tangentX, tangentY) || 1;
+    const normalX = tangentY / length;
+    const normalY = -tangentX / length;
+    const wave = Math.sin(t * twists * Math.PI * 2 + phase) * CABLE_STYLE.amplitude;
+    points.push(`${index === 0 ? 'M' : 'L'}${(x + normalX * wave).toFixed(2)} ${(y + normalY * wave).toFixed(2)}`);
   }
-  const started = performance.now();
-  function frame(now) {
-    const t = Math.min(1, (now - started) / CABLE_ART.drawMs);
-    const eased = 1 - Math.pow(1 - t, 3);
-    image.setAttribute(
-      'transform',
-      compressedTransform(geometry, 0.06 + eased * 0.94, 0.35 + eased * 0.65),
-    );
-    if (t < 1) {
-      requestAnimationFrame(frame);
-      return;
-    }
-    image.setAttribute('transform', geometry.imageTransform);
-    onDone();
-  }
-  requestAnimationFrame(frame);
+  return points.join(' ');
 }
 
 function placeLabel(label) {
@@ -516,25 +523,45 @@ function placeLabel(label) {
   return `a ${label}`;
 }
 
-function buildCableTag(key, midpoint) {
-  const tag = svgElement('g', {
-    class: 'cable-tag',
-    transform: `translate(${midpoint.x} ${midpoint.y + CABLE_ART.tagHang})`,
+function buildTerminal(geometry, which, tone) {
+  const point = which === 'start' ? geometry.start : geometry.end;
+  const angle = which === 'start' ? geometry.angle : geometry.angle + 180;
+  const group = svgElement('g', {
+    class: `cable-terminal is-${which}`,
+    transform: `translate(${point.x} ${point.y}) rotate(${angle})`,
   });
-  tag.append(svgElement('path', { class: 'tag-loop', d: 'M0-14v-7' }));
-  tag.append(svgElement('circle', { class: 'tag-ring', cx: 0, cy: -24, r: 3.5 }));
-  tag.append(svgElement('rect', { class: 'tag-body', x: -19, y: -14, width: 38, height: 28, rx: 5 }));
-  tag.append(svgElement('circle', { class: 'tag-dot', cx: -9, cy: 0, r: 4.5, fill: KEY_COLORS[key] ?? '#f2ede3' }));
-  const text = svgElement('text', { class: 'tag-text', x: 7, y: 4, 'text-anchor': 'middle' });
-  text.textContent = key;
-  tag.append(text);
-  return tag;
+  group.append(svgElement('rect', {
+    class: 'cable-terminal-body',
+    x: '-4.5',
+    y: '-6.5',
+    width: '17',
+    height: '13',
+    rx: '3.5',
+  }));
+  group.append(svgElement('rect', {
+    class: 'cable-terminal-ring',
+    x: '4.2',
+    y: '-6',
+    width: '2.4',
+    height: '12',
+    rx: '1',
+    fill: tone.light,
+  }));
+  group.append(svgElement('circle', {
+    class: 'cable-terminal-pin',
+    cx: '13.5',
+    cy: '0',
+    r: '2.2',
+  }));
+  return group;
 }
 
 function createCable({ from, to, key, bow, animate = false }) {
   const start = rimPoint(PARTS[from], PARTS[to], PARTS[from].r);
   const end = rimPoint(PARTS[to], PARTS[from], PARTS[to].r);
   const geometry = arcGeometry(start, end, bow);
+  const tone = KEY_TONES[key] ?? KEY_TONES[1];
+  const twists = Math.max(4, Math.round(geometry.chord / 50));
   cableSerial += 1;
   const cable = svgElement('g', {
     class: `cable${animate ? ' is-drawing' : ''}`,
@@ -546,33 +573,48 @@ function createCable({ from, to, key, bow, animate = false }) {
     tabindex: '0',
     'aria-label': `Cable de la llave ${key}: ${PARTS[from].label} ${placeLabel(PARTS[to].label)}`,
   });
+  cable.append(svgElement('path', { class: 'cable-body-shadow', d: geometry.path, fill: 'none', pathLength: '1' }));
+  cable.append(svgElement('path', {
+    class: 'cable-body',
+    d: geometry.path,
+    fill: 'none',
+    pathLength: '1',
+    stroke: tone.base,
+  }));
+  const strands = [
+    [0, tone.cable, 'is-light'],
+    [Math.PI / 2, tone.dark, 'is-dark'],
+    [Math.PI, tone.cable, 'is-light'],
+    [(Math.PI * 3) / 2, tone.dark, 'is-dark'],
+  ];
+  for (const [phase, color, variant] of strands) {
+    cable.append(svgElement('path', {
+      class: `cable-strand ${variant}`,
+      d: braidPath(start, geometry.control, end, twists, phase),
+      fill: 'none',
+      pathLength: '1',
+      stroke: color,
+    }));
+  }
+  cable.append(svgElement('path', {
+    class: 'cable-sheen',
+    d: braidPath(start, geometry.control, end, twists, Math.PI / 4),
+    fill: 'none',
+    pathLength: '1',
+    stroke: tone.light,
+  }));
+  cable.append(buildTerminal(geometry, 'start', tone));
+  cable.append(buildTerminal(geometry, 'end', tone));
   cable.append(svgElement('path', { class: 'cable-hit', d: geometry.path, fill: 'none' }));
-  const arc = svgElement('g', { class: 'cable-arc', transform: geometry.wrapperTransform });
-  const stretch = svgElement('g', { class: 'cable-stretch' });
-  const shake = svgElement('g', { class: 'cable-shake' });
-  const image = svgElement('image', {
-    class: 'cable-image',
-    href: CABLE_ART.href,
-    x: '0',
-    y: '0',
-    width: String(CABLE_ART.width),
-    height: String(CABLE_ART.height),
-    transform: animate ? compressedTransform(geometry, 0.06, 0.35) : geometry.imageTransform,
-  });
-  shake.append(image);
-  stretch.append(shake);
-  arc.append(stretch);
-  cable.append(arc);
-  cable.append(buildCableTag(key, geometry.midpoint));
 
   wireGroup.append(cable);
   registerCable(cable);
 
   if (animate) {
-    window.setTimeout(() => cable.classList.add('is-drawn'), 30);
-    animateCableArc(image, geometry, () => {
-      window.setTimeout(() => cable.classList.remove('is-drawing', 'is-drawn'), 380);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => cable.classList.add('is-drawn'));
     });
+    window.setTimeout(() => cable.classList.remove('is-drawing', 'is-drawn'), 700);
   }
   return cable;
 }
@@ -604,33 +646,41 @@ function hoveredPartId(clientX, clientY, sourceId) {
 }
 
 function ensurePreview() {
-  let arc = $('.cable-preview-arc', previewLayer);
-  if (arc !== null) {
+  let cable = $('.cable-preview-cable', previewLayer);
+  if (cable !== null) {
     return {
-      arc,
-      image: $('.cable-preview-image', previewLayer),
+      cable,
+      shadow: $('.cable-preview-shadow', previewLayer),
+      base: $('.cable-preview-base', previewLayer),
+      strandA: $('.cable-preview-strand.is-a', previewLayer),
+      strandB: $('.cable-preview-strand.is-b', previewLayer),
+      strandC: $('.cable-preview-strand.is-c', previewLayer),
+      strandD: $('.cable-preview-strand.is-d', previewLayer),
       line: $('.cable-preview-line', previewLayer),
       plug: $('.cable-preview-plug', previewLayer),
     };
   }
-  arc = svgElement('g', { class: 'cable-preview-arc' });
-  const image = svgElement('image', {
-    class: 'cable-preview-image',
-    href: CABLE_ART.href,
-    x: '0',
-    y: '0',
-    width: String(CABLE_ART.width),
-    height: String(CABLE_ART.height),
-  });
-  arc.append(image);
+  cable = svgElement('g', { class: 'cable-preview-cable' });
+  const shadow = svgElement('path', { class: 'cable-preview-shadow', fill: 'none' });
+  const base = svgElement('path', { class: 'cable-preview-base', fill: 'none' });
+  const strandA = svgElement('path', { class: 'cable-preview-strand is-a', fill: 'none' });
+  const strandB = svgElement('path', { class: 'cable-preview-strand is-b', fill: 'none' });
+  const strandC = svgElement('path', { class: 'cable-preview-strand is-c', fill: 'none' });
+  const strandD = svgElement('path', { class: 'cable-preview-strand is-d', fill: 'none' });
+  cable.append(shadow);
+  cable.append(base);
+  cable.append(strandA);
+  cable.append(strandB);
+  cable.append(strandC);
+  cable.append(strandD);
   const line = svgElement('path', { class: 'cable-preview-line', fill: 'none' });
   const plug = svgElement('g', { class: 'cable-preview-plug' });
   plug.append(svgElement('circle', { class: 'cable-preview-ring', r: '12' }));
   plug.append(svgElement('circle', { class: 'cable-preview-dot', r: '5' }));
-  previewLayer.append(arc);
+  previewLayer.append(cable);
   previewLayer.append(line);
   previewLayer.append(plug);
-  return { arc, image, line, plug };
+  return { cable, shadow, base, strandA, strandB, strandC, strandD, line, plug };
 }
 
 function updateCablePreview(sourceId, clientX, clientY) {
@@ -650,9 +700,21 @@ function updateCablePreview(sourceId, clientX, clientY) {
   const end = targetId === null ? pointer : rimPoint(target, from, target.r);
   const bow = targetId === null ? autoBow(start, end) : chooseBow(sourceId, targetId);
   const geometry = arcGeometry(start, end, bow);
+  const twists = Math.max(4, Math.round(geometry.chord / 50));
   const preview = ensurePreview();
-  preview.arc.setAttribute('transform', geometry.wrapperTransform);
-  preview.image.setAttribute('transform', geometry.imageTransform);
+  preview.shadow.setAttribute('d', geometry.path);
+  preview.base.setAttribute('d', geometry.path);
+  preview.base.setAttribute('stroke', '#0c2422');
+  const strands = [
+    [preview.strandA, 0, '#38c6b8'],
+    [preview.strandB, Math.PI / 2, '#2b9a90'],
+    [preview.strandC, Math.PI, '#38c6b8'],
+    [preview.strandD, (Math.PI * 3) / 2, '#2b9a90'],
+  ];
+  for (const [path, phase, color] of strands) {
+    path.setAttribute('d', braidPath(start, geometry.control, end, twists, phase));
+    path.setAttribute('stroke', color);
+  }
   preview.line.setAttribute('d', geometry.path);
   preview.plug.setAttribute('transform', `translate(${end.x} ${end.y})`);
   preview.plug.classList.toggle('is-target', targetId !== null);
@@ -661,13 +723,6 @@ function updateCablePreview(sourceId, clientX, clientY) {
 
 function hideCablePreview() {
   previewLayer.replaceChildren();
-}
-
-function curveMidpoint(start, control, end) {
-  return {
-    x: 0.25 * start.x + 0.5 * control.x + 0.25 * end.x,
-    y: 0.25 * start.y + 0.5 * control.y + 0.25 * end.y,
-  };
 }
 
 function svgElement(tag, attributes) {
@@ -720,6 +775,11 @@ function cutCable(element, event = null) {
   if (from !== undefined && to !== undefined) {
     state.cables.delete(pairKey(from, to));
   }
+  const lock = partElement('lock');
+  if (lock !== null && lock.dataset.open === 'true' && mechanismComplete() === false) {
+    lock.dataset.open = 'false';
+    window.setTimeout(() => flashPart(lock), 320);
+  }
   element.classList.add('is-cutting');
   let x = 0;
   let y = 0;
@@ -732,11 +792,14 @@ function cutCable(element, event = null) {
     y = rect.top + rect.height / 2;
   }
   spawnCutSpark(x, y);
-  toolCursor.classList.add('is-snapping');
-  window.setTimeout(() => toolCursor.classList.remove('is-snapping'), 260);
+  const scissorsButton = $('.inventory-tool[data-tool="scissors"]');
+  if (scissorsButton !== null) {
+    scissorsButton.classList.add('is-snapping');
+    window.setTimeout(() => scissorsButton.classList.remove('is-snapping'), 260);
+  }
+  const hadFocus = document.activeElement === element;
   sounds.snip();
   showToast('El cable salta y queda cortado.');
-  const hadFocus = document.activeElement === element;
   window.setTimeout(() => {
     element.remove();
     updateMissingSocket();
@@ -758,42 +821,81 @@ function updateMissingSocket() {
   });
 }
 
-/* Probar y asaltar: demostraciones visuales, sin lógica de juego. */
+function mechanismComplete() {
+  return state.cables.has(pairKey('gear-1', 'gear-2'));
+}
+
+/* Probar una llave y ensayar con el ladrón: demostraciones visuales, sin lógica de juego. */
 function probeMechanism() {
   clearSource();
+  const lock = partElement('lock');
+  if (mechanismComplete() === false) {
+    if (lock.dataset.open === 'true') {
+      lock.dataset.open = 'false';
+      flashPart(lock);
+    }
+    stage.classList.add('is-alarm');
+    mechanism.classList.add('is-probing');
+    ringBell(partElement('bell'), 'El pulso cayó en el contacto vacío; la campana marcó el error. La caja sigue cerrada.');
+    window.setTimeout(() => {
+      stage.classList.remove('is-alarm');
+      mechanism.classList.remove('is-probing');
+    }, 1200);
+    return;
+  }
   mechanism.classList.add('is-probing');
   rotateGear(partElement('gear-1'));
   rotateGear(partElement('gear-2'));
-  const lock = partElement('lock');
-  if (lock.dataset.open !== 'true') {
-    lock.dataset.open = 'true';
-    flashPart(lock);
-  }
+  sounds.gear();
+  lock.dataset.open = 'true';
+  flashPart(lock);
   $$('.cable').forEach((cable, index) => {
     cable.style.setProperty('--pulse-delay', `${index * 70}ms`);
     cable.classList.add('is-pulsing');
   });
   sounds.plug();
-  showToast('La llave recorre el mecanismo. El perno cede.');
+  showToast('La llave recorrió el mecanismo. El perno cedió.', 2600);
+  window.setTimeout(() => {
+    sounds.lock();
+  }, 420);
   window.setTimeout(() => {
     mechanism.classList.remove('is-probing');
     $$('.cable').forEach((cable) => {
       cable.classList.remove('is-pulsing');
       cable.style.removeProperty('--pulse-delay');
     });
+    lock.dataset.open = 'false';
+    sounds.lock();
   }, 1800);
 }
 
 function assaultMechanism() {
+  const complete = mechanismComplete();
+  const lock = partElement('lock');
+  if (lock !== null) {
+    lock.dataset.open = 'false';
+  }
   stage.classList.add('is-heist');
   thief.classList.add('is-leaning');
-  sounds.lock();
-  showToast('El ladrón está probando la cerradura…', 2600);
+  sounds.approach();
+  if (complete) {
+    showToast('El ladrón prueba el mecanismo…', 2200);
+    window.setTimeout(() => {
+      stage.classList.remove('is-heist');
+      thief.classList.remove('is-leaning');
+      sounds.lock();
+      sounds.verdict();
+      showToast('El ladrón se retira: el ensayo resistió. La caja no cedió.', 2800);
+    }, 1800);
+    return;
+  }
+  showToast('El ladrón busca un punto débil…', 2200);
   window.setTimeout(() => {
     stage.classList.remove('is-heist');
     thief.classList.remove('is-leaning');
-    showToast('El ladrón se retira. Fin de la demostración.', 2200);
-  }, 2800);
+    ringBell(partElement('bell'), 'El ladrón encontró el camino. El ensayo falló; vuelve al taller.');
+    sounds.error();
+  }, 1800);
 }
 
 /* Overlays. */
@@ -808,7 +910,6 @@ function openOverlay(kind) {
   overlay.hidden = false;
   gameShell.inert = true;
   document.body.classList.add('has-overlay');
-  hideCursor();
   if (kind === 'hint') {
     renderHint();
   }
@@ -826,8 +927,8 @@ function openOverlay(kind) {
 function closeOverlay() {
   overlay.hidden = true;
   document.body.classList.remove('has-overlay');
-  dossierContent.replaceChildren();
   gameShell.inert = false;
+  dossierContent.replaceChildren();
   if (state.lastFocus !== null && document.contains(state.lastFocus)) {
     state.lastFocus.focus();
   }
@@ -930,15 +1031,7 @@ $$('.inventory-item').forEach((button) => {
     state.dragKey = button.dataset.key ?? state.key;
     setTool(state.dragTool, state.dragKey);
     document.body.classList.add('is-dragging');
-    toolCursor.classList.add('is-pressed');
-    showCursor(event.clientX, event.clientY);
   });
-});
-
-document.addEventListener('pointermove', (event) => {
-  if (state.dragging) {
-    showCursor(event.clientX, event.clientY);
-  }
 });
 
 document.addEventListener('pointerup', (event) => {
@@ -947,7 +1040,6 @@ document.addEventListener('pointerup', (event) => {
   }
   state.dragging = false;
   document.body.classList.remove('is-dragging');
-  toolCursor.classList.remove('is-pressed');
   const target = document.elementFromPoint(event.clientX, event.clientY);
   const part = target === null ? null : target.closest('.part');
   const cable = target === null ? null : target.closest('.cable');
@@ -958,9 +1050,6 @@ document.addEventListener('pointerup', (event) => {
     state.suppressClickUntil = performance.now() + 260;
     cutCable(cable, event);
   }
-  if (stage.contains(target) === false) {
-    hideCursor();
-  }
 });
 
 document.addEventListener('pointercancel', () => {
@@ -969,29 +1058,19 @@ document.addEventListener('pointercancel', () => {
   }
   state.dragging = false;
   document.body.classList.remove('is-dragging');
-  toolCursor.classList.remove('is-pressed');
-  hideCursor();
 });
 
 stage.addEventListener('pointermove', (event) => {
-  if (isFinePointer === false) {
-    return;
-  }
   if (event.target.closest('.table-object') !== null) {
-    hideCursor();
     hideCablePreview();
     return;
   }
-  showCursor(event.clientX, event.clientY);
   if (state.tool === 'wire' && state.source !== null) {
     updateCablePreview(state.source, event.clientX, event.clientY);
   }
 });
 
 stage.addEventListener('pointerleave', () => {
-  if (state.dragging === false) {
-    hideCursor();
-  }
   hideCablePreview();
 });
 
@@ -1020,7 +1099,7 @@ probeButton.addEventListener('click', probeMechanism);
 assaultButton.addEventListener('click', assaultMechanism);
 
 /* Estado inicial. */
+fitStage();
 seedCables();
 setTool('wire', '1');
 updateMissingSocket();
-window.setTimeout(hideStageHint, 6200);

@@ -5,8 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>El Cerrajero — Taller del Nivel 1</title>
   <link rel="icon" href="data:,">
-  <link rel="preload" href="assets/fonts/BodoniModa-Variable.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="assets/fonts/Jost-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Cinzel-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/Oswald-Variable.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/SpecialElite-Regular.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body data-tool="wire" data-key="1">
@@ -48,6 +49,7 @@
       </div>
     </header>
 
+    <div class="stage-viewport" id="stage-viewport">
     <main class="stage" id="stage" aria-label="Mesa de trabajo del taller">
       <img class="scene" src="assets/sprites/fondo-banco.jpg" alt="" aria-hidden="true" draggable="false" data-sprite="fondo-banco">
       <div class="stage-light" aria-hidden="true"></div>
@@ -77,18 +79,16 @@
 
         <svg class="wires" id="wires" viewBox="0 0 900 560" role="group" aria-label="Cables del mecanismo" tabindex="-1">
           <defs>
-            <filter id="tag-shadow" x="-50%" y="-50%" width="200%" height="200%">
-              <feDropShadow dx="0" dy="3" stdDeviation="2.5" flood-color="#000" flood-opacity="0.7"/>
-            </filter>
+            <linearGradient id="terminal-brass" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0" stop-color="#f6dc92"/>
+              <stop offset="0.45" stop-color="#c79a32"/>
+              <stop offset="1" stop-color="#4a3412"/>
+            </linearGradient>
           </defs>
 
           <g id="wire-group" role="group" aria-label="Cables"></g>
 
-          <g id="alarm-layer" aria-hidden="true">
-            <path class="alarm-shadow" d="M80 500C280 520 600 520 800 500" fill="none"></path>
-            <path class="alarm-bus" d="M80 500C280 520 600 520 800 500" fill="none"></path>
-            <circle class="alarm-node" cx="300" cy="512" r="4"></circle>
-            <circle class="alarm-node" cx="620" cy="512" r="4"></circle>
+          <g id="socket-layer" aria-hidden="true">
             <path class="missing-groove" d="M407 242Q455 266 503 248" fill="none"></path>
             <circle class="open-socket" cx="407" cy="242" r="4.5"></circle>
             <circle class="open-socket" cx="503" cy="248" r="4.5"></circle>
@@ -117,25 +117,25 @@
           <span class="gear-numeral" aria-hidden="true">II</span>
         </div>
 
-        <div class="part part-lock" data-part="lock" role="button" tabindex="0" aria-label="Cerrojo de la caja">
+        <div class="part part-lock" data-part="lock" role="button" tabindex="0" aria-label="Cerrojo de la caja" title="El cerrojo solo cede al desbloquear el mecanismo">
           <span class="part-aura" aria-hidden="true"></span>
           <img class="lock-bolt" src="assets/sprites/perno.svg" alt="" draggable="false" data-sprite="perno">
           <img class="lock-body" src="assets/sprites/cilindro-cerradura.png" alt="" draggable="false" data-sprite="cilindro-cerradura">
           <span class="lock-led" aria-hidden="true"></span>
         </div>
 
-        <button class="part part-bell" type="button" data-part="bell" aria-label="Campana de alarma">
+        <button class="part part-bell" type="button" data-part="bell" aria-label="Campana de alarma" title="La campana suena si una llave cae en un contacto vacío">
           <img src="assets/sprites/campana-alarma.png" alt="" draggable="false" data-sprite="campana-alarma">
         </button>
       </div>
 
-      <div class="tool-cursor" id="tool-cursor" hidden aria-hidden="true">
-        <img id="tool-cursor-img" src="assets/sprites/carrete-cobre.png" alt="" draggable="false">
-        <span class="cursor-dot"></span>
-      </div>
-
-      <p class="stage-hint" id="stage-hint">Elige una herramienta y pruébala sobre el mecanismo.</p>
     </main>
+    </div>
+
+    <div class="tool-status" role="status" aria-live="polite">
+      <span class="tool-status-led" aria-hidden="true"></span>
+      <span class="tool-status-text" id="tool-status-text">Llave 1 en mano — Selecciona origen y destino</span>
+    </div>
 
     <p class="mobile-scroll-note">Desliza el mecanismo para recorrerlo →</p>
 
@@ -143,19 +143,19 @@
       <div class="inventory-keys">
         <span class="key-rail" aria-hidden="true"></span>
         <div class="key-row">
-          <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 1">
+          <button class="inventory-item inventory-key is-active" type="button" data-tool="key" data-key="1" aria-label="Llave 1">
             <img src="assets/sprites/llave-1.png" alt="" draggable="false" data-sprite="llave-1">
             <span class="item-name">Llave 1</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 2">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="2" aria-label="Llave 2">
             <img src="assets/sprites/llave-2.png" alt="" draggable="false" data-sprite="llave-2">
             <span class="item-name">Llave 2</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 3">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="3" aria-label="Llave 3">
             <img src="assets/sprites/llave-3.png" alt="" draggable="false" data-sprite="llave-3">
             <span class="item-name">Llave 3</span>
           </button>
-          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" data-cursor="assets/sprites/llave-cursor.png" aria-label="Llave 4">
+          <button class="inventory-item inventory-key" type="button" data-tool="key" data-key="4" aria-label="Llave 4">
             <img src="assets/sprites/llave-4.png" alt="" draggable="false" data-sprite="llave-4">
             <span class="item-name">Llave 4</span>
           </button>
@@ -181,8 +181,8 @@
       </div>
 
       <div class="inventory-actions">
-        <button class="action-button" id="probe-button" type="button">Probar</button>
-        <button class="action-button is-primary" id="assault-button" type="button">Ensayo</button>
+        <button class="action-button" id="probe-button" type="button" title="Probar una llave en el mecanismo" aria-label="Probar una llave en el mecanismo">Probar</button>
+        <button class="action-button is-primary" id="assault-button" type="button" title="Ensayo del ladrón: prueba el mecanismo sin asalto final" aria-label="Ensayo del ladrón">Ensayo</button>
       </div>
     </footer>
 

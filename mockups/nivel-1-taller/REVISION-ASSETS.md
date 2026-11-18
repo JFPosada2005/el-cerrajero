@@ -30,7 +30,7 @@ Todos los PNG de IA tenían fondo transparente real (alpha en las esquinas) salv
 | `engranaje.png` | 2048×2048 | Ruedas de memoria I y II | Recorte y reducción a `rueda-engranaje.png` (1022×1024) |
 | `alarma.png` | 2048×2048 | Campana de alarma | Recorte y reducción a `campana-alarma.png` (508×512) |
 | `tijeras.png` | 1456×720 | Herramienta de corte y cursor | Recorte y reducción a `tijeras.png` (800×369) |
-| `cable.png` | 2752×1536 | Cables del mecanismo | Recorte a 1600×480; arco entre piezas con escala uniforme, sin compresión vertical |
+| `cable.png` | 2752×1536 | **Descartado** | El sprite fotográfico no convenció; los cables se rehicieron como trenza SVG coloreada por llave |
 
 ### Llaves 2–4
 
@@ -44,7 +44,7 @@ La silueta es idéntica. Los distintivos numéricos HTML se retiraron: partían 
 
 ### Cursor de llave
 
-Se recortó el arco de la llave para `llave-cursor.png` (126×200). Así el cursor no es una llave de 46 px de alto con el mango fuera de pantalla.
+El cursor de imagen se descartó. La llave y la herramienta activas se indican con elevación, brillo y la barra de estado; el puntero se mantiene nativo para evitar recortes y problemas de renderizado.
 
 ### Nota-pista
 
@@ -76,7 +76,7 @@ Así se usa el material de la placa sin perder el layout horizontal del mecanism
 
 ### Conclusión de la revisión WEB
 
-Los packs no eran sprites listos para este estilo: eran pixel art, modelos 3D cartoon, texturas de 64 px o un atlas de mesa. Con la segunda tanda de IA se reemplazaron las piezas mecánicas más visibles —engranajes, campana, tijeras y cable— y quedaron en SVG solo el perno, la mesa y el marco de la placa.
+Los packs no eran sprites listos para este estilo: eran pixel art, modelos 3D cartoon, texturas de 64 px o un atlas de mesa. Con la segunda tanda de IA se reemplazaron las piezas mecánicas más visibles —engranajes, campana y tijeras—; el cable se rehizo como trenza SVG y quedaron en SVG el perno, la mesa y el marco de la placa.
 
 Si más adelante se quiere subir el realismo del perno o de la mesa, el siguiente paso sería renderizar modelos 3D con Blender o encargar esos sprites en el mismo estilo de la IA.
 
@@ -90,7 +90,7 @@ Si más adelante se quiere subir el realismo del perno o de la mesa, el siguient
 | `mesa-madera.svg` | Se usa | Superficie de banco oscura y limpia; el .blend gótico no era un sprite |
 | `placa-marco.svg` | Nuevo | Marco de bronce, tornillos y placas sobre la textura de la IA |
 
-Los SVG de engranajes, campana, tijeras y engranaje-herramienta quedan como respaldo, pero el mockup ya usa los PNG de IA. `cable-braid.png` se descartó: el cable se resuelve con la imagen completa recortada en arco.
+Los SVG de engranajes, campana, tijeras y engranaje-herramienta quedan como respaldo, pero el mockup ya usa los PNG de IA. El sprite fotográfico del cable y `cable-braid.png` se descartaron: los cables son trenzas SVG coloreadas por llave, sin etiquetas.
 
 ---
 
@@ -99,8 +99,8 @@ Los SVG de engranajes, campana, tijeras y engranaje-herramienta quedan como resp
 - Recorte de alpha y padding del 4 % en todos los props.
 - Fondo y textura de placa convertidos a JPG para bajar peso; los props con transparencia siguen en PNG-24.
 - Llaves 2–4 recoloreadas desde una sola silueta.
-- Números de llave en HTML para no hornear cuatro imágenes distintas.
-- Cursor de llave recortado al arco.
+- Números de llave retirados del inventario para no partir la silueta.
+- Puntero nativo: sin cursor de imagen para llaves ni herramientas.
 - Nota-pista con fondo eliminado por flood fill.
 - Placa compuesta por textura + marco SVG.
 - Placa y fondo con versiones optimizadas; los PNG originales quedan en las carpetas del escritorio.
