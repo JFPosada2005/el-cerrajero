@@ -322,10 +322,7 @@
   min-width: 0;
 }
 
-.level-scene[data-level="4"] .l4-lever-row .l4-probe {
-  flex: 0 0 auto;
-}
-
+.level-scene[data-level="4"] .l4-lever-row .l4-probe,
 .level-scene[data-level="4"] .l4-lever-row .l4-assault {
   flex: 1 1 0;
   min-width: 0;
@@ -431,10 +428,10 @@
 }
 
 /* Selectores finales (n4.selectors): la placa viste el bloque y las seis
-   posiciones viven encima, en dos grupos lado a lado dentro de la banda. */
+   posiciones viven encima, en dos grupos lado a lado dentro de la columna. */
 .level-scene[data-level="4"] .l4-selectors {
   display: flex;
-  flex: 0 1 auto;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 8px;
   min-width: 0;

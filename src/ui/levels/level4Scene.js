@@ -190,7 +190,8 @@ export function createLevelScene(options = {}) {
   leverRow.append(probe, assault);
 
   // Selectores finales (n4.selectors): la placa con las seis posiciones de
-  // la pila. Viven en la banda, en una fila con los papeles y los carretes,
+  // la pila. Viven en la columna, debajo de la botonera PROBAR/ENSAYO, con
+  // los dos grupos lado a lado para que entren sin scroll.
   // para que se vean sin scroll interno. Dos grupos diegéticos con rótulo
   // (arriba + acción); el parent engancha `data-stack-top` /
   // `data-stack-action` en main.js y re-sincroniza `is-active` y
@@ -244,7 +245,7 @@ export function createLevelScene(options = {}) {
   statusSlot.setAttribute('aria-label', 'Pila del montacargas');
   statusSlot.setAttribute('aria-live', 'polite');
 
-  column.append(leverRow, statusSlot);
+  column.append(leverRow, selectors, statusSlot);
   body.append(plateWrap, column);
   rig.append(body);
 
@@ -290,7 +291,9 @@ export function createLevelScene(options = {}) {
   hudSlot.setAttribute('aria-label', 'Estado del taller');
   hudSlot.setAttribute('aria-live', 'polite');
 
-  dockRow.append(papers, cut, selectors, keysSlot);
+  // Los diales viven en la columna, debajo de la botonera (donde se ven
+  // bien); la banda queda con papeles, carretes centrados y tijera al lado.
+  dockRow.append(papers, keysSlot, cut);
   dock.append(dockRow, hudSlot);
 
   element.append(backdrop, light, bench, dust, rig, dock);

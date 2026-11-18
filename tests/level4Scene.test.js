@@ -508,11 +508,6 @@ test('rig contenido con cabecera compacta y slots en su lugar', () => {
     findOne(leverRow, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'assault'),
     'la palanca va en la fila',
   );
-  assert.equal(
-    findAll(column, (n) => classes(n).includes('l4-selectors')).length,
-    0,
-    'los diales viven en la banda, no en la columna',
-  );
   const dock = findOne(scene.element, (n) => classes(n).includes('l4-dock'));
   const row = findOne(dock, (n) => classes(n).includes('l4-dock-row'));
   for (const action of ['contract', 'hint', 'log']) {
@@ -525,8 +520,13 @@ test('rig contenido con cabecera compacta y slots en su lugar', () => {
     findOne(row, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'cut'),
     'la tijera vive en la banda',
   );
-  const panel = findOne(row, (n) => classes(n).includes('l4-selectors'));
-  assert.ok(findOne(panel, (n) => classes(n).includes('l4-dial-groups')), 'los diales viven en la banda');
+  const panel = findOne(column, (n) => classes(n).includes('l4-selectors'));
+  assert.ok(findOne(panel, (n) => classes(n).includes('l4-dial-groups')), 'los diales viven en la columna');
+  assert.equal(
+    findAll(row, (n) => classes(n).includes('l4-selectors')).length,
+    0,
+    'la banda queda sin diales',
+  );
 });
 
 test('columna sin scroll y botonera en fila horizontal', () => {
@@ -538,6 +538,8 @@ test('columna sin scroll y botonera en fila horizontal', () => {
   assert.ok(leverRow, 'existe la botonera PROBAR/ENSAYO');
   assert.ok(cssHas(leverRow, 'display: flex'), 'los dos controles comparten fila');
   assert.ok(!cssHas(leverRow, 'flex-direction: column'), 'lado a lado, no apilados');
+  const [twins] = cssBlocks('.level-scene[data-level="4"] .l4-lever-row .l4-probe,\n.level-scene[data-level="4"] .l4-lever-row .l4-assault');
+  assert.ok(twins && cssHas(twins, 'flex: 1 1 0'), 'PROBAR y ENSAYO simétricos: mismo ancho y márgenes');
 });
 
 test('sello de fase como línea grabada y dispose', () => {
@@ -590,7 +592,7 @@ test('la escena ocupa toda la pantalla, sin recuadro', () => {
   assert.ok(cssHas(roots[0], 'border: 0'), 'sin marcos en la raíz');
 });
 
-test('banda de mesa ordenada sin solapes: papeles y tijera a la izquierda, carretes al centro-derecha, estado al final', () => {
+test('banda de mesa ordenada sin solapes: papeles, carretes centrados, tijera al lado, estado al final', () => {
   const [dock] = cssBlocks('.level-scene[data-level="4"] .l4-dock');
   assert.ok(dock, 'existe la regla de la banda');
   assert.ok(cssHas(dock, 'flex-direction: column'), 'la banda apila renglones');
@@ -600,7 +602,7 @@ test('banda de mesa ordenada sin solapes: papeles y tijera a la izquierda, carre
   assert.ok(cssHas(row, 'display: flex'), 'papeles, tijera y carretes comparten renglón');
   const [keys] = cssBlocks('.level-scene[data-level="4"] .l4-keys-slot');
   assert.ok(keys, 'existe la ranura de carretes');
-  assert.ok(cssHas(keys, 'justify-content: center'), 'los carretes van al centro-derecha');
+  assert.ok(cssHas(keys, 'justify-content: center'), 'los carretes van centrados');
   assert.ok(cssHas(keys, 'min-height: 104px'), 'la ranura reserva alto de carrete + chapa');
   const [hud] = cssBlocks('.level-scene[data-level="4"] .l4-hud-slot');
   assert.ok(hud, 'existe la ranura del estado');
@@ -611,6 +613,14 @@ test('banda de mesa ordenada sin solapes: papeles y tijera a la izquierda, carre
     assert.ok(block, `existe ${sel}`);
     assert.ok(!cssHas(block, 'absolute'), `${sel} va en flujo, sin superponerse`);
   }
+  const scene = setup();
+  const bandRow = findOne(findOne(scene.element, (n) => classes(n).includes('l4-dock')), (n) => classes(n).includes('l4-dock-row'));
+  const order = bandRow.children.map((n) => classes(n).join('.'));
+  assert.deepEqual(
+    order,
+    ['l4-papers', 'l4-keys-slot', 'l4-cut'],
+    'banda: papeles, carretes centrados y tijera al lado',
+  );
 });
 
 test('la placa no pasa del 65% del ancho', () => {
