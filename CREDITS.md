@@ -49,6 +49,16 @@ Los archivos finales del Nivel 1 se reexportaron a WebP desde los originales del
 | Selectores de pila | Nivel 4 | SVG dibujado a mano; 240×64 | Proyecto |
 | Palanca arriba/abajo | Nivel 4 | SVG dibujado a mano; 64×64 | Proyecto |
 
+## Fondos P1
+
+| Asset | Nivel | Origen | Licencia |
+|---|---|---|---|
+| Fondo | N2 · Hotel Mirador | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
+| Día | N3 · Museo del Llano | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
+| Noche | N3 · Museo del Llano | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
+| Fondo | N4 · Teatro Municipal | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
+| Fondo | N5 · Banco Central | Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP | Proyecto |
+
 ## Audio
 
 | SFX | Archivo | Origen | Licencia |

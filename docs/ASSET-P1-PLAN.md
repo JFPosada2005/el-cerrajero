@@ -1,6 +1,6 @@
 # Plan de assets P1 — remaster
 
-**Estado:** P1-1 vectorial ejecutado en `feat/remaster-assets-p1`. P1-2 (fondos, papel y boleta) y P1-3 (SFX) pendientes de que el owner los genere o los descargue.
+**Estado:** P1-1 vectorial y P1-2 fondos ejecutados en `feat/remaster-assets-p1`. Quedan las texturas de papel, la boleta y los SFX P1.
 **Rama:** `feat/remaster-assets-p1`, creada desde `feat/remaster-assets` (P0). Cuando el PR de P0 se mergee, rebasar sobre `feat/remaster-integration`.
 **Alcance:** `assets/`, `docs/` y `CREDITS.md`. No se toca `src/`, `src/game`, `tests/`, `index.html` ni `styles.css`.
 **Contrato:** [`docs/ASSET-MANIFEST.md`](ASSET-MANIFEST.md) y [`assets/manifest.json`](../assets/manifest.json).
@@ -86,3 +86,12 @@ Freesound (CC0) o Pixabay (Pixabay License). El agente recorta, normaliza, convi
 - `npm test`: 253/253.
 - Sin push todavía.
 - P1-2 y P1-3 pendientes de los assets del owner.
+
+### Checkpoint 2026-11-18 — P1-2 fondos
+
+- Cinco fondos generados con Gemini y exportados a WebP 2048×1152.
+- N2: 166.672 B · N3 día: 220.784 B · N3 noche: 132.032 B · N4: 199.118 B · N5: 206.682 B.
+- Total de fondos: **925.288 B**.
+- `assets/manifest.json`: 49 rutas `available`.
+- `CREDITS.md` actualizado.
+- Pendiente: texturas de papel, boleta de depósito y SFX P1.

@@ -255,7 +255,9 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
       },
       "pinion": {
         "final": "assets/levels/02/pinion.webp",
@@ -282,14 +284,18 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
       },
       "backgroundNight": {
         "final": "assets/levels/03/night.webp",
         "placeholder": null,
         "kind": "image",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
       },
       "lamp": {
         "final": "assets/levels/03/lamp.svg",
@@ -305,7 +311,9 @@
         "placeholder": null,
         "kind": "image",
         "priority": "P1",
-        "status": "missing"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
       },
       "stackBase": {
         "final": "assets/levels/04/stack-base.webp",
@@ -359,7 +367,9 @@
         "placeholder": "mockups/nivel-1-taller/assets/sprites/fondo-banco.jpg",
         "kind": "image",
         "priority": "P1",
-        "status": "placeholder"
+        "status": "available",
+        "license": "Proyecto — asset IA (Gemini)",
+        "source": "Generado por el owner con Gemini; recortado a 2048×1152 y exportado a WebP"
       },
       "tape": {
         "final": "assets/levels/05/tape.svg",
