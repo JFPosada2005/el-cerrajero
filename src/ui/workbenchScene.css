@@ -461,47 +461,83 @@
     display: none;
   }
 
-  /* Inventario compacto con scroll interno, sin empujar la página. */
+  /* Inventario en dos filas visibles sin scroll interno: carretes arriba
+   * (~294px entran en 371px), CORTAR/RESORTE abajo. Los carretes son de la
+   * unidad de paleta y no se tocan. */
   .wb-scene .wb-inventory {
-    flex-wrap: nowrap;
-    overflow-x: auto;
-    gap: 8px;
+    flex-wrap: wrap;
+    overflow-x: clip;
+    gap: 6px;
     min-height: 48px;
-    padding: 8px;
+    padding: 6px;
   }
 
   .wb-scene .wb-inventory > * {
     flex: 0 0 auto;
   }
 
+  /* Las herramientas deben caber dentro del inventario y envolver:
+   * carretes arriba, cortar/resorte en la fila siguiente. */
+  .wb-scene .wb-inventory > .tools {
+    flex: 1 1 100%;
+    max-width: 100%;
+    gap: 8px 6px;
+  }
+
   /* Dock sticky común: inventario y acciones quedan visibles juntos,
-   * sin superponerse, fijos abajo con el área segura. */
+   * sin superponerse, fijos abajo con el área segura. Presupuesto a 390px:
+   * inventario ≈152 (dos filas visibles) + gap 6 + acciones 44 + padding 12
+   * ≈ 208 ≈ 210. Preferible 210 con todo visible que 180 con recortes. */
   .wb-scene .wb-dock {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     position: sticky;
     bottom: 0;
     z-index: 20;
-    padding: 8px;
-    padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
+    max-height: calc(252px + env(safe-area-inset-bottom, 0px));
+    box-sizing: border-box;
+    padding: 6px;
+    padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px));
     background: rgba(11, 15, 20, 0.96);
     border: 1px solid #3a4a5e;
     border-radius: 12px;
   }
 
-  .wb-scene .wb-actions {
-    position: static;
-    z-index: auto;
-    flex-wrap: wrap;
+  .wb-scene .wb-dock > * {
+    box-sizing: border-box;
+  }
+
+  /* Acciones en una sola fila que se lee completa: el texto puede bajar a
+   * dos líneas (nada lo recorta) y cada botón conserva 44px de alto.
+   * Especificidad (0,5,0): supera el `nowrap` de gameChrome sin depender
+   * del orden de carga. */
+  .wb-scene .wb-dock .wb-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
     padding: 0;
     background: none;
     border: 0;
     border-radius: 0;
   }
 
-  .wb-scene .wb-actions .wb-btn {
-    flex: 1 1 auto;
+  .wb-scene .wb-dock .wb-actions .wb-btn[data-action],
+  .wb-scene .wb-dock .wb-actions .wb-btn[data-doc] {
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 44px;
+    padding: 0 4px;
+    font-size: clamp(10px, 3.1vw, 12px);
+    letter-spacing: 0.04em;
+    white-space: normal;
+    overflow: visible;
+  }
+
+  /* Sin remaches laterales en el dock compacto: con botones de 65 px los
+   * remaches de gameChrome caen encima de la etiqueta. */
+  .wb-scene .wb-dock .wb-actions .wb-btn::before,
+  .wb-scene .wb-dock .wb-actions .wb-btn::after {
+    display: none;
   }
 
   .wb-scene .wb-rule,
@@ -522,6 +558,11 @@
   .wb-scene [tabindex] {
     scroll-margin-top: 8px;
     scroll-margin-bottom: 128px;
+  }
+
+  /* El último contenido de la escena scrollea por encima del dock opaco. */
+  .wb-scene .wb-stage {
+    scroll-margin-bottom: 260px;
   }
 }
 
@@ -556,5 +597,10 @@
   .wb-scene .wb-stage {
     height: clamp(380px, calc(100vh - 376px), 580px);
     min-height: 0;
+  }
+
+  /* Sin inventario (sala de recuento) la mesa ocupa el alto que libera el dock. */
+  .wb-scene.is-drum-room .wb-stage {
+    height: clamp(380px, calc(100vh - 268px), 720px);
   }
 }

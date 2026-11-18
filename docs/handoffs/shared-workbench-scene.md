@@ -21,8 +21,10 @@ No se tocó nada fuera de la superficie: sin cambios en `main.js`, `index.html`,
 
 ## Comportamiento móvil (≤768px, solo CSS + plegables)
 
-- **Dock sticky común** (`div.wb-dock` con inventario + acciones, en ese orden): `position: sticky; bottom: 0`, fondo propio y `safe-area-inset-bottom`. Inventario y acciones quedan visibles juntos sin superponerse; las acciones ya no son sticky por separado. Los carretes (`#palette` del parent) viven dentro del inventario y nunca quedan bajo la barra.
-- **Escenario**: `order: -1` (taller primero), `min-height: 240px`, `max-height: 62vh/svh` con `overflow: auto` (scroll interno).
+- **Dock sticky común** (`div.wb-dock` con inventario + acciones, en ese orden): `position: sticky; bottom: 0`, `max-height: calc(210px + safe-area)`, fondo propio. Presupuesto a 390px: inventario ≈152 (dos filas visibles) + gap 6 + acciones 44 + padding 12 ≈ 208 ≈ 210. Preferible 210 con todo visible que 180 con recortes. Los carretes (`#palette` del parent) viven dentro del inventario y nunca quedan bajo la barra.
+- **Acciones en una sola fila que se lee completa**: `flex: 1 1 0; min-width: 0; padding: 0 4px; font-size: clamp(10px, 3.1vw, 12px); letter-spacing: 0.04em;` sin `overflow: hidden` ni `text-overflow` en la etiqueta (puede bajar a dos líneas; cada botón conserva 44px de alto). Especificidad (0,5,0) con `[data-action]/[data-doc]` para imponerse al `nowrap` de `gameChrome.css` sin depender del orden de carga.
+- **Inventario en dos filas visibles sin scroll interno**: `flex-wrap: wrap` + `overflow-x: clip`, sin `max-height` ni `overflow-y`. Carretes arriba (~294px entran en 371px), CORTAR/RESORTE abajo, siempre a la vista. Los carretes son de la unidad de paleta y no se tocan.
+- **Escenario**: `order: -1` (taller primero), `min-height: 240px`, `max-height: 62vh/svh` con `overflow: auto` (scroll interno) y `scroll-margin-bottom: 196px` para que el último contenido scrollee por encima del dock opaco.
 - **Inventario**: compacto, una fila con `overflow-x: auto` interno; hijos sin encoger.
 - **Objetivo/bitácora**: papel con botón Plegar/Desplegar; plegado oculta regla/intro/nota o la lista, nunca vacía datos.
 - **Sin scroll horizontal**: `.wb-scene` con `max-width: 100%` + `overflow-x: clip`, cabecera en flex con filas, título con `overflow-wrap`, hijos de grid con `min-width: 0`.
@@ -36,7 +38,7 @@ No se tocó nada fuera de la superficie: sin cambios en `main.js`, `index.html`,
 
 ## Tests
 
-- `node --test tests/workbenchScene.test.js` → **22 pass, 0 fail** (15 previos intactos + 7 nuevos: plegable de objetivo, plegable de bitácora, dock con slots, CSS móvil con dock, dock `display: contents` en escritorio, plegables ocultos en escritorio, composición de escritorio).
+- `node --test tests/workbenchScene.test.js` → **23 pass, 0 fail** (15 previos intactos + 8 nuevos: plegable de objetivo, plegable de bitácora, dock con slots, CSS móvil con dock compacto, acciones a 44px en una fila, dock `display: contents` en escritorio, plegables ocultos en escritorio, composición de escritorio).
 - `node --test` (suite completa) → **369 pass, 0 fail** (364 previos + 5 nuevos).
 
 ## Cómo integrarlo en `main.js`

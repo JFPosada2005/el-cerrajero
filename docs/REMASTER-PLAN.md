@@ -377,13 +377,15 @@ test('S-D3 the rotated paper does not overflow its scroll container', () => {
 
 ---
 
-## Estado de implementación (2026-11-17)
+## Estado de implementación (2026-11-17, cierre de la pasada visual)
 
-- **R0/R1:** autorizaciones Aut-1/Aut-2 aprobadas; fuentes Cinzel/Oswald/Special Elite; manifiesto de assets; shell compartido y escenas N1–N5 integrados.
-- **Hecho:** escena del N1 con banco, mesa, placa, ladrón, papeles y campana; escenas N2–N5 montadas con placeholders; editor real dentro de cada placa; `343/343` tests.
-- **Desvíos deliberados:** fuentes de Mateo (`153ee7d`) reemplazan Bodoni/Jost/Plex; ficha de objetivo lateral (M1) en lugar del papel único del mockup; escenas N2–N5 usan CSS/SVG hasta que lleguen los assets.
-- **Pendiente inmediato:** M2/M3/M5 visuales (nodos, cables y llavero), limpieza de N5 y mobile, assets de Mateo.
-- **Deuda:** el render viejo de `main.js` quedó detrás de un early return; limpiar al cerrar la integración.
+- **R0/R1:** autorizaciones Aut-1/Aut-2 aprobadas; fuentes Cinzel/Oswald/Special Elite; manifiesto de assets; shell compartido y escenas N1–N5 integradas.
+- **Hecho:** escena del N1 con banco, mesa, placa, ladrón, papeles y campana; N2 hotel (placa de 640 px, indicador 90 px, tablero 434×276); N3 museo (alas día/noche, glifos, tablero 527×334); N4 tramoya (palancas, pila real, tablero 552×350); N5 sala de recuento sin duplicar tambor/cinta, boleta sin scroll y stage ampliado a 632 px; cuatro carretes de cable en el inventario; dock móvil único con carretes, herramientas y las cinco acciones legibles; modales de papel y bitácora con entradas reales. `417/417` tests.
+- **Verificado en navegador (Edge headless, 1440×900):** los cinco niveles dan `scrollHeight 900` y `scrollWidth 1440`, sin scroll de página; escena dentro del `wb-stage` (524 px; 632 en N5); tableros visibles: N1 633×308, N2 434×276, N3 527×334, N4 552×350, N5 tambor 725×269.
+- **Verificado en navegador (390×844):** `scrollWidth 390` en los cinco, sin scroll horizontal; escenas ≤ stage con scroll interno; dock de 252 px con carretes, CORTAR/RESORTE y acciones completas.
+- **Desvíos deliberados:** fuentes de Mateo (`153ee7d`) reemplazan Bodoni/Jost/Plex; ficha de objetivo lateral (M1) en lugar del papel único del mockup; escenas N2–N5 usan CSS/SVG hasta que lleguen los assets; N2 sacrifica tamaño de tablero (434×276) para que entre el encabezado y la sala.
+- **Pendiente:** assets finales de Mateo (fondos N2–N5, props, SFX, música) y una segunda pasada de atmósfera sobre N3/N5 cuando existan; el tablero de N2 podría ganar 40 px si el indicador baja a una sola línea.
+- **Deuda:** ninguna en `main.js`: el render viejo detrás de los `early return` fue eliminado y `renderWorkshop`/`renderDrumWorkshop` solo delegan en las escenas.
 
 ## Key Learnings
 

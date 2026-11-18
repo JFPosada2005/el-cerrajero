@@ -390,17 +390,43 @@ test('el css móvil (≤768px) fija el dock, compacta inventario y pliega papele
   const after = css.slice(mobileAt);
   const dockAt = after.indexOf('.wb-dock');
   assert.ok(dockAt > 0, 'el dock tiene reglas móviles');
-  assert.ok(after.slice(dockAt, dockAt + 400).includes('position: sticky'), 'el dock queda fijo abajo en móvil');
+  const dockRules = after.slice(dockAt, dockAt + 600);
+  assert.ok(dockRules.includes('position: sticky'), 'el dock queda fijo abajo en móvil');
+  assert.ok(dockRules.includes('max-height'), 'el dock tiene alto acotado');
+  assert.ok(dockRules.includes('252px'), 'el dock llega a ~252px más el área segura, con todo visible');
   assert.ok(!/\.wb-actions\s*\{[^}]*position:\s*sticky/.test(after), 'las acciones ya no son sticky por separado: el dock las lleva');
+  const actionsAt = after.indexOf('.wb-dock .wb-actions');
+  assert.ok(actionsAt > 0, 'las acciones tienen reglas móviles');
+  const actionsRules = after.slice(actionsAt, actionsAt + 900);
+  assert.ok(actionsRules.includes('flex-wrap: nowrap'), 'las cinco acciones van en una sola fila');
+  assert.ok(actionsRules.includes('white-space: normal'), 'la etiqueta puede bajar a dos líneas en vez de recortarse');
+  assert.ok(!actionsRules.includes('overflow: hidden'), 'nada recorta la etiqueta de las acciones');
+  assert.ok(!actionsRules.includes('text-overflow'), 'sin puntos suspensivos en las acciones');
   assert.ok(after.includes('.wb-inventory'), 'el inventario tiene reglas móviles');
-  assert.ok(after.includes('overflow-x: auto'), 'el inventario usa scroll interno');
-  assert.ok(after.includes('.wb-stage'), 'el escenario tiene reglas móviles');
-  assert.ok(after.includes('overflow: auto'), 'el escenario usa scroll interno');
+  assert.ok(!after.includes('overflow-x: auto'), 'el inventario ya no scrollea en horizontal');
+  assert.ok(!after.includes('overflow-y'), 'el inventario no tiene scroll vertical interno');
+  assert.ok(!after.includes('max-height: 104px'), 'el inventario muestra sus dos filas sin tope');
+  assert.ok(after.includes('overflow-x: clip'), 'sin desborde horizontal en el dock');
+  assert.ok(after.includes('flex-wrap: wrap'), 'la cabecera envuelve y el inventario baja a dos filas');
   assert.ok(after.includes('data-collapsed'), 'los papeles se pliegan en móvil');
-  assert.ok(after.includes('scroll-margin-bottom'), 'el foco no queda tapado por la barra fija');
+  assert.ok(after.includes('scroll-margin-bottom: 260px'), 'el stage scrollea por encima del dock opaco');
+  assert.ok(after.includes('.wb-dock .wb-actions .wb-btn::before'), 'los remaches no tapan la etiqueta en el dock compacto');
+  assert.ok(after.includes('.wb-inventory > .tools'), 'las herramientas caben y envuelven dentro del inventario');
   assert.ok(after.includes('safe-area-inset-bottom'), 'respeta el área segura');
   assert.ok(after.includes('overflow-x: clip'), 'sin scroll horizontal de página');
-  assert.ok(after.includes('flex-wrap: wrap'), 'la cabecera y las acciones envuelven a 320px');
+});
+
+test('las acciones móviles mantienen target de 44px en una fila', () => {
+  const mobile = css.slice(css.indexOf('max-width: 768px'));
+  const btnAt = mobile.indexOf('.wb-dock .wb-actions .wb-btn');
+  assert.ok(btnAt > 0, 'los botones de acción tienen reglas móviles');
+  const btnRules = mobile.slice(btnAt, btnAt + 900);
+  assert.ok(btnRules.includes('min-width: 0'), 'los botones ceden ancho para entrar los cinco');
+  assert.ok(btnRules.includes('min-height: 44px'), 'cada acción mide ≥44px de alto');
+  assert.ok(btnRules.includes('clamp(10px, 3.1vw, 12px)'), 'la etiqueta escala sin recortarse');
+  assert.ok(btnRules.includes('flex: 1 1 0'), 'las cinco se reparten la fila');
+  assert.ok(!mobile.includes('overflow: hidden'), 'el móvil no recorta etiquetas en ningún lado');
+  assert.ok(!mobile.includes('text-overflow: ellipsis'), 'el móvil no usa puntos suspensivos');
 });
 
 test('el dock no cambia el escritorio: display contents en base', () => {
