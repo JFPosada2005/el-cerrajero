@@ -9,12 +9,11 @@
    Funciona dentro del shell con `.is-immersive` y también sin ella:
    la raíz ya sale del flujo y cubre su stage.
    La banda de mesa es una fila flex real (nada de posiciones absolutas
-   que se crucen): papeles a la izquierda, indicador de prueba,
-   `keysSlot` (paleta y herramientas del parent) al centro, tijera y
-   palanca de ensayo a la derecha, y `hudSlot` (línea de marcha del
-   parent) como último renglón. En escritorio ancho el indicador se
-   ancla al borde de la placa, junto al mecanismo. Todo con
-   box-sizing border-box y max-width 100 %: nada desborda la ventana.
+   que se crucen): papeles a la izquierda, `keysSlot` (paleta y
+   herramientas del parent) al centro, tijera al lado de los carretes
+   y probar + ensayo juntos a la derecha. `hudSlot` (línea de marcha
+   del parent) va como último renglón. Todo con box-sizing border-box
+   y max-width 100 %: nada desborda la ventana.
    Los seis props (papeles, indicador, palanca y tijera) son los
    controles reales: botones transparentes sin caja, foco visible teal
    y área táctil ≥44 px. El parent engancha sus manejadores sobre los
@@ -124,17 +123,19 @@
 }
 
 /* Placa de níquel y latón: el centro de la composición, sobre la mesa.
-   No supera el 65 % del ancho para no tapar la banda de mesa. Solo el
-   tablero vive en su flujo; relés, piñón y sello decoran desde
-   posiciones absolutas sin comerle lugar al editor. */
+   Crece con la ventana (alto proporcional, misma razón 760/620) sin
+   superar el 65 % del ancho ni chocar con la banda. Los elementos
+   internos los agranda el parent vía viewBox: solo el tablero vive en
+   su flujo; relés, piñón y sello decoran desde posiciones absolutas
+   sin comerle lugar al editor. */
 .level-scene[data-level="2"] .l2-plate {
   position: absolute;
   left: 50%;
   top: 44%;
   z-index: 2;
-  width: min(65%, 620px);
-  max-width: 100%;
+  height: min(64%, 700px);
   aspect-ratio: 760 / 620;
+  max-width: 65%;
   transform: translate(-50%, -50%);
   border: 1px solid rgba(212, 167, 44, 0.55);
   border-radius: 12px;
@@ -347,22 +348,12 @@
   pointer-events: none;
 }
 
-/* Indicador de pisos: tocarlo hace la prueba. En la banda va junto a
-   los papeles; en escritorio ancho se ancla al borde de la placa,
-   junto al mecanismo. */
+/* Indicador de pisos: tocarlo hace la prueba. Va en la banda a la
+   derecha, junto a la palanca de ensayo, en el mismo grupo. */
 .level-scene[data-level="2"] .l2-probe {
   display: flex;
   flex-direction: column;
   align-items: center;
-}
-
-@media (min-width: 1101px) {
-  .level-scene[data-level="2"] .l2-probe {
-    position: absolute;
-    left: calc(50% - min(32.5%, 310px) - 16px);
-    top: 44%;
-    transform: translate(-100%, -50%);
-  }
 }
 
 .level-scene[data-level="2"] .l2-gauge {
@@ -648,6 +639,7 @@
      aria-label. */
   .level-scene[data-level="2"] .l2-plate {
     width: 94%;
+    height: auto;
     top: 40%;
   }
 

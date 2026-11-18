@@ -78,9 +78,9 @@ function propButton(action, label, className) {
 
 /**
  * Indicador de pisos. Es el control de prueba: tocarlo hace la prueba.
- * Vive en la banda de mesa y en escritorio ancho se ancla al borde de
- * la placa, junto al mecanismo. El recorrido real lo muestra el
- * tablero del parent.
+ * Va en la banda a la derecha, junto a la palanca de ensayo, en el
+ * mismo grupo de controles del mecanismo. El recorrido real lo muestra
+ * el tablero del parent.
  */
 function buildProbe() {
   const button = propButton('probe', 'Probar la llave en el indicador de pisos', 'l2-probe');
@@ -268,7 +268,7 @@ export function createLevelScene(options = {}) {
 
   const band = el('div', 'l2-band');
   band.setAttribute('aria-label', 'Mesa de trabajo');
-  band.append(papers, buildProbe(), keysSlot, buildScissors(), buildLever(phase));
+  band.append(papers, keysSlot, buildScissors(), buildProbe(), buildLever(phase));
   element.append(band, hudSlot);
 
   function dispose() {

@@ -140,8 +140,8 @@ test('ranuras de carretes y marcha en la banda de mesa', () => {
   );
   assert.deepEqual(
     order,
-    ['papers', 'probe', 'keys', 'cut', 'assault'],
-    'la banda ordena papeles, prueba, carretes, tijera y ensayo',
+    ['papers', 'keys', 'cut', 'probe', 'assault'],
+    'la banda ordena papeles, carretes, tijera, prueba y ensayo',
   );
   const papers = findOne(scene.element, (n) => classes(n).includes('l2-papers'), 'papeles');
   assert.strictEqual(papers.parentNode, band, 'los papeles viven en la banda');
@@ -370,14 +370,15 @@ test('la escena ocupa toda la pantalla, sin recuadro', () => {
   );
 });
 
-test('la placa es el centro, sin tapar la banda', () => {
+test('placa de trabajo más grande y proporcional', () => {
   const plateAt = css.indexOf('.level-scene[data-level="2"] .l2-plate {');
   assert.ok(plateAt > 0, 'la placa tiene regla propia');
   const plate = css.slice(plateAt, css.indexOf('}', plateAt));
   assert.ok(plate.includes('left: 50%'), 'centrada');
   assert.ok(plate.includes('translate(-50%, -50%)'), 'centrada en los dos ejes');
-  assert.ok(plate.includes('min(65%, 620px)'), 'placa contenida al 65 % como máximo');
-  assert.ok(plate.includes('aspect-ratio'), 'proporción de placa de sala');
+  assert.ok(plate.includes('aspect-ratio: 760 / 620'), 'misma proporción');
+  assert.ok(plate.includes('min(64%, 700px)'), 'crece con la ventana');
+  assert.ok(plate.includes('max-width: 65%'), 'sin tapar la banda');
 });
 
 test('banda de mesa sin solapes: fila flex real, nada absoluto que se cruce', () => {
@@ -392,11 +393,13 @@ test('banda de mesa sin solapes: fila flex real, nada absoluto que se cruce', ()
   assert.ok(band.includes('width: 100%'), 'banda a lo ancho');
   assert.ok(band.includes('max-width: 100%'), 'banda sin desborde');
   assert.ok(band.includes('margin-top: auto'), 'banda al fondo, en flujo');
+  assert.ok(band.includes('align-items: flex-end'), 'carretes con la misma posición vertical');
   for (const item of ['.l2-papers', '.l2-probe', '.l2-keys', '.l2-scissors', '.l2-lever']) {
     assert.ok(!rule(item).includes('position: absolute'), `${item} fluye en la banda`);
   }
   const keys = rule('.l2-keys');
   assert.ok(keys.includes('flex: 1 1 auto'), 'carretes con lugar sin empujar la banda');
+  assert.ok(keys.includes('justify-content: center'), 'carretes centrados en la mesa');
   assert.ok(keys.includes('min-width: 0'), 'carretes que ceden antes de desbordar');
   assert.ok(keys.includes('flex-wrap: wrap'), 'el rack envuelve dentro de su ranura');
   assert.ok(keys.includes('max-width: 100%'), 'carretes sin desborde');
@@ -420,15 +423,16 @@ test('banda de mesa sin solapes: fila flex real, nada absoluto que se cruce', ()
   );
 });
 
-test('probar junto al mecanismo: anclado a la placa en escritorio, en banda si no', () => {
-  const wideAt = css.indexOf('@media (min-width: 1101px)');
-  assert.ok(wideAt > 0, 'quiebre de escritorio ancho');
-  const wide = css.slice(wideAt);
-  assert.ok(wide.includes('.l2-probe'), 'el indicador tiene regla de escritorio');
-  assert.ok(wide.includes('position: absolute'), 'anclado fuera del flujo en escritorio');
-  assert.ok(wide.includes('translate(-100%, -50%)'), 'pegado al borde de la placa');
-  assert.ok(wide.includes('min(32.5%, 310px)'), 'al borde de la mitad de la placa');
-  assert.ok(wide.includes('.l2-gauge-img'), 'el indicador crece en escritorio');
+test('probar junto a ensayo a la derecha, en el mismo grupo', () => {
+  const scene = setup();
+  const band = findOne(scene.element, (n) => classes(n).includes('l2-band'), 'banda');
+  const actions = band.children.map((child) => child.getAttribute('data-action'));
+  const probeAt = actions.indexOf('probe');
+  const assaultAt = actions.indexOf('assault');
+  assert.ok(probeAt >= 0 && assaultAt === probeAt + 1, 'probar y ensayo van juntos a la derecha');
+  assert.ok(probeAt > actions.indexOf('cut'), 'después de papeles, carretes y tijera');
+  assert.ok(!css.includes('min(32.5%, 310px)'), 'fuera el ancla lateral del indicador');
+  assert.ok(!css.includes('translate(-100%'), 'el indicador fluye en la banda en todo ancho');
 });
 
 test('la marcha la mueve el parent al último renglón, sin franja', () => {
