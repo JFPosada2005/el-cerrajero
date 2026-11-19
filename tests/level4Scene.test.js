@@ -307,6 +307,7 @@ test('slots finales con data-src y archivo en disco', () => {
     'levels.01.contract': ['assets/levels/01/props/contract.webp'],
     'levels.01.hint': ['assets/levels/01/props/hint.webp'],
     'levels.01.log': ['assets/levels/01/props/log.webp'],
+    'levels.01.scissors': ['assets/levels/01/props/scissors.webp'],
   };
   for (const [slot, files] of Object.entries(expected)) {
     assert.ok(assets.includes(slot), `slot final ${slot}`);
@@ -615,12 +616,13 @@ test('banda de mesa ordenada sin solapes: papeles, carretes centrados, tijera al
   }
   const scene = setup();
   const bandRow = findOne(findOne(scene.element, (n) => classes(n).includes('l4-dock')), (n) => classes(n).includes('l4-dock-row'));
-  const order = bandRow.children.map((n) => classes(n).join('.'));
+  const order = bandRow.children.map((n) => classes(n));
   assert.deepEqual(
-    order,
+    order.map((tokens) => tokens.includes('l4-cut') ? 'l4-cut' : tokens.join('.')),
     ['l4-papers', 'l4-keys-slot', 'l4-cut'],
     'banda: papeles, carretes centrados y tijera al lado',
   );
+  assert.ok(order[2].includes('scissors-prop'), 'la tijera es el prop compartido del N1');
 });
 
 test('la placa no pasa del 65% del ancho', () => {

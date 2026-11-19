@@ -26,6 +26,8 @@
  * nunca como marcas parseadas.
  */
 
+import { createScissorsProp } from '../scissorsProp.js';
+
 const ALARM_NOTE = 'Cualquier otra combinación deja la alarma encendida.';
 const FALLBACK_KEYS = ['▲ Subir', '▼ Bajar'];
 
@@ -275,12 +277,13 @@ export function createLevelScene(options = {}) {
     papers.append(item);
   }
 
-  // --- Tijera sobre la mesa (diegético de `cut`): el resorte sigue como
-  // modo del inventario del parent. `is-active` y `aria-pressed` los pone
-  // `toggleScissors` del parent; acá solo se dibuja el prop.
-  const cut = propButton('cut', 'Cortar un cable', 'l4-cut');
-  cut.append(make('span', 'l4-cut-glyph', '✂'));
-  cut.append(make('span', 'l4-cut-name', 'Tijera'));
+  // --- Tijera sobre la mesa (diegético de `cut`): el mismo prop
+  // compartido del N1. `is-active` y `aria-pressed` los pone
+  // `toggleScissors` del parent; acá solo se apoya el prop.
+  const cut = createScissorsProp({
+    className: 'l4-cut',
+    nameClass: 'l4-cut-name',
+  });
 
   const keysSlot = make('div', 'l4-keys-slot');
   keysSlot.setAttribute('data-slot', 'keys');

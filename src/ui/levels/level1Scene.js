@@ -18,6 +18,8 @@
 // `docs/ASSET-INTEGRATION.md` §3). Si un asset falta, el navegador muestra
 // el marco igual: la escena no se bloquea.
 
+import { createScissorsProp } from '../scissorsProp.js';
+
 const SPRITES = 'mockups/nivel-1-taller/assets/sprites';
 
 const DEFAULTS = {
@@ -152,16 +154,10 @@ export function createLevelScene({ level = {}, puzzle = {}, phase = 'repair' } =
   bell.append(bellName);
   element.append(bell);
 
-  const scissors = document.createElement('button');
-  scissors.type = 'button';
-  scissors.className = 'level-scissors';
-  scissors.setAttribute('data-action', 'cut');
-  scissors.setAttribute('aria-label', 'Cortar un cable');
-  scissors.append(finalImage('assets/levels/01/props/scissors.webp', 'levels.01.scissors', { alt: '' }));
-  const scissorsName = document.createElement('span');
-  scissorsName.className = 'level-scissors-name';
-  scissorsName.textContent = 'Tijera';
-  scissors.append(scissorsName);
+  const scissors = createScissorsProp({
+    className: 'level-scissors',
+    nameClass: 'level-scissors-name',
+  });
   element.append(scissors);
 
   const trial = document.createElement('button');

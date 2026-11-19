@@ -354,6 +354,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  order: 4;
 }
 
 .level-scene[data-level="2"] .l2-gauge {
@@ -396,6 +397,7 @@
   display: flex;
   flex: none;
   align-items: flex-end;
+  order: 1;
   gap: 12px;
   margin: 0;
   padding: 0;
@@ -442,6 +444,7 @@
   flex-wrap: wrap;
   align-items: flex-end;
   justify-content: center;
+  order: 3;
   gap: 8px;
   min-width: 0;
   max-width: 100%;
@@ -466,59 +469,17 @@
   background: transparent;
 }
 
-/* Tijera sobre la mesa, dibujada con CSS. `is-active` marca el modo corte. */
+/* Tijera sobre la mesa: el prop compartido del N1. `is-active` marca el
+   modo corte. En la banda va justo a la derecha de la bitácora (tercer
+   papel): el DOM no se mueve (los tests asertan el orden de hijos), la
+   posición la da `order`. */
 .level-scene[data-level="2"] .l2-scissors {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 60px;
+  order: 2;
+  width: 64px;
   max-width: 100%;
-}
-
-.level-scene[data-level="2"] .l2-scissors-visual {
-  position: relative;
-  display: block;
-  width: 56px;
-  max-width: 100%;
-  height: 56px;
-  pointer-events: none;
-}
-
-.level-scene[data-level="2"] .l2-scissors-blade {
-  position: absolute;
-  left: 6px;
-  top: 24px;
-  width: 44px;
-  max-width: 80%;
-  height: 6px;
-  border-radius: 3px;
-  background: linear-gradient(180deg, #e8eef4, #8b98a8 60%, #5c6672);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
-
-.level-scene[data-level="2"] .l2-scissors-blade--up {
-  transform: rotate(-24deg);
-}
-
-.level-scene[data-level="2"] .l2-scissors-blade--down {
-  transform: rotate(24deg);
-}
-
-.level-scene[data-level="2"] .l2-scissors-ring {
-  position: absolute;
-  left: 2px;
-  width: 16px;
-  height: 16px;
-  border: 4px solid var(--l2-brass-dark);
-  border-radius: 50%;
-}
-
-.level-scene[data-level="2"] .l2-scissors-ring--up {
-  top: 2px;
-}
-
-.level-scene[data-level="2"] .l2-scissors-ring--down {
-  bottom: 2px;
 }
 
 .level-scene[data-level="2"] .l2-scissors.is-active {
@@ -535,6 +496,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  order: 5;
   gap: 4px;
   max-width: 100%;
 }
@@ -633,10 +595,25 @@
 }
 
 @media (max-width: 700px) {
-  /* En celular la banda envuelve en filas: papeles, prueba, tijera y
-     palanca arriba; carretes en su propia fila; marcha al pie. Nada
-     se superpone y todo sigue ≥44 px; los rótulos largos quedan en el
-     aria-label. */
+  /* En celular la banda envuelve en filas: papeles y tijera primero
+     (la tijera sigue pegada a la bitácora), después prueba y palanca;
+     carretes en su propia fila; marcha al pie. Nada se superpone y
+     todo sigue ≥44 px; los rótulos largos quedan en el aria-label. */
+  .level-scene[data-level="2"] .l2-scissors {
+    order: 2;
+  }
+
+  .level-scene[data-level="2"] .l2-probe {
+    order: 3;
+  }
+
+  .level-scene[data-level="2"] .l2-lever {
+    order: 4;
+  }
+
+  .level-scene[data-level="2"] .l2-keys {
+    order: 5;
+  }
   .level-scene[data-level="2"] .l2-plate {
     width: 94%;
     height: auto;
@@ -681,11 +658,6 @@
 
   .level-scene[data-level="2"] .l2-scissors {
     width: 44px;
-  }
-
-  .level-scene[data-level="2"] .l2-scissors-visual {
-    width: 44px;
-    height: 44px;
   }
 
   .level-scene[data-level="2"] .l2-lever-visual {

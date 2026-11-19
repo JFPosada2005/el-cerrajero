@@ -18,6 +18,8 @@
 // placeholder CSS/SVG con `data-status="a producir"` (solo en atributo,
 // nunca en texto visible).
 
+import { createScissorsProp } from '../scissorsProp.js';
+
 const SVG_NS = 'http://www.w3.org/2000/svg';
 
 function node(tag, className, text) {
@@ -66,32 +68,6 @@ function phaseId(phase) {
     return 'build';
   }
   return 'repair';
-}
-
-// Tijera del conservador: dos anillas y hojas cruzadas.
-function scissorsGlyph() {
-  const svg = svgNode('svg', {
-    viewBox: '0 0 40 40',
-    class: 'museum-cut-art',
-    'aria-hidden': 'true',
-    focusable: 'false',
-  });
-  svg.append(svgNode('path', {
-    d: 'M8 32 L30 10 M10 10 L28 28',
-    fill: 'none',
-    stroke: 'currentColor',
-    'stroke-width': '2.4',
-    'stroke-linecap': 'round',
-  }));
-  svg.append(svgNode('circle', {
-    cx: '9', cy: '33', r: '4',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
-  }));
-  svg.append(svgNode('circle', {
-    cx: '9', cy: '12', r: '4',
-    fill: 'none', stroke: 'currentColor', 'stroke-width': '2',
-  }));
-  return svg;
 }
 
 // Interruptor de la sala de noche: palanca de latón sobre base.
@@ -307,17 +283,22 @@ statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
   const lamps = node('div', 'museum-lamps');
   lamps.append(lampFigure('day'));
 
-  // La lámpara de la sala de noche es la consola de alarma: probar.
-  const probe = node('button', 'museum-lamp-btn');
+  // La lámpara de la sala es la consola de alarma: probar. En reparación
+  // (sala de día) la lámpara es la amarilla; en construcción (sala de
+  // noche), la teal. Es el mismo prop con el color de su sala.
+  const inBuild = phaseId(phase) === 'build';
+  const lampVariant = inBuild ? 'night' : 'day';
+  const probe = node('button', `museum-lamp-btn museum-lamp-btn--${lampVariant}`);
   probe.type = 'button';
   probe.setAttribute('data-action', 'probe');
   probe.setAttribute('aria-label', 'Probar la llave en la sala');
-  probe.append(lampFigure('night'));
+  probe.append(lampFigure(lampVariant));
   probe.append(node('span', 'museum-prop-name', 'Probar'));
 
-  // El interruptor de la sala de noche: ensayo del asalto. Junto a
-  // PROBAR (a su izquierda, mismo grupo) sobre el borde derecho de la placa.
-  const assaultBuild = phaseId(phase) === 'build';
+  // El interruptor de la sala: ensayo del asalto. Va a la derecha de
+  // PROBAR (mismo grupo sobre el borde derecho de la placa): primero se
+  // prueba la llave y después se lanza el asalto.
+  const assaultBuild = inBuild;
   const assault = node('button', 'museum-assault');
   assault.type = 'button';
   assault.setAttribute('data-action', 'assault');
@@ -326,21 +307,20 @@ statusSlot.setAttribute('aria-label', 'La marcha del mecanismo del museo');
   assault.append(node('span', 'museum-prop-name', assaultBuild ? 'Asalto' : 'Ensayo'));
 
   const alarmGroup = node('div', 'museum-alarm-group');
-  alarmGroup.append(assault);
   alarmGroup.append(probe);
+  alarmGroup.append(assault);
   lamps.append(alarmGroup);
 
-  // La tijera sobre la mesa: cortar.
-  const cut = node('button', 'museum-cut');
-  cut.type = 'button';
-  cut.setAttribute('data-action', 'cut');
-  cut.setAttribute('aria-label', 'Cortar un cable con la tijera');
-  cut.append(scissorsGlyph());
-  cut.append(node('span', 'museum-prop-name', 'Tijera'));
+  // La tijera sobre la mesa: cortar. Mismo prop y mismo asset que el N1.
+  const cut = createScissorsProp({
+    className: 'museum-cut',
+    nameClass: 'museum-prop-name',
+    label: 'Cortar un cable con la tijera',
+  });
 
   // Banda de mesa en flujo (nunca absoluta): una sola fila sin solapes
-  // (papeles a la izquierda, `keysSlot` al centro-derecha, tijera a la
-  // derecha) y el estado como último renglón. ENSAYO va junto a PROBAR en
+  // (papeles a la izquierda, tijera justo a su derecha, `keysSlot` al
+  // centro-derecha) y el estado como último renglón. ENSAYO va junto a PROBAR en
   // el grupo de alarma, no en la banda. El parent monta `#palette` y
   // herramientas en `keysSlot` y muda su nodo de estado a `hudSlot` (siempre vacío en
   // la escena: el parent lo llena con `append`); la escena no decide nada.

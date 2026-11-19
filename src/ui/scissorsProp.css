@@ -1,0 +1,50 @@
+/* Prop compartido: la tijera del taller.
+ *
+ * La misma pieza en todos los niveles: un botón diegético sin caja con el
+ * asset final del N1 (`levels.01.scissors`). Estas reglas son la base; cada
+ * escena puede pisarlas con su propia clase de posición (`.level-scissors`,
+ * `.l2-scissors`, `.museum-cut`, `.l4-cut`), porque los CSS de nivel se
+ * cargan después.
+ */
+
+.scissors-prop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  width: 64px;
+  min-width: 44px;
+  min-height: 44px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+}
+
+.scissors-prop .scissors-prop-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  pointer-events: none;
+}
+
+/* Modo corte: el parent pone `is-active` en `[data-action="cut"]`. */
+.scissors-prop.is-active {
+  outline: 2px solid #d4a72c;
+  outline-offset: 2px;
+  border-radius: 6px;
+  filter: drop-shadow(0 0 6px rgb(212 167 44 / 0.8));
+}
+
+.scissors-prop:focus-visible {
+  outline: 2px solid #38c6b8;
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scissors-prop {
+    transition: none;
+  }
+}

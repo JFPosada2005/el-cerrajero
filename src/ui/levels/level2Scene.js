@@ -17,13 +17,16 @@
  *
  * Finales de `assets/manifest.json`: `levels.02.background`,
  * `levels.02.floorIndicator`, `levels.02.pinion`, `shared.prop.relay`
- * y `levels.01.contract|hint|log` (papeles de la mesa).
- * Cada slot final lleva `data-asset` con su slot del manifiesto,
- * `data-status="final"` y `data-src` con la ruta usada. La palanca y
- * la tijera no tienen asset final (P1 pendiente): se dibujan con CSS
- * marfil/latón y llevan `data-status="placeholder"`, sin texto visible.
+ * y `levels.01.contract|hint|log` (papeles de la mesa). La tijera es el
+ * prop compartido del taller: el asset final del N1
+ * (`levels.01.scissors`, `assets/levels/01/props/scissors.webp`) con
+ * `data-status="final"`; la palanca no tiene asset final (P1 pendiente):
+ * se dibuja con CSS marfil/latón y lleva `data-status="placeholder"`,
+ * sin texto visible.
  * Vocabulario de taller en los textos visibles: sin términos académicos.
  */
+
+import { createScissorsProp } from '../scissorsProp.js';
 
 const PHASE_WORDS = { repair: 'Reparación', build: 'Construcción' };
 
@@ -143,26 +146,11 @@ function buildPaper(action, label, name, src, asset) {
 }
 
 /**
- * Tijera sobre la mesa dibujada con CSS (sin asset final). `is-active`
+ * Tijera sobre la mesa: el mismo prop compartido del N1. `is-active`
  * marca el modo corte, como en el N1.
  */
 function buildScissors() {
-  const button = propButton('cut', 'Cortar un cable', 'l2-scissors');
-  const visual = el('span', 'l2-scissors-visual');
-  visual.setAttribute('aria-hidden', 'true');
-  markPlaceholder(visual);
-  const bladeUp = el('span', 'l2-scissors-blade l2-scissors-blade--up');
-  bladeUp.setAttribute('aria-hidden', 'true');
-  const bladeDown = el('span', 'l2-scissors-blade l2-scissors-blade--down');
-  bladeDown.setAttribute('aria-hidden', 'true');
-  const ringUp = el('span', 'l2-scissors-ring l2-scissors-ring--up');
-  ringUp.setAttribute('aria-hidden', 'true');
-  const ringDown = el('span', 'l2-scissors-ring l2-scissors-ring--down');
-  ringDown.setAttribute('aria-hidden', 'true');
-  visual.append(bladeUp, bladeDown, ringUp, ringDown);
-  const name = el('span', 'l2-prop-name', 'Tijera');
-  button.append(visual, name);
-  return button;
+  return createScissorsProp({ className: 'l2-scissors', nameClass: 'l2-prop-name' });
 }
 
 /**

@@ -67,13 +67,27 @@
   box-sizing: border-box;
 }
 
-/* Fondo: ala de día arriba (luz cálida de claraboya), ala de noche abajo (teal de luna). */
+/* Fondo: la grilla base aloja las dos alas; la fase decide cuál se ve.
+   En reparación la sala de día (luz cálida de claraboya) a pantalla
+   completa; en construcción la de noche (teal de luna). La otra ala no
+   se pinta (`display: none`) y la grilla colapsa a una fila: el DOM no
+   cambia. */
 .level-scene[data-level="3"] .museum-backdrop {
   position: absolute;
   inset: 0;
   display: grid;
   grid-template-rows: 1fr 1fr;
   pointer-events: none;
+}
+
+.level-scene[data-level="3"][data-phase="repair"] .museum-backdrop,
+.level-scene[data-level="3"][data-phase="build"] .museum-backdrop {
+  grid-template-rows: 1fr;
+}
+
+.level-scene[data-level="3"][data-phase="repair"] .museum-wing--night,
+.level-scene[data-level="3"][data-phase="build"] .museum-wing--day {
+  display: none;
 }
 
 .level-scene[data-level="3"] .museum-backdrop::after {
@@ -83,6 +97,20 @@
   background:
     radial-gradient(circle at 24% 6%, rgba(240, 207, 106, 0.16) 0%, transparent 30%),
     radial-gradient(circle at 82% 72%, rgba(56, 198, 184, 0.1) 0%, transparent 34%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+/* El velo acompaña a la fase: día cálido en reparación, teal de luna
+   en construcción; la viñeta queda siempre para leer la placa. */
+.level-scene[data-level="3"][data-phase="repair"] .museum-backdrop::after {
+  background:
+    radial-gradient(circle at 50% 0%, rgba(240, 207, 106, 0.2) 0%, transparent 42%),
+    radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.42) 100%);
+}
+
+.level-scene[data-level="3"][data-phase="build"] .museum-backdrop::after {
+  background:
+    radial-gradient(circle at 78% 16%, rgba(56, 198, 184, 0.16) 0%, transparent 42%),
     radial-gradient(circle at 50% 48%, transparent 44%, rgba(0, 0, 0, 0.42) 100%);
 }
 
@@ -198,8 +226,9 @@
   filter: drop-shadow(0 0 10px currentColor);
 }
 
-/* Grupo de alarma sobre el borde derecho de la placa: ENSAYO junto a
-   PROBAR (ensayo a la izquierda, prueba a la derecha). */
+/* Grupo de alarma sobre el borde derecho de la placa: PROBAR junto a
+   ENSAYO (prueba a la izquierda, ensayo a la derecha: primero se prueba
+   la llave y después se lanza el asalto). */
 .level-scene[data-level="3"] .museum-alarm-group {
   position: absolute;
   right: 4%;
@@ -239,7 +268,19 @@
   top: auto;
   right: auto;
   bottom: auto;
+  left: auto;
   width: 34px;
+}
+
+/* Probar acompaña a la fase: lámpara amarilla (latón) en reparación,
+   teal en construcción. El halo y el brillo usan `currentColor`, así
+   que el color del botón alcanza. */
+.level-scene[data-level="3"] .museum-lamp-btn--day {
+  color: var(--museum-brass-2);
+}
+
+.level-scene[data-level="3"] .museum-lamp-btn--night {
+  color: var(--museum-teal);
 }
 
 /* Mesa de nogal del taller. */
@@ -370,7 +411,15 @@
   box-shadow: 0 0 8px rgba(56, 198, 184, 0.8);
 }
 
-/* Slot del editor real: el parent monta aquí el svg#canvas (viewBox 0 0 820 520). */
+/* Los rótulos nombran las dos salas, pero no mienten: la fase que no se
+   ve queda atenuada. */
+.level-scene[data-level="3"][data-phase="repair"] .museum-wing-tag--night,
+.level-scene[data-level="3"][data-phase="build"] .museum-wing-tag--day {
+  opacity: 0.45;
+}
+
+/* Slot del editor real: el parent monta aquí el svg#canvas y fija su
+   viewBox según las celdas. */
 .level-scene[data-level="3"] .museum-editor-slot {
   flex: 1 1 auto;
   min-height: 0;
@@ -391,14 +440,10 @@
 
 .level-scene[data-level="3"] .museum-editor-slot #canvas {
   display: block;
+  width: 100%;
   height: 100%;
-  width: auto;
-  max-width: 100%;
-  max-height: 100%;
-  aspect-ratio: 820 / 520;
   min-width: 0;
   margin-inline: auto;
-  object-fit: contain;
   background: transparent;
   background-image: none;
   border: 0;
@@ -533,8 +578,9 @@
 
 /* Banda de mesa en flujo (nunca absoluta: la placa termina donde la
    banda empieza, con aire, y nada pisa los rótulos de la placa). Papeles
-   y tijera a la izquierda, `keysSlot` al centro-derecha, ENSAYO a la
-   izquierda y PROBAR arriba a la derecha; el estado (`hudSlot`) es el
+   a la izquierda, tijera justo a su derecha, `keysSlot` al centro-derecha;
+   PROBAR y ENSAYO viven juntos en el grupo de alarma sobre el borde
+   derecho de la placa (no en la banda); el estado (`hudSlot`) es el
    último renglón, por encima del borde inferior, nunca en el tablero. */
 .level-scene[data-level="3"] .museum-dock {
   position: static;
@@ -542,7 +588,7 @@
   display: grid;
   grid-template-columns: auto 1fr auto;
   grid-template-areas:
-    "papers keys cut"
+    "papers cut keys"
     "hud hud hud";
   align-items: end;
   gap: 4px 16px;
@@ -636,7 +682,8 @@
   filter: drop-shadow(0 0 8px currentColor);
 }
 
-/* Tijera sobre la mesa: el control de cortar. */
+/* Tijera sobre la mesa: el prop compartido del N1. Va justo a la derecha
+   de la bitácora (área `cut` entre `papers` y `keys`). */
 .level-scene[data-level="3"] .museum-cut {
   grid-area: cut;
   align-self: end;
@@ -652,13 +699,6 @@
   border: 0;
   cursor: pointer;
   color: #c9c9c9;
-}
-
-.level-scene[data-level="3"] .museum-cut-art {
-  display: block;
-  width: 40px;
-  height: auto;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.7));
 }
 
 /* Ranura de carretes y herramientas: el parent monta aquí `#palette`.
@@ -753,11 +793,11 @@
   }
 
   .level-scene[data-level="3"] .museum-plate {
-    width: min(100%, 960px);
+    width: min(100%, 1080px);
   }
 
   .level-scene[data-level="3"] .museum-status {
-    width: min(100%, 960px);
+    width: min(100%, 1080px);
   }
 
   .level-scene[data-level="3"] .museum-plate-title {

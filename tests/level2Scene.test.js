@@ -274,6 +274,7 @@ test('slots finales con imágenes locales y sin pendientes visibles', () => {
     ['levels.01.contract', 'assets/levels/01/props/contract.webp'],
     ['levels.01.hint', 'assets/levels/01/props/hint.webp'],
     ['levels.01.log', 'assets/levels/01/props/log.webp'],
+    ['levels.01.scissors', 'assets/levels/01/props/scissors.webp'],
   ]) {
     assert.ok(byAsset.has(asset), `slot ${asset} declarado`);
     assert.equal(byAsset.get(asset).getAttribute('data-src'), src);
@@ -283,9 +284,22 @@ test('slots finales con imágenes locales y sin pendientes visibles', () => {
   );
   assert.ok(relayFinals.length >= 1, 'relés en final');
   const placeholders = byAttr(scene.element, 'data-status', 'placeholder');
-  assert.ok(placeholders.length >= 2, 'palanca y tijera declaran su pendiente en data-status');
+  assert.equal(placeholders.length, 1, 'solo la palanca sigue pendiente: la tijera ya es el asset final del N1');
   const pendingTexts = placeholders.map((n) => n.textContent);
   assert.ok(pendingTexts.every((text) => text === ''), 'lo pendiente no lleva texto visible');
+  const cut = findOne(scene.element, (n) => n.tag === 'button' && n.getAttribute('data-action') === 'cut', 'tijera');
+  assert.ok(classes(cut).includes('l2-scissors'), 'la tijera conserva su clase de posición');
+  const cutImg = findOne(cut, (n) => n.tag === 'img', 'imagen de la tijera');
+  assert.equal(cutImg.getAttribute('src'), 'assets/levels/01/props/scissors.webp', 'la tijera es el asset del N1');
+  assert.equal(cutImg.getAttribute('data-asset'), 'levels.01.scissors', 'slot del manifiesto');
+  assert.equal(cutImg.getAttribute('data-status'), 'final', 'asset final, no pendiente');
+  assert.equal(cutImg.getAttribute('data-src'), 'assets/levels/01/props/scissors.webp', 'data-src con la ruta usada');
+  assert.ok(existsSync(join(ROOT, 'assets/levels/01/props/scissors.webp')), 'la tijera final existe en disco');
+  assert.deepEqual(
+    findAll(cut, (n) => classes(n).includes('l2-prop-name')).map((n) => n.textContent),
+    ['Tijera'],
+    'el rótulo va debajo de la imagen',
+  );
 });
 
 test('papeles con assets finales e imagen visible', () => {

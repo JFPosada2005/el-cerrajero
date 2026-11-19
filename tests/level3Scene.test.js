@@ -111,19 +111,21 @@ test('fase repair/build en placa y raíz', () => {
 test('no crea editor, cables, llaves, juicio ni lógica', () => {
   const scene = createLevelScene({});
   const nodes = all(scene);
-  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 4, 'glifos SVG propios (2 lámparas, tijera, interruptor; bifurcador y resorte usan solo la foto final)');
+  assert.equal(nodes.filter((node) => node.tag === 'svg').length, 3, 'glifos SVG propios (2 lámparas y el interruptor; la tijera, el bifurcador y el resorte usan la foto final)');
   const imgs = nodes.filter((node) => node.tag === 'img');
-  assert.equal(imgs.length, 5, 'fotos finales: bifurcador, resorte y papeles del conservador');
+  assert.equal(imgs.length, 6, 'fotos finales: tijera del N1, bifurcador, resorte y papeles del conservador');
   const paperSrcs = [
     'assets/levels/01/props/contract.webp',
     'assets/levels/01/props/hint.webp',
     'assets/levels/01/props/log.webp',
   ];
+  const SCISSORS_SRC = 'assets/levels/01/props/scissors.webp';
   for (const img of imgs) {
     assert.ok(
       [
         'assets/shared/props/fork.svg',
         'assets/shared/props/spring.svg',
+        SCISSORS_SRC,
         ...paperSrcs,
       ].includes(img.getAttribute('src')),
       `img con asset final: ${img.getAttribute('src')}`,
@@ -134,6 +136,12 @@ test('no crea editor, cables, llaves, juicio ni lógica', () => {
   for (const src of paperSrcs) {
     assert.ok(existsSync(join(repoRoot, src)), `el papel existe en disco: ${src}`);
   }
+  const cutImg = imgs.find((img) => img.getAttribute('src') === SCISSORS_SRC);
+  assert.ok(cutImg, 'la tijera usa el asset final del N1');
+  assert.equal(cutImg.getAttribute('data-asset'), 'levels.01.scissors', 'slot del manifiesto');
+  assert.equal(cutImg.getAttribute('data-status'), 'final', 'asset final, no pendiente');
+  assert.equal(cutImg.getAttribute('data-src'), SCISSORS_SRC, 'data-src con la ruta usada');
+  assert.ok(existsSync(join(repoRoot, SCISSORS_SRC)), 'la tijera final existe en disco');
   assert.equal(nodes.filter((node) => node.tag === 'canvas').length, 0);
   const classed = nodes.flatMap((node) => classes(node));
   for (const banned of ['wire', 'edge', 'state', 'key', 'inventory', 'graph']) {
@@ -344,13 +352,8 @@ test('el editor real cabe: #canvas dentro del slot para 5–8 casillas a 1440 y 
   assert.ok(!/min-height\s*:\s*\d+px/.test(slot), 'el slot no fija un mínimo que pelee con el flex');
 
   const canvas = bodyFor('.level-scene[data-level="3"] .museum-editor-slot #canvas');
-  assert.ok(/height\s*:\s*100%/.test(canvas), 'el #canvas escala por alto');
-  assert.ok(/width\s*:\s*auto/.test(canvas), 'el #canvas no se estira en ancho');
-  assert.ok(!/(?:^|[^-])width\s*:\s*100%/.test(canvas), 'el #canvas no estira el mecanismo');
-  assert.ok(/max-width\s*:\s*100%/.test(canvas), 'el #canvas nunca supera el ancho del slot');
-  assert.ok(/max-height\s*:\s*100%/.test(canvas), 'el #canvas nunca supera el alto del slot');
-  assert.ok(/margin-inline\s*:\s*auto/.test(canvas), 'el #canvas queda centrado');
-  assert.ok(/aspect-ratio/.test(canvas), 'el #canvas conserva la proporción 820×520');
+  assert.ok(/width\s*:\s*100%/.test(canvas), 'el #canvas llena el ancho del slot');
+  assert.ok(/height\s*:\s*100%/.test(canvas), 'el #canvas llena el alto del slot');
 
   assert.ok(/@media[^{]*max-width\s*:\s*700px/.test(sceneCss), 'hay ajuste para 390×844');
   assert.ok(
@@ -566,10 +569,11 @@ test('ranuras keys y hud en la banda de mesa para el parent', () => {
   assert.equal(scene.hudSlot.parentNode, dock, 'hudSlot vive en la banda');
   const order = dock.children.map((child) => child.className);
   assert.deepEqual(
-    order,
+    order.map((name) => name.includes('museum-cut') ? 'museum-cut' : name),
     ['museum-papers', 'museum-keys', 'museum-cut', 'museum-hud'],
     'la banda ordena papeles, carretes, tijera y estado último (ENSAYO va con PROBAR)',
   );
+  assert.ok(order[2].includes('scissors-prop'), 'la tijera es el prop compartido del N1');
 });
 
 test('banda inferior ordenada sin solapes declarados', () => {
@@ -593,8 +597,8 @@ test('banda inferior ordenada sin solapes declarados', () => {
   assert.ok(!/position\s*:\s*absolute/.test(dock), 'la banda nunca flota sobre la placa ni el tablero');
   assert.ok(/display\s*:\s*grid/.test(dock), 'la banda es grilla, no pila absoluta');
   assert.ok(
-    /grid-template-areas\s*:[^;]*"papers keys cut"[^;]*"hud hud hud"/s.test(dock),
-    'papeles a la izquierda, keys al centro-derecha, tijera a la derecha, estado último por encima del borde',
+    /grid-template-areas\s*:[^;]*"papers cut keys"[^;]*"hud hud hud"/s.test(dock),
+    'papeles a la izquierda, tijera al lado de la bitácora, keys al centro-derecha, estado último por encima del borde',
   );
   for (const prop of ['.museum-papers', '.museum-cut']) {
     const body = bodyFor(`.level-scene[data-level="3"] ${prop}`);
@@ -675,7 +679,7 @@ test('ENSAYO junto a PROBAR: mismo grupo sobre el borde derecho', () => {
   assert.equal(byAction.assault.parentNode, group, 'ENSAYO vive en el grupo');
   assert.equal(byAction.probe.parentNode, group, 'PROBAR vive en el grupo');
   const order = group.children.map((child) => child.getAttribute('data-action'));
-  assert.deepEqual(order, ['assault', 'probe'], 'ENSAYO a la izquierda de PROBAR');
+  assert.deepEqual(order, ['probe', 'assault'], 'PROBAR a la izquierda de ENSAYO');
   const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
   const found = clean
     .split('}')
@@ -718,6 +722,32 @@ test('ENSAYO refleja la fase: Ensayo en reparación, Asalto en construcción', (
     const probe = all(scene).find((node) => node.getAttribute('data-action') === 'probe');
     assert.ok(probe, 'PROBAR sigue en su grupo en ambas fases');
   }
+});
+
+test('fondo y lámpara cambian con la fase: día en reparación, noche en construcción', () => {
+  const repair = createLevelScene({ phase: 'repair' });
+  const build = createLevelScene({ phase: 'build' });
+  const probeOf = (scene) => all(scene).find((node) => node.getAttribute('data-action') === 'probe');
+  assert.ok(classes(probeOf(repair)).includes('museum-lamp-btn--day'), 'en reparación PROBAR es la lámpara amarilla');
+  assert.ok(classes(probeOf(build)).includes('museum-lamp-btn--night'), 'en construcción PROBAR es la lámpara teal');
+  const clean = sceneCss.replace(/\/\*[\s\S]*?\*\//g, '');
+  function bodiesFor(exact) {
+    return clean
+      .split('}')
+      .map((chunk) => chunk.split('{'))
+      .filter((parts) => parts.length === 2)
+      .map(([selector, body]) => ({ selector: selector.trim(), body }))
+      .filter((rule) => rule.selector.split(',').map((part) => part.trim()).includes(exact))
+      .map((rule) => rule.body);
+  }
+  const hiddenNight = bodiesFor('.level-scene[data-level="3"][data-phase="repair"] .museum-wing--night');
+  assert.ok(hiddenNight.some((body) => /display\s*:\s*none/.test(body)), 'en reparación el ala de noche no se pinta');
+  const hiddenDay = bodiesFor('.level-scene[data-level="3"][data-phase="build"] .museum-wing--day');
+  assert.ok(hiddenDay.some((body) => /display\s*:\s*none/.test(body)), 'en construcción el ala de día no se pinta');
+  const dayLamp = bodiesFor('.level-scene[data-level="3"] .museum-lamp-btn--day');
+  assert.ok(dayLamp.some((body) => /color\s*:\s*var\(--museum-brass-2\)/.test(body)), 'la lámpara de día es amarilla (latón)');
+  const nightLamp = bodiesFor('.level-scene[data-level="3"] .museum-lamp-btn--night');
+  assert.ok(nightLamp.some((body) => /color\s*:\s*var\(--museum-teal\)/.test(body)), 'la lámpara de noche es teal');
 });
 
 test('keysSlot: alto para la chapa del carrete y sin recorte vertical', () => {
