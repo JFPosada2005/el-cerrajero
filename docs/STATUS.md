@@ -64,7 +64,7 @@ El proyecto tiene un **nivel 1 jugable** y el **motor AFD completo**. Los nivele
 ## Qué sigue
 
 1. **Contratos y flujo desplegados:** los cinco niveles usan el esquema, `applyEdit`, los jueces y el progreso.
-2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (privado).
+2. Repositorio creado y `main` subido: <https://github.com/JFPosada2005/el-cerrajero> (público).
 3. Invitación enviada a **MateoTorres1543** con permiso `write`; pendiente de aceptar.
 4. **T4 (nivel 3, AFND-λ) listo:** motor, datos y UI de resortes; pendiente el smoke test de navegador.
 5. **T5 (nivel 4, AP) listo:** motor, datos, oráculos, juez acotado y UI de pila; pendiente el smoke test de navegador.

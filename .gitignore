@@ -2,7 +2,9 @@ node_modules/
 __pycache__/
 .atl/
 *.pdf
+# Los entregables finales se publican aunque sean PDF.
+!Entregables/*.pdf
 *.log
 Thumbs.db
 .DS_Store
-Informe_y_entregables/
+Informes_y_entregables_editables/

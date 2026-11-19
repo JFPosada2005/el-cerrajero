@@ -1,6 +1,6 @@
 # El Cerrajero
 
-Repositorio: <https://github.com/JFPosada2005/el-cerrajero> (privado).
+Repositorio: <https://github.com/JFPosada2005/el-cerrajero> (público).
 
 Proyecto final de **Lenguajes de Programación** (Universidad de los Llanos). Un juego de puzles donde el jugador repara mecanismos de seguridad que, formalmente, son autómatas. El juego nunca nombra la teoría: la usa. El informe es el que la hace explícita.
 
@@ -49,7 +49,7 @@ Cada nivel es un contrato. El **contrato** (papel sobre la mesa) cuenta la situa
 | [`docs/ESTUDIO_TEORIA.md`](docs/ESTUDIO_TEORIA.md) | Estudio aplicado de la teoría del curso al juego. |
 | [`docs/STATUS.md`](docs/STATUS.md) | Qué funciona, qué sigue y qué está bloqueado. |
 | [`CREDITS.md`](CREDITS.md) | Fuentes, licencias y autoría de los assets. |
-| [`Informe_y_entregables/`](Informe_y_entregables/) | Informe IEEE, fuente editable y PDF. |
+| [`Entregables/`](Entregables/) | Informe IEEE y presentación de sustentación, en PDF. Las fuentes editables se mantienen fuera del repositorio. |
 
 ## Estructura
 
@@ -73,6 +73,7 @@ Cada nivel es un contrato. El **contrato** (papel sobre la mesa) cuenta la situa
 ├── assets/                 # fondos, props, fuentes, SFX y manifiesto
 ├── tests/                  # pruebas con node --test
 ├── docs/                   # diseño, lógica, plan y estado
+├── Entregables/            # informe y presentación en PDF
 └── package.json
 ```
 
